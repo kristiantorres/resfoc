@@ -56,7 +56,6 @@ public:
   void tridiag(float *diag, float *odiag, float *b);
 
 private:
-  //nt = n1; t0 = o1; dt = d1; nz = nd; eps = epsilon
   int _nt, _nz;
   float _t0, _dt, _eps;
 };
