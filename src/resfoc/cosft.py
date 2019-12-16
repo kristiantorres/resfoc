@@ -1,23 +1,33 @@
 import numpy as np
 
 ## Main functions
-def cosft(dat,axis1=None,axis2=None,axis3=None):
+def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
   """ Computes the forward cosine transform just as in Madagascar """
   if(len(dat.shape) == 1):
     return cosft1d(dat)
   elif(len(dat.shape) == 2):
     return cosft2d(dat,axis1,axis2)
-  else:
+  elif(len(dat.shape) == 3):
     return cosft3d(dat,axis1,axis2,axis3)
+  elif(len(dat.shape) == 4):
+    return cosft4d(dat,axis1,axis2,axis3,axis4)
+  else:
+    print("Cosine transform > 4D not yet implemented")
+    return
 
-def icosft(dat,axis1=None,axis2=None,axis3=None):
+def icosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
   """ Computes the inverse cosine transform """
   if(len(dat.shape) == 1):
     return icosft1d(dat)
   elif(len(dat.shape) == 2):
     return icosft2d(dat,axis1,axis2)
-  else:
+  elif(len(dat.shape) == 3):
     return icosft3d(dat,axis1,axis2,axis3)
+  elif(len(dat.shape) == 4):
+    return icosft4d(dat,axis1,axis2,axis3,axis4)
+  else:
+    print("Inverse cosine transform > 4D not yet implemented")
+    return
 
 ## 1D Transforms
 def cosft1d(sig):
@@ -57,7 +67,7 @@ def cosft2d(img,axis1=None,axis2=None):
   elif(axis2 and not axis1):
     return cosft2d2(img)
   else:
-    ft = cosft2d1(img)
+    ft  =  cosft2d1(img)
     return cosft2d2(ft)
 
 def icosft2d(img,axis1=None,axis2=None):
@@ -69,7 +79,7 @@ def icosft2d(img,axis1=None,axis2=None):
   elif(axis2 and not axis1):
     return icosft2d2(img)
   else:
-    ift = icosft2d1(img)
+    ift  = icosft2d1(img)
     return icosft2d2(ift)
 
 def cosft2d1(img):
@@ -140,16 +150,16 @@ def cosft3d(cub,axis1=None,axis2=None,axis3=None):
     return cosft3d3(cub)
   # Multi-axes transforms
   elif(axis1 and axis2 and not axis3):
-    ft = cosft3d1(cub)
+    ft  =  cosft3d1(cub)
     return cosft3d2(ft)
   elif(axis1 and axis3 and not axis2):
-    ft = cosft3d1(cub)
+    ft  =  cosft3d1(cub)
     return cosft3d3(ft)
   elif(axis2 and axis3 and not axis1):
-    ft = cosft3d2(cub)
+    ft  =  cosft3d2(cub)
     return cosft3d3(ft)
   else:
-    ft1 = cosft3d1(cub)
+    ft1  = cosft3d1(cub)
     ft12 = cosft3d2(ft1)
     return cosft3d3(ft12)
 
@@ -166,18 +176,18 @@ def icosft3d(cub,axis1=None,axis2=None,axis3=None):
     return icosft3d3(cub)
   # Multi-axes inverse transforms
   elif(axis1 and axis2 and not axis3):
-    ift = icosft3d1(cub)
+    ift  = icosft3d1(cub)
     return icosft3d2(ift)
   elif(axis1 and axis3 and not axis2):
-    ift = icosft3d1(cub)
+    ift  = icosft3d1(cub)
     return icosft3d3(ift)
   elif(axis2 and axis3 and not axis1):
-    ift = icosft3d2(cub)
+    ift  = icosft3d2(cub)
     return icosft3d3(ift)
   else:
-    ift1 = icosft3d1(cub)
+    ift1  = icosft3d1(cub)
     ift12 = icosft3d2(ift1)
-    return icosft3d3(ift12)
+    return  icosft3d3(ift12)
 
 def cosft3d1(cub):
   """ Cosine transform along axis 1 (slowest) """
@@ -259,6 +269,170 @@ def icosft3d3(cub):
   pcub[:,:,n3:nw] = 0.0
   # Compute inverse cosine transform
   return np.real(np.fft.irfft(pcub,axis=2))[:,:,0:n3]
+
+def cosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None):
+  """ 4D cosine transform """
+  if(axis1==None and axis2==None and axis3==None and axis4==None):
+    return hcub
+  # Single axes transforms
+  if(axis1 and not axis2 and not axis3 and not axis4):
+    return cosft4d1(hcub)
+  elif(axis2 and not axis1 and not axis3 and not axis4):
+    return cosft4d2(hcub)
+  elif(axis3 and not axis1 and not axis2 and not axis4):
+    return cosft4d3(hcub)
+  elif(axis4 and not axis1 and not axis2 and not axis3):
+    return cosft4d2(hcub)
+  # Multi-axes transforms
+  elif(axis1 and axis2 and axis3 and not axis4):
+    ft1 =  cosft4d1(hcub)
+    ft12 = cosft4d2(ft1)
+    return cosft4d3(ft12)
+  else:
+    print("This type of 4D cosft has not been yet implemented")
+    return
+
+def icosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None):
+  """ 4D inverse cosine transform """
+  # Single axes inverse transforms
+  if(axis1 and not axis2 and not axis3 and not axis4):
+    return icosft4d1(hcub)
+  elif(axis2 and not axis1 and not axis3 and not axis4):
+    return icosft4d2(hcub)
+  elif(axis3 and not axis1 and not axis2 and not axis4):
+    return icosft4d3(hcub)
+  elif(axis4 and not axis1 and not axis2 and not axis3):
+    return icosft4d2(hcub)
+  # Multi-axes transforms
+  elif(axis1 and axis2 and axis3 and not axis4):
+    ift1  = icosft4d1(hcub)
+    ift12 = icosft4d2(ift1)
+    return  icosft4d3(ift12)
+  elif(axis2 and axis3 and axis4 and not axis1):
+    ift2  = icosft4d2(hcub)
+    ift23 = icosft4d3(ift2)
+    return  icosft4d4(ift23)
+  else:
+    print("This type of 4D icosft has not yet been implemented")
+    return
+
+def cosft4d1(hcub):
+  """ Cosine transform along axis 1 (slowest) """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n1-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([nt,n2,n3,n4])
+  phcub[0:n1,:,:,:] = hcub[:,:,:,:]
+  phcub[n1:nw,:,:,:]  = 0.0
+  phcub[nw:nt,:,:,:]  = phcub[nt-nw:0:-1]
+  # Compute cosine transform
+  return np.real(np.fft.rfft(phcub,axis=0))[0:n1,:,:,:]
+
+def icosft4d1(hcub):
+  """ Inverse cosine transform along axis 1 (slowest) """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n1-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([nw,n2,n3,n4])
+  phcub[0:n1,:,:,:]  = hcub[:,:,:,:]
+  phcub[n1:nw,:,:,:] = 0.0
+  # Compute inverse cosine transform
+  return np.real(np.fft.irfft(phcub,axis=0))[0:n1,:,:,:]
+
+def cosft4d2(hcub):
+  """ Cosine transform along axis 2 """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n2-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,nt,n3,n4])
+  phcub[:,0:n2,:,:] = hcub[:,:,:,:]
+  phcub[:,n2:nw,:,:]  = 0.0
+  phcub[:,nw:nt,:,:]  = phcub[:,nt-nw:0:-1,:,:]
+  # Compute cosine transform
+  return np.real(np.fft.rfft(phcub,axis=1))[:,0:n2,:,:]
+
+def icosft4d2(hcub):
+  """ Inverse cosine transform along axis 2 """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n2-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,nw,n3,n4])
+  phcub[:,0:n2,:,:]  = hcub[:,:,:,:]
+  phcub[:,n2:nw,:,:] = 0.0
+  # Compute inverse cosine transform
+  return np.real(np.fft.irfft(phcub,axis=1))[:,0:n2,:,:]
+
+def cosft4d3(hcub):
+  """ Cosine transform along axis 3 """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n3-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,n2,nt,n4])
+  phcub[:,:,0:n3,:] = hcub[:,:,:,:]
+  phcub[:,:,n3:nw,:]  = 0.0
+  phcub[:,:,nw:nt,:]  = phcub[:,:,nt-nw:0:-1,:]
+  # Compute cosine transform
+  return np.real(np.fft.rfft(phcub,axis=2))[:,:,0:n3,:]
+
+def icosft4d3(hcub):
+  """ Inverse cosine transform along axis 3 """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n3-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,n2,nw,n4])
+  phcub[:,:,0:n3,:]  = hcub[:,:,:,:]
+  phcub[:,:,n3:nw,:] = 0.0
+  # Compute inverse cosine transform
+  return np.real(np.fft.irfft(phcub,axis=2))[:,:,0:n3,:]
+
+def cosft4d4(hcub):
+  """ Cosine transform along axis 4 (fastest) """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n4-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,n2,n3,nt])
+  phcub[:,:,:,0:n4] = hcub[:,:,:,:]
+  phcub[:,:,:,n4:nw]  = 0.0
+  phcub[:,:,:,nw:nt]  = phcub[:,:,:,nt-nw:0:-1]
+  # Compute cosine transform
+  return np.real(np.fft.rfft(phcub,axis=3))[:,:,:,0:n4]
+
+def icosft4d4(hcub):
+  """ Inverse cosine transform along axis 4 (fastest) """
+  # Get sizes
+  n1,n2,n3,n4 = hcub.shape
+  nt = 2*next_fast_size(n4-1)
+  nw = int(nt/2) + 1
+  # Prepare input
+  phcub = np.zeros([n1,n2,n3,nw])
+  phcub[:,:,:,0:n4]  = hcub[:,:,:,:]
+  phcub[:,:,:,n4:nw] = 0.0
+  # Compute inverse cosine transform
+  return np.real(np.fft.irfft(phcub,axis=3))[:,:,:,0:n4]
+
+def samplings(dat,axes):
+  """ Computes the cosine transformed samplings """
+  ns = dat.shape
+  ndim = len(ns)
+  ds = []
+  for idim in range(ndim):
+    ds.append(1/(2*next_fast_size(ns[idim]-1)*axes.d[idim]))
+
+  return ds
 
 def next_fast_size(n):
   """ Gets the next fastest size of the cosine transform """
