@@ -10,7 +10,7 @@
 class rstolt {
 public:
   rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, float dro, float oro);
-  void resmig(float *dat, float *img);
+  void resmig(float *dat, float *img, int nthrd);
 
 private:
   int _nz, _nm, _nh, _nro;

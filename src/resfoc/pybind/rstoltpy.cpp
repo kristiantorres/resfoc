@@ -1,7 +1,7 @@
 /**
  * Python interface to rstolt.cpp
  * @author: Joseph Jennings
- * @version: 2019.12.12
+ * @version: 2019.12.14
  */
 
 #include <pybind11/pybind11.h>
@@ -21,11 +21,12 @@ PYBIND11_MODULE(rstolt,m) {
           py::arg("oro"))
       .def("resmig",[](rstolt &rst,
           py::array_t<float, py::array::c_style> dat,
-          py::array_t<float, py::array::c_style> img
+          py::array_t<float, py::array::c_style> img,
+          int nthrd
           )
           {
-            rst.resmig(dat.mutable_data(), img.mutable_data());
+            rst.resmig(dat.mutable_data(), img.mutable_data(), nthrd);
           },
-          py::arg("dat"), py::arg("img")
+          py::arg("dat"), py::arg("img"), py::arg("nthrd")
           );
 }

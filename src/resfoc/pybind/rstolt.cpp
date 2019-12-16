@@ -1,4 +1,5 @@
 
+#include <omp.h>
 #include <stdio.h>
 #include <math.h>
 #include "stretch.h"
@@ -14,18 +15,19 @@ rstolt::rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, fl
   _oro = oro - (nro-1)*dro;
 }
 
-void rstolt::resmig(float *dat, float *img) {
+void rstolt::resmig(float *dat, float *img, int nthrd) {
 
   /* Initialize stretch */
   stretch intrp = stretch(_nz,0.0,_dz,_nz,0.01);
 
-  /* Temporary arrays */
-  float *str = new float[_nz]();
-  float *trc = new float[_nz]();
-  float *mig = new float[_nz]();
-
+  omp_set_num_threads(nthrd);
   /* Loop over rho */
+#pragma omp parallel for default(shared)
   for(int iro = 0; iro < _nro; ++iro) {
+    /* Temporary arrays */
+    float *str = new float[_nz](); float *trc = new float[_nz]();
+    float *mig = new float[_nz]();
+    /* Compute rho */
     float vov = _oro + iro*_dro;
     /* Loop over sub-surface offset */
     for(int ih = 0; ih < _nh; ++ih) {
@@ -56,8 +58,8 @@ void rstolt::resmig(float *dat, float *img) {
         memcpy(&img[iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz],mig,sizeof(float)*_nz);
       }
     }
+    /* Free memory */
+    delete[] str; delete[] trc; delete[] mig;
   }
 
-  /* Free memory */
-  delete[] str; delete[] trc; delete[] mig;
 }
