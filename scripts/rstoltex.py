@@ -33,12 +33,12 @@ pimgftt = np.ascontiguousarray(np.transpose(pimgft,(2,1,0)))
 pimgftt = pimgftt.astype('float32')
 print(pimgftt.shape)
 print(pimgftt.flags)
-nzp = pimgftt.shape[2]; nmp = pimgftt.shape[1]; nhp = pimgftt.shape[0]; nro = 4
+nzp = pimgftt.shape[2]; nmp = pimgftt.shape[1]; nhp = pimgftt.shape[0]; nro = 2
 print(nzp,nmp,nhp,nro)
 rst = rstolt.rstolt(nzp,nmp,nhp,nro,dcs[0],dcs[1],dcs[2],0.01,1.0)
 
 rmig = np.zeros([2*nro-1,nhp,nmp,nzp],dtype='float32')
-rst.resmig(pimgftt,rmig)
+rst.resmig(pimgftt,rmig,2)
 rmigt = np.transpose(rmig,(3,2,1,0))
 raxes = seppy.axes([nzp,nmp,nhp,2*nro-1],[0.0,0.0,0.0,98],[dcs[0],dcs[1],dcs[2],0.01])
 sep.write_file(None,raxes,rmigt,ofname='inrstolt.H')
