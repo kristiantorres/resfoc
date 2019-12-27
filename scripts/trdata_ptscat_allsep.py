@@ -54,6 +54,7 @@ defaults = {
     "nprint": 100,
     "prefix": "",
     "beg": 0,
+    "end": 9999
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -73,6 +74,7 @@ ioArgs.add_argument("-datapath",help="Output datapath of where to write the SEPl
 ioArgs.add_argument("-nwrite",help="Number of examples to compute before writing [20]",type=int)
 ioArgs.add_argument("-prefix",help="Prefix that will be used for label and feature files [None]",type=str)
 ioArgs.add_argument("-beg",help="Numeric suffix used for keeping track of examples [0]",type=int)
+ioArgs.add_argument("-end",help="Last example for writing [9999]",type=int)
 # Imaging parameters
 imgArgs = parser.add_argument_group('Imaging parameters')
 imgArgs.add_argument("-nsx",help="Number of sources [41]",type=int)
@@ -100,7 +102,7 @@ sep = seppy.sep(sys.argv)
 # IO parameters
 outdir = args.outdir; nwrite = args.nwrite
 prefix = args.prefix; dpath = args.datapath
-beg = args.beg
+beg = args.beg; end = args.end
 
 # Verbosity argument
 verb = sep.yn2zoo(args.verb)
@@ -132,7 +134,7 @@ for iex in range(nex):
     imgs[:,:,:,:,k], rhos[:,:,k] = createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,keepoff=True,debug=False)
   if(k == nwrite-1):
     # Create tag
-    suffix = sep.create_inttag(beg+iex,nex)+".H"
+    suffix = sep.create_inttag(beg+iex+1,end)+".H"
     # Write features
     sep.write_file(None,iaxes,imgs,ofname=outdir+prefix+"img"+suffix,dpath=dpath)
     # Write labels
@@ -156,7 +158,7 @@ if(nres != 0):
   resrhos = np.zeros([nz,nx,nres],dtype='float32')
   resimgs[:] = imgs[:,:,:,:,:nres]; resrhos = rhos[:,:,:nres]
   # Write features
-  suffix = sep.create_inttag(beg+nex-1,nex) + ".H"
+  suffix = sep.create_inttag(beg+nex,end) + ".H"
   sep.write_file(None,resiaxes,resimgs,ofname=outdir+prefix+"img"+suffix)
   # Write labels
   sep.write_file(None,resraxes,resrhos,ofname=outdir+prefix+"lbl"+suffix)

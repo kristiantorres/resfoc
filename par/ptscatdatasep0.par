@@ -4,6 +4,7 @@ outdir=./dat/ptscat0/
 datapath=/scr1/joseph29/ptscat0/
 nwrite=3
 beg=0
+end=9999
 prefix=
 # Imaging parameters
 nsx=41
