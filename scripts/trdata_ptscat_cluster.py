@@ -23,15 +23,21 @@ residual migration. So the actual output of residual migration parameters is
 as: oro - (nro-1)*dro. This forces that the output be centered at the oro
 provided by the user
 
+Finally, this script provides the capability of submitting many jobs
+to a PBS/Torque cluster. By default, the script attempts run 200 jobs
+(total examples = no. of jobs * nexamples per job). The user can
+override these parameters in the cluster arguments section
+
 @author: Joseph Jennings
-@version: 2019.12.27
+@version: 2019.12.28
 """
 
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-from training_data import createdata_ptscat
-import time
+import clusterhelp.rmtrdat as rmtrdat
+import clusterhelp.pbshelper as pbs
+import subprocess
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)
@@ -39,12 +45,12 @@ conf_parser.add_argument("-c", "--conf_file",
                          help="Specify config file", metavar="FILE")
 args, remaining_argv = conf_parser.parse_known_args()
 defaults = {
-    "nex": 2000,
-    "nwrite": 20,
-    "nsx": 26,
+    "nex": 50,
+    "nwrite": 50,
+    "nsx": 41,
     "osx": 3,
     "nz": 256,
-    "nx": 256,
+    "nx": 400,
     "nh": 10,
     "nro": 6,
     "oro": 1.0,
@@ -53,7 +59,13 @@ defaults = {
     "nprint": 100,
     "prefix": "",
     "beg": 0,
-    "end": 9999
+    "end": 9999,
+    "tjobs": 200,
+    "nsubmit": 5,
+    "logpath": ".",
+    "parpath": ".",
+    "jobprefix": "ptscat0",
+    "klean": 'y'
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -88,80 +100,109 @@ rmigArgs.add_argument("-oro",help="Center residual migration [1.0]",type=float)
 rmigArgs.add_argument("-dro",help="Rho spacing [0.01]",type=float)
 # Machine learning parameters
 mlArgs = parser.add_argument_group('Machine learning parameters')
-mlArgs.add_argument("-nex",help="Total number of examples [2000]",type=int)
+mlArgs.add_argument("-nex",help="Total number of examples [50]",type=int)
 # Other arguments
 othArgs = parser.add_argument_group('Other parameters')
 othArgs.add_argument("-verb",help="Verbosity flag [y]",type=str)
 othArgs.add_argument("-nprint",help="How often to print a new example [100]",type=int)
+# Cluster arguments
+cluArgs = parser.add_argument_group('Cluster parameters')
+cluArgs.add_argument("-tjobs",help="Total number of jobs to run [200], cannot do more than 200 in default queue",type=int)
+cluArgs.add_argument("-nsubmit",help="Number of times to attempt a job submission [5]",type=int)
+cluArgs.add_argument("-logpath",help="Path to logfile [current directory]",type=str)
+cluArgs.add_argument("-parpath",help="Path to parfile [current directory]",type=str)
+cluArgs.add_argument("-jobprefix",help="Job prefix for par files [ptscat0]",type=str)
+cluArgs.add_argument("-klean",help="Clean up cluster submission files [y]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Setup IO
 sep = seppy.sep(sys.argv)
 
-# IO parameters
-outdir = args.outdir; nwrite = args.nwrite
-prefix = args.prefix; dpath = args.datapath
-beg = args.beg; end = args.end
-
-# Verbosity argument
-verb = sep.yn2zoo(args.verb)
-nprint = args.nprint
-
-# Imaging parameters
-nsx = args.nsx; osx = args.osx
-nz = args.nz; nx = args.nx; nh = args.nh
-
-# Residual migration parameters
-nro = args.nro; oro = args.oro; dro = args.dro
-
-# Machine learning parameters
+# Get command line arguments
+tjobs = args.tjobs;
 nex = args.nex
+logpath = args.logpath; parpath = args.parpath
+jobprefix = args.jobprefix
+verb = sep.yn2zoo(args.verb)
+klean = sep.yn2zoo(args.klean)
 
-# Output arrays and axes
-dz = 20.0; dx = 20.0
-iaxes = seppy.axes([nz,nx,2*nh+1,2*nro-1,nwrite],[0.0,0.0,-nh*dx,oro-(nro-1)*dro,0.0],[dz,dx,dx,dro,1.0])
-raxes = seppy.axes([nz,nx,nwrite],[0.0,0.0,0.0],[dz,dx,1.0])
-imgs = np.zeros([nz,nx,2*nh+1,2*nro-1,nwrite],dtype='float32')
-rhos = np.zeros([nz,nx,nwrite],dtype='float32')
+# Base command for all jobs
+bcmd = '/data/sep/joseph29/opt/anaconda3/envs/py35/bin/python ./scripts/trdata_ptscat_allsep.py -c '
 
-# Create all examples
-k = 0
-for iex in range(nex):
-  if(verb):
-    if(iex%nprint == 0):
-      print("%d ... "%(beg+iex+1),end='')
-    imgs[:,:,:,:,k], rhos[:,:,k] = createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,keepoff=True,debug=False)
-  if(k == nwrite-1):
-    # Create tag
-    suffix = sep.create_inttag(beg+iex+1,end)+".H"
-    # Write features
-    sep.write_file(None,iaxes,imgs,ofname=outdir+prefix+"img"+suffix,dpath=dpath)
-    # Write labels
-    sep.write_file(None,raxes,rhos,ofname=outdir+prefix+"lbl"+suffix,dpath=dpath)
-    # Reset arrays
-    imgs[:] = 0.0; rhos[:] = 0.0
-    if(verb): print("Writing %d examples"%(nwrite))
-    # Reset counter
-    k = -1
-  k += 1
+# TODO: Split all jobs into a few batches
 
-# Write remaining examples
-nres = nex%nwrite
-if(nres != 0):
-  if(verb): print("Writing %d residual examples"%(nres))
-  # Residual axes
-  resiaxes = seppy.axes([nz,nx,2*nh+1,2*nro-1,nres],[0.0,0.0,-nh*dx,oro-(nro-1)*dro,0.0],[dz,dx,dx,dro,1.0])
-  resraxes = seppy.axes([nz,nx,nres],[0.0,0.0,0.0],[dz,dx,1.0])
-  # Residual training data
-  resimgs = np.zeros([nz,nx,2*nh+1,2*nro-1,nres],dtype='float32')
-  resrhos = np.zeros([nz,nx,nres],dtype='float32')
-  resimgs[:] = imgs[:,:,:,:,:nres]; resrhos = rhos[:,:,:nres]
-  # Write features
-  suffix = sep.create_inttag(beg+nex,end) + ".H"
-  sep.write_file(None,resiaxes,resimgs,ofname=outdir+prefix+"img"+suffix)
-  # Write labels
-  sep.write_file(None,resraxes,resrhos,ofname=outdir+prefix+"lbl"+suffix)
+# Create and submit all jobs
+alljobs = []
+for ijob in range(tjobs):
+  # Create job
+  args.beg += nex
+  alljobs.append(rmtrdat.rmtrjob(args,jobprefix,parpath,logpath,verb=verb))
+  cmd = bcmd + alljobs[ijob].pfname
+  # Submit job
+  alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+  if(verb): print("Job=%d %s"%(ijob, alljobs[ijob].jobid))
 
-# Flag for cluster helper to determine success
-print("Success!")
+if(verb): print("All jobs submitted. Managing jobs now...")
+
+# TODO: Loop over each of the batches and proceed as normal
+
+# Loop until all jobs have completed
+while len(alljobs) > 0:
+  todel = []
+  qlines = pbs.qstat()
+  # Check the status of each job
+  for ijob in range(len(alljobs)):
+    #alljobs[ijob].getstatus()
+    alljobs[ijob].getstatus_fast(qlines)
+    if(verb):
+      print("Job=%d %s sep: %s default: %s"%(ijob, alljobs[ijob].jobid,
+        alljobs[ijob].status['sep'], alljobs[ijob].status['default']))
+    if('Q' in alljobs[ijob].status.values()):
+    # If job is queued, submit to other queue
+      cmd = bcmd + alljobs[ijob].pfname
+      alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+      todel.append(False)
+    elif('C' in alljobs[ijob].status.values()):
+    # If completed delete or resubmit
+      if(alljobs[ijob].success('Success!')):
+        todel.append(True)
+      elif(alljobs[ijob].nsub < args.nsubmit):
+        cmd = bcmd + alljobs[ijob].pfname
+        alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+        todel.append(False)
+      else:
+        if(verb): print("Having trouble submitting job. Removing...")
+        todel.append(True)
+    elif('R' == alljobs[ijob].status['sep'] and 'R' == alljobs[ijob].status['default']):
+      alljobs[ijob].cleanup()
+      todel.append(False)
+    else:
+      # Leave the job alone
+      todel.append(False)
+  # Delete completed jobs
+  idx = 0
+  for ijob in range(len(alljobs)):
+    if(todel[ijob]):
+      del alljobs[idx]
+    else:
+      idx += 1
+  print(" ")
+
+if(klean):
+  # Remove scripts
+  rmscr = 'rm %s*.sh'%(jobprefix)
+  if(verb): print(rmscr)
+  sp = subprocess.check_call(rmscr,shell=True)
+  # Remove log files
+  rmlog = 'rm %s/%s*.log'%(logpath,jobprefix)
+  if(verb): print(rmlog)
+  sp = subprocess.check_call(rmlog,shell=True)
+  # Remove par files
+  rmpar = 'rm %s/%s*.par'%(parpath,jobprefix)
+  if(verb): print(rmpar)
+  sp = subprocess.check_call(rmpar,shell=True)
+  # Remove qstat.out
+  rmqs = 'rm qstat.out'
+  if(verb): print(rmqs)
+  sp = subprocess.check_call(rmqs,shell=True)
 
