@@ -3,7 +3,7 @@
 outdir=./dat/ptscat0/
 datapath=/data/sep/joseph29/scratch/ptscat0/
 nwrite=15
-beg=4603
+beg=7197
 end=9999
 prefix=
 # Imaging parameters
@@ -19,7 +19,8 @@ dro=0.01
 # ML parameters
 nex=15
 # Cluster arguments
-tjobs=300
+ajobs=180
+tjobs=180
 logpath=./log/ptscat0
 parpath=./par/ptscat0
 nsubmit=5

@@ -29,7 +29,7 @@ to a PBS/Torque cluster. By default, the script attempts run 200 jobs
 override these parameters in the cluster arguments section
 
 @author: Joseph Jennings
-@version: 2019.12.28
+@version: 2019.12.30
 """
 
 import sys, os, argparse, configparser
@@ -45,8 +45,8 @@ conf_parser.add_argument("-c", "--conf_file",
                          help="Specify config file", metavar="FILE")
 args, remaining_argv = conf_parser.parse_known_args()
 defaults = {
-    "nex": 50,
-    "nwrite": 50,
+    "nex": 15,
+    "nwrite": 15,
     "nsx": 41,
     "osx": 3,
     "nz": 256,
@@ -60,7 +60,8 @@ defaults = {
     "prefix": "",
     "beg": 0,
     "end": 9999,
-    "tjobs": 200,
+    "tjobs": 600,
+    "ajobs": 200,
     "nsubmit": 5,
     "logpath": ".",
     "parpath": ".",
@@ -107,7 +108,8 @@ othArgs.add_argument("-verb",help="Verbosity flag [y]",type=str)
 othArgs.add_argument("-nprint",help="How often to print a new example [100]",type=int)
 # Cluster arguments
 cluArgs = parser.add_argument_group('Cluster parameters')
-cluArgs.add_argument("-tjobs",help="Total number of jobs to run [200], cannot do more than 200 in default queue",type=int)
+cluArgs.add_argument("-tjobs",help="Total number of jobs to run [600]",type=int)
+cluArgs.add_argument("-ajobs",help="Number of jobs either in queue or running at once [200], cannot do more than 200 in default queue",type=int)
 cluArgs.add_argument("-nsubmit",help="Number of times to attempt a job submission [5]",type=int)
 cluArgs.add_argument("-logpath",help="Path to logfile [current directory]",type=str)
 cluArgs.add_argument("-parpath",help="Path to parfile [current directory]",type=str)
@@ -119,7 +121,7 @@ args = parser.parse_args(remaining_argv)
 sep = seppy.sep(sys.argv)
 
 # Get command line arguments
-tjobs = args.tjobs;
+tjobs = args.tjobs; ajobs = args.ajobs
 nex = args.nex
 logpath = args.logpath; parpath = args.parpath
 jobprefix = args.jobprefix
@@ -129,64 +131,75 @@ klean = sep.yn2zoo(args.klean)
 # Base command for all jobs
 bcmd = '/data/sep/joseph29/opt/anaconda3/envs/py35/bin/python ./scripts/trdata_ptscat_allsep.py -c '
 
-# TODO: Split all jobs into a few batches
-
 # Create and submit all jobs
-alljobs = []
+actjobs = []; lefjobs = []
 for ijob in range(tjobs):
-  # Create job
-  args.beg += nex
-  alljobs.append(rmtrdat.rmtrjob(args,jobprefix,parpath,logpath,verb=verb))
-  cmd = bcmd + alljobs[ijob].pfname
-  # Submit job
-  alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
-  if(verb): print("Job=%d %s"%(ijob, alljobs[ijob].jobid))
+  if(ijob < ajobs):
+    # Create job
+    args.beg += nex
+    actjobs.append(rmtrdat.rmtrjob(args,jobprefix,parpath,logpath,verb=verb))
+    cmd = bcmd + actjobs[ijob].pfname
+    # Submit job
+    actjobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+    if(verb): print("Job=%d %s"%(ijob, actjobs[ijob].jobid))
+  else:
+    # Leftover jobs, to be submitted
+    args.beg += nex
+    lefjobs.append(rmtrdat.rmtrjob(args,jobprefix,parpath,logpath,verb=verb))
 
-if(verb): print("All jobs submitted. Managing jobs now...")
-
-# TODO: Loop over each of the batches and proceed as normal
+if(verb): print("%d jobs submitted, %d jobs waiting. Managing jobs now...\n"%(len(actjobs),len(lefjobs)))
 
 # Loop until all jobs have completed
-while len(alljobs) > 0:
+while len(actjobs) > 0:
   todel = []
   qlines = pbs.qstat()
   # Check the status of each job
-  for ijob in range(len(alljobs)):
-    #alljobs[ijob].getstatus()
-    alljobs[ijob].getstatus_fast(qlines)
+  for ijob in range(len(actjobs)):
+    #actjobs[ijob].getstatus()
+    actjobs[ijob].getstatus_fast(qlines)
     if(verb):
-      print("Job=%d %s sep: %s default: %s"%(ijob, alljobs[ijob].jobid,
-        alljobs[ijob].status['sep'], alljobs[ijob].status['default']))
-    if('Q' in alljobs[ijob].status.values()):
+      print("Job=%d %s sep: %s default: %s"%(ijob, actjobs[ijob].jobid,
+        actjobs[ijob].status['sep'], actjobs[ijob].status['default']))
+    if('Q' in actjobs[ijob].status.values()):
     # If job is queued, submit to other queue
-      cmd = bcmd + alljobs[ijob].pfname
-      alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+      cmd = bcmd + actjobs[ijob].pfname
+      actjobs[ijob].submit(jobprefix,cmd,sleep=0.0)
       todel.append(False)
-    elif('C' in alljobs[ijob].status.values()):
+    elif('C' in actjobs[ijob].status.values()):
     # If completed delete or resubmit
-      if(alljobs[ijob].success('Success!')):
+      if(actjobs[ijob].success('Success!')):
+        if(verb): print("Job=%d %s complete!"%(ijob,actjobs[ijob].jobid))
         todel.append(True)
-      elif(alljobs[ijob].nsub < args.nsubmit):
-        cmd = bcmd + alljobs[ijob].pfname
-        alljobs[ijob].submit(jobprefix,cmd,sleep=0.0)
+      elif(actjobs[ijob].nsub < args.nsubmit):
+        cmd = bcmd + actjobs[ijob].pfname
+        actjobs[ijob].submit(jobprefix,cmd,sleep=0.0)
         todel.append(False)
       else:
-        if(verb): print("Having trouble submitting job. Removing...")
+        if(verb): print("Having trouble submitting job %s. Removing..."%(actjobs[ijob].jobid))
         todel.append(True)
-    elif('R' == alljobs[ijob].status['sep'] and 'R' == alljobs[ijob].status['default']):
-      alljobs[ijob].cleanup()
+    elif('R' == actjobs[ijob].status['sep'] and 'R' == actjobs[ijob].status['default']):
+      actjobs[ijob].cleanup()
       todel.append(False)
     else:
       # Leave the job alone
       todel.append(False)
   # Delete completed jobs
   idx = 0
-  for ijob in range(len(alljobs)):
+  for ijob in range(len(actjobs)):
     if(todel[ijob]):
-      del alljobs[idx]
+      del actjobs[idx]
     else:
       idx += 1
-  print(" ")
+  # Submit and add leftover jobs
+  for ijob in range(len(lefjobs)):
+    # Don't append if no active jobs complete
+    if(len(actjobs) >= ajobs): break
+    cmd = bcmd + lefjobs[0].pfname
+    lefjobs[0].submit(jobprefix,cmd,sleep=0.0)
+    actjobs.append(lefjobs[0])
+    if(verb): print("Submitting waiting Job %s..."%(lefjobs[0].jobid))
+    del lefjobs[0]
+  if(verb): print("Number of active jobs %d, Number of waiting jobs %d\n"%(len(actjobs),len(lefjobs)))
 
 if(klean):
   # Remove scripts
