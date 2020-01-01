@@ -30,7 +30,7 @@ provided by the user
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-from training_data import createdata_ptscat
+from resfoc.training_data import createdata_ptscat
 import time
 
 # Parse the config file

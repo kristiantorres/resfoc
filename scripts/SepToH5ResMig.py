@@ -7,7 +7,7 @@ User must specify the directory in which the data
 are located and the output .h5 file.
 
 @author: Joseph Jennings
-@version: 2019.12.30
+@version: 2019.12.31
 """
 
 import sys, os, argparse, configparser
@@ -26,6 +26,7 @@ defaults = {
     "verb": "y",
     "zidx": 10,
     "nprint": 100,
+    "prefix": ""
     }
 if args.conf_file:
   config = ConfigParser.SafeConfigParser()
@@ -47,6 +48,7 @@ parser.add_argument("-out",help="output h5 file",required=True,type=str)
 parser.add_argument("-zidx",help="Index of zero subsurface offset [10]",type=int)
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 parser.add_argument("-nprint",help="Print after so many examples [100]",type=int)
+parser.add_argument("-prefix",help="Prefix to lbl or img (for example test) [None]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up IO
@@ -58,10 +60,11 @@ out = args.out
 zidx = args.zidx
 verb = sep.yn2zoo(args.verb)
 nprint = args.nprint
+prefix = args.prefix
 
 # First get total number of examples
-imgfiles = sorted(glob.glob(sepdir + '/img*.H'))
-lblfiles = sorted(glob.glob(sepdir + '/lbl*.H'))
+imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))
+lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))
 
 assert(len(imgfiles) == len(lblfiles)), "Must have as many features as labels. Exiting"
 
@@ -73,7 +76,7 @@ if(verb): print("Total number of examples: %d"%(ntot))
 
 # Allocate output array
 iaxes = sep.read_header(None,ifname=imgfiles[0])
-nz = iaxes.n[0]; nx = iaxes.n[1]; nro = iaxes.n[3];
+nz = iaxes.n[0]; nx = iaxes.n[1]; nro = iaxes.n[3]
 
 imgs = np.zeros([nz,nx,nro,ntot],dtype='float32')
 rhos = np.zeros([nz,nx,ntot],dtype='float32')

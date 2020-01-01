@@ -26,6 +26,7 @@ defaults = {
     "verb": "y",
     "ro1idx": 5,
     "nprint": 100,
+    "prefix": "",
     }
 if args.conf_file:
   config = ConfigParser.SafeConfigParser()
@@ -47,6 +48,7 @@ parser.add_argument("-out",help="output h5 file",required=True,type=str)
 parser.add_argument("-ro1idx",help="Index of rho=1 [5]",type=int)
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 parser.add_argument("-nprint",help="Print after so many examples [100]",type=int)
+parser.add_argument("-prefix",help="Prefix to lbl or img (for example test) [None]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up IO
@@ -58,10 +60,11 @@ out = args.out
 ro1idx = args.ro1idx
 verb = sep.yn2zoo(args.verb)
 nprint = args.nprint
+prefix = args.prefix
 
 # First get total number of examples
-imgfiles = sorted(glob.glob(sepdir + '/img*.H'))
-lblfiles = sorted(glob.glob(sepdir + '/lbl*.H'))
+imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))
+lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))
 
 assert(len(imgfiles) == len(lblfiles)), "Must have as many features as labels. Exiting"
 

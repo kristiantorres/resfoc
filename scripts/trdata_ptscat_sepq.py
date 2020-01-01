@@ -35,7 +35,7 @@ different scripts be run for different queues.
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-from training_data import createdata_ptscat
+from resfoc.training_data import createdata_ptscat
 import clusterhelp as pbs
 import h5py
 

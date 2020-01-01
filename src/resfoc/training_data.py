@@ -8,7 +8,7 @@ import resfoc.rstolt as rstolt
 import matplotlib.pyplot as plt
 import inpout.seppy as seppy
 
-def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,keepoff=False,debug=False):
+def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debug=False):
   """ Creates a single training example: prestack residual migration images
   and the rho values to be estimated
   """
@@ -27,7 +27,11 @@ def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,keepoff=False,debug=False):
   migval  = 2500.0
   migvel  = np.zeros([nz,nx],dtype='float32') + migval
   # Create perturbation
-  dvel    = vel.create_randptscatmodel(nz,nx,100,25)
+  dvel = None
+  if(grid):
+    dvel = vel.create_ptscatmodel(nz,nx,50,50)
+  else:
+    dvel = vel.create_randptscatmodel(nz,nx,100,25)
   if(debug):
     plt.imshow(dvel,cmap='gray',vmin=-1.0,vmax=1.0); plt.show()
 
