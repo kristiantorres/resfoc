@@ -1,11 +1,21 @@
 # Utility functions for processing data before 
 # inputting to a neural network
+import sys
 import numpy as np
 from scipy import interpolate
 
+def normalize(img,eps=sys.float_info.epsilon):
+  """ 
+  Normalizes an image accross channels  by removing
+  the mean and dividing by the standard deviation
+  """
+  return (img - np.mean(img))/(np.std(img) + eps)
+
 def resizepow2(img,kind='linear'):
-  """ Resizes an image so that its dimensions are 
-  a power of 2 """
+  """ 
+  Resizes an image so that its dimensions are 
+  a power of 2 
+  """
   # Get input shape
   length=img.shape[-1]
   height=img.shape[-2]
@@ -17,7 +27,8 @@ def resizepow2(img,kind='linear'):
   return resample(img,new_shape,kind)
 
 def resample(img,new_shape,kind='linear'):
-  """ Resamples an image. Can work up to 4D numpy arrays.
+  """ 
+  Resamples an image. Can work up to 4D numpy arrays.
   assumes that the nz and nx axes are the last two (fastest) 
   """
   # Original coordinates
@@ -41,7 +52,7 @@ def resample(img,new_shape,kind='linear'):
         f = interpolate.interp2d(x,y,img[i,j,:,:],kind=kind)
         res[i,j,:,:] = f(xnew,ynew)
   elif len(img.shape)==3:
-    res = np.zeros([img.shape[0],img.shape[1],new_shape[0],new_shape[1]],dtype='float32')
+    res = np.zeros([img.shape[0],new_shape[0],new_shape[1]],dtype='float32')
     for i in range(img.shape[0]):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
