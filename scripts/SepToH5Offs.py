@@ -7,7 +7,7 @@ User must specify the directory in which the data
 are located and the output .h5 file.
 
 @author: Joseph Jennings
-@version: 2019.01.02
+@version: 2020.01.02
 """
 
 import sys, os, argparse, configparser
