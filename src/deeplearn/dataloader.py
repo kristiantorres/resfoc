@@ -22,7 +22,7 @@ class resmig_generator_h5(Sequence):
 
   def __getitem__(self,idx):
     xb = self.hfin[self.hfkeys[idx]]
-    yb = self.hfin[self.hfkeys[idx + self.nb]]
+    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
     return xb, yb
 
 #
@@ -57,4 +57,40 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
   # Remove the original file
   if(clean):
     sp = subprocess.check_call('rm %s'%(fin),shell=True)
+
+def load_alldata(trfile,vafile,dsize):
+  """ Loads all data and labels into numpy arrays """
+  # Open the files
+  hftr = h5py.File(trfile,'r')
+  hfva = h5py.File(vafile,'r')
+  # Get number of examples
+  trkeys = list(hftr.keys()); vakeys = list(hfva.keys())
+  ntr = int(len(trkeys)/2)
+  nva = int(len(vakeys)/2)
+  # Get shape of examples
+  xshape = hftr[trkeys[0]].shape
+  yshape = hftr[trkeys[0+ntr]].shape
+  # Allocate output arrays
+  if(len(xshape) == 4):
+    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
+  elif(len(xshape) == 3):
+    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2]],dtype='float32')
+  ally = np.zeros([(ntr+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
+  k = 0
+  # Get all training examples
+  for itr in range(ntr):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
+      ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
+      k += 1
+  # Get all validation examples
+  for iva in range(nva):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
+      ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
+      k += 1
+  # Close the files
+  hftr.close(); hfva.close()
+
+  return allx,ally
 
