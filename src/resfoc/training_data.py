@@ -5,11 +5,11 @@ import scaas.velocity as vel
 from resfoc.tpow import tpow
 import resfoc.cosft as cft
 import resfoc.rstolt as rstolt
-import matplotlib.pyplot as plt
 import inpout.seppy as seppy
 
-def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debug=False):
-  """ Creates a single training example: prestack residual migration images
+def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,spacing=25,grid=False,keepoff=False,debug=False):
+  """
+  Creates a single training example: prestack residual migration images
   and the rho values to be estimated
   """
   ## Create the point scatterer model
@@ -21,7 +21,7 @@ def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debu
   modval  = 2500.0
   modvel  = np.zeros([nz,nx],dtype='float32') + modval
   romin = oro - (nro-1)*dro; romax = romin + dro*(2*nro-1)
-  rhos = vel.create_randomptb(nz,nx,romin,romax,ncpu=10)
+  rhos = vel.create_randomptb(nz,nx,romin,romax,ncpu=8)
   modvel = modvel/rhos
   # Create migration velocity
   migval  = 2500.0
@@ -29,9 +29,9 @@ def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debu
   # Create perturbation
   dvel = None
   if(grid):
-    dvel = vel.create_ptscatmodel(nz,nx,50,50)
+    dvel = vel.create_ptscatmodel(nz,nx,spacing,spacing)
   else:
-    dvel = vel.create_randptscatmodel(nz,nx,100,25)
+    dvel = vel.create_randptscatmodel(nz,nx,100,spacing)
   if(debug):
     plt.imshow(dvel,cmap='gray',vmin=-1.0,vmax=1.0); plt.show()
 
@@ -105,7 +105,7 @@ def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debu
   sca = sca2d.scaas2d(ntd,nxp,nzp,dtd,dx,dz,dtu,bx,bz,alpha=0.99)
 
   # Forward modeling for all shots
-  nthreads = 24
+  nthreads = 8
   sca.brnfwd(allsrcs,allsrcx,allsrcz,nsrc,allrecx,allrecz,nrec,nsx,modvelp,dvelp,ddat,nthreads)
 
   rnh = 2*nh + 1
@@ -134,7 +134,7 @@ def createdata_ptscat(nsx,osx,nz,nx,nh,nro,oro,dro,grid=False,keepoff=False,debu
 
   # Residual Stolt migration
   rmig = np.zeros([fnro,nhpc,nmpc,nzpc],dtype='float32')
-  rst.resmig(imgepft,rmig,int(fnro))
+  rst.resmig(imgepft,rmig,nthreads)
 
   # Inverse cosine transform
   rmigift = cft.icosft(rmig,axis2=1,axis3=1,axis4=1)

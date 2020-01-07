@@ -17,13 +17,13 @@ in H5 or SEPlib format (default is SEPlib format).
 This version loads all of the test data into memory
 
 @author: Joseph Jennings
-@version: 2020.01.05
+@version: 2020.01.06
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
 import h5py
-from deeplearn.dataloader import resmig_generator_h5
+from deeplearn.dataloader import load_alldata
 from tensorflow.keras.models import model_from_json
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -40,6 +40,7 @@ defaults = {
     "seplib": "y",
     "qc": "y",
     "roout": None,
+    "gpus": [],
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -61,11 +62,12 @@ ioArgs.add_argument("-wgtin",help="Output CNN filter coefficients",type=str)
 ioArgs.add_argument("-arcin",help="Output CNN architecture",type=str)
 ioArgs.add_argument("-roout",help="Output estimated rho",type=str)
 # Other arguments
-parser.add_argument("-qc",help="Plots the estimated rho against the true rho",type=str)
+parser.add_argument("-qc",help="Plots the estimated rho against the true rho [y]",type=str)
 parser.add_argument("-nbatches",help="Number of batches on which to make predictions [default is all]",type=int)
 parser.add_argument("-bsize",help="Batch size for creating data generator [20]",type=int)
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 parser.add_argument("-seplib",help="Flag whether to output data in [SEPlib] or H5 format",type=str)
+parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
@@ -73,6 +75,9 @@ sep = seppy.sep(sys.argv)
 
 # Get command line arguments
 verb = sep.yn2zoo(args.verb)
+gpus = sep.read_list(args.gpus,[])
+if(len(gpus) != 0):
+  for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
 sepf = sep.yn2zoo(args.seplib)
 qc   = sep.yn2zoo(args.qc)
 
@@ -92,16 +97,17 @@ wgts = model.load_weights(args.wgtin)
 
 if(verb): model.summary()
 
-# Create dataloader
-tsdgen = resmig_generator_h5(tsdat,bsize)
-xshape,yshape = tsdgen.get_xyshapes()
+# Load all data
+allx,ally = load_alldata(tsdat,None,bsize)
+ally = np.squeeze(ally)
 
 # Set GPUs
 tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Evaluate on test data (predict on all examples)
-pred = model.predict_generator(tsdgen,verbose=1,steps=nbatches)
+pred = model.predict(allx,verbose=1)
 pred = np.squeeze(pred)
+print(pred.shape)
 
 # Write the predictions
 if(roout != None):
@@ -126,9 +132,11 @@ if(qc):
       nbatches = nb
     for ib in range(nbatches):
       for iex in range(bsize):
+        print(ally[k,:,:].shape)
         f,ax = plt.subplots(1,2,figsize=(10,5),gridspec_kw={'width_ratios': [1, 1]})
         ax[0].imshow(pred[k,:,:],cmap='jet',vmin=0.95,vmax=1.05)
-        ax[1].imshow(hf[keys[ib+nb]][iex],cmap='jet',vmin=0.95,vmax=1.05)
+        ax[1].imshow(ally[k,:,:],cmap='jet',vmin=0.95,vmax=1.05)
         plt.savefig('./fig/ex%d.png'%(iex),bbox_inches='tight',dpi=150)
         plt.show()
         k += 1
+

@@ -41,6 +41,7 @@ defaults = {
     "fltsize": 5,
     "unet": "y",
     "drpout": 0.0,
+    "gpus": []
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -72,6 +73,7 @@ netargs.add_argument('-unet',help='Create a network with skip connects [y]',type
 netargs.add_argument('-drpout',help='Dropout percent from 0 - 1 [0.0]',type=float)
 # Other arguments
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
+parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
@@ -79,6 +81,9 @@ sep = seppy.sep(sys.argv)
 
 # Get command line arguments
 verb  = sep.yn2zoo(args.verb)
+gpus  = sep.read_list(args.gpus,[])
+if(len(gpus) != 0):
+  for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
 
 # Training arguments
 lr      = args.lr

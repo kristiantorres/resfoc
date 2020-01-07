@@ -60,13 +60,17 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
 
 def load_alldata(trfile,vafile,dsize):
   """ Loads all data and labels into numpy arrays """
-  # Open the files
+  # Get training number of examples
   hftr = h5py.File(trfile,'r')
-  hfva = h5py.File(vafile,'r')
-  # Get number of examples
-  trkeys = list(hftr.keys()); vakeys = list(hfva.keys())
+  trkeys = list(hftr.keys())
   ntr = int(len(trkeys)/2)
-  nva = int(len(vakeys)/2)
+  # Get the validation number of examples
+  if(vafile != None):
+    hfva = h5py.File(vafile,'r')
+    vakeys = list(hfva.keys())
+    nva = int(len(vakeys)/2)
+  else:
+    nva = 0; vakeys = []
   # Get shape of examples
   xshape = hftr[trkeys[0]].shape
   yshape = hftr[trkeys[0+ntr]].shape
@@ -90,7 +94,8 @@ def load_alldata(trfile,vafile,dsize):
       ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
       k += 1
   # Close the files
-  hftr.close(); hfva.close()
+  hftr.close()
+  if(vafile != None): hfva.close()
 
   return allx,ally
 
