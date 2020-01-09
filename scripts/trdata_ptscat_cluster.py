@@ -35,8 +35,8 @@ override these parameters in the cluster arguments section
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-import clusterhelp.rmtrdat as rmtrdat
-import clusterhelp.pbshelper as pbs
+import cluster.rmtrdat as rmtrdat
+import cluster.pbshelper as pbs
 import subprocess
 
 # Parse the config file
