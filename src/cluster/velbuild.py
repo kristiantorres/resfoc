@@ -1,6 +1,6 @@
-import cluster.pbsjob as job
+import cluster.slurmjob as job
 
-class veljob(job.pbsjob):
+class veljob(job.slurmjob):
   """ Keeps track of jobs for creating velocity models """
 
   def __init__(self,pars,jobname,parpath=".",logpath=".",user='joseph29',verb=False):
