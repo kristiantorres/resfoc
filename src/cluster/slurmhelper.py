@@ -5,7 +5,7 @@ import string, random
 import time
 
 def write_script(name,cmd,nprocs=8,queue='sep',logpath='.',outfile=None,errfile=None,erase=True):
-  """ Writes a PBS script to file """
+  """ Writes a slurm script to file """
   if(outfile == None):
     outfile = name
   if(errfile == None):
@@ -19,7 +19,7 @@ def write_script(name,cmd,nprocs=8,queue='sep',logpath='.',outfile=None,errfile=
   outfile = logpath + '/' + outfile + tag + "_out.log"
   errfile = logpath + '/' + errfile + tag + "_err.log"
   # Create the PBS script
-  pbsout = """#! /bin/tcsh
+  slurmout = """#! /bin/tcsh
 #SBATCH --job-name %s
 #SBATCH --ntasks=1 nodes=1:ppn=%d
 #SBATCH --cpus-per-task=%d
@@ -33,7 +33,7 @@ cd $SLURM_SUBMIT_DIR
 #
 # End of script"""%(name,nprocs,queue,outfile,errfile,cmd)
   with open(name+".sh",'w') as f:
-    f.write(pbsout)
+    f.write(slurmout)
 
   return name+".sh"
 
