@@ -19,7 +19,6 @@ void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, in
 
   //TODO: should check nzot with nzin and itop and ibot
   /* Assign the expanded model indices in lyrot */
-  fprintf(stderr,"nzot=%d\n",nzot);
   tbb::parallel_for(tbb::blocked_range<int>(0, _n3),
       [&](const tbb::blocked_range<int>& r) {
     for (int i3 = r.begin(); i3 != r.end(); ++i3) {
@@ -150,8 +149,6 @@ void evntcre8::bandpass(float f1, float f2, float f3, int n1, int n2, int n3, fl
   nc[1] = n[1];
   nc[2] = n[2];
   size_t n123 = nc[0] * nc[1] * nc[2];
-
-  fprintf(stderr,"bandPass: %d %d %d\n", (int)n[0], (int)n[1], (int)n[2]);
 
   fftwf_complex* tmp = new fftwf_complex[n123];
   fftwf_init_threads();

@@ -1,5 +1,5 @@
 import numpy as np
-import evntcre8
+import velocity.evntcre8 as evntcre8
 import matplotlib.pyplot as plt
 
 class mdlbuild:
@@ -53,6 +53,7 @@ class mdlbuild:
                      band1,band2,band3,
                      var,layer,layer_rand,dev_layer,dev_pos,
                      nzot,lyrot,velot)
-    plt.imshow(velot[0,:,:].T); plt.show()
+    # Update the layer and velocity models
     self.vel = velot
+    self.lyr = lyrot
 
