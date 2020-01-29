@@ -28,6 +28,7 @@ class evntcre8 {
     float find_absmax(int n1, int n2, int n3, float *arr);
     void scale(int n1, int n2, int n3, float *arr, float sc);
     void norm(int n1, int n2, int n3, float *arr, float sc);
+    void zder(int nz, float *lblin, float *lblot);
 
   private:
     int _n2, _n3;

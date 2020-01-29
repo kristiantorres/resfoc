@@ -265,6 +265,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
 }
 
+
 int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
   int mx = tbb::parallel_reduce(
       tbb::blocked_range<size_t>(0, n3), int(0),
@@ -430,4 +431,23 @@ void evntcre8::scale(int n1, int n2, int n3, float *arr, float sc) {
 void evntcre8::norm(int n1, int n2, int n3, float *arr, float sc) {
   float mx = find_absmax(n1,n2,n3,arr);
   scale(n1,n2,n3,arr,sc/mx);
+}
+
+void evntcre8::zder(int nz, float *lblin, float *lblot) {
+
+  for(int i3 = 0; i3 < _n3; ++i3) {
+    for(int i2 = 0; i2 < _n2; ++i2) {
+      for(int i1 = 0; i1 < nz; ++i1) {
+        /* One-sided derivatives at the ends */
+        if(i1 == 0) {
+          lblot[i3*nz*_n2 + i2*nz + i1] = lblin[i3*nz*_n2 + i2*nz + i1+1] - lblin[i3*nz*_n2 + i2*nz + i1-0];
+        } else if(i1 == nz-1) {
+          lblot[i3*nz*_n2 + i2*nz + i1] = lblin[i3*nz*_n2 + i2*nz + i1+0] - lblin[i3*nz*_n2 + i2*nz + i1-1];
+        } else {
+          lblot[i3*nz*_n2 + i2*nz + i1] = 0.5*lblin[i3*nz*_n2 + i2*nz + i1+1] - 0.5*lblin[i3*nz*_n2 + i2*nz + i1-1];
+        }
+      }
+    }
+  }
+
 }

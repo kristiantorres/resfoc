@@ -80,15 +80,18 @@ class mdlbuild:
     nz = self.vel.shape[2]
     velot = np.zeros(self.vel.shape,dtype='float32')
     lyrot = np.zeros(self.lyr.shape,dtype='int32')
+    lbltp = np.zeros(self.vel.shape,dtype='float32')
     lblot = np.zeros(self.vel.shape,dtype='float32')
     # Create the fault
     self.ec8.fault(nz,self.lyr,self.vel,
                    azim,begx,begy,begz,dz,daz,
                    theta_shift,perp_die,dist_die,theta_die,dirf,
-                   lyrot,velot,lblot)
-    # Update layer and velocity models and label
+                   lyrot,velot,lbltp)
+    # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
+    # Compute z-derivative of label and update label
+    self.ec8.zder(nz,lbltp,lblot)
     self.lbl = lblot
 
   def get_label(self):

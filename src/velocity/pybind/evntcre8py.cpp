@@ -89,5 +89,16 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("begy"), py::arg("begz"), py::arg("dz"), py::arg("daz"),
              py::arg("thetashift"), py::arg("perpdie"), py::arg("distdie"), py::arg("thetadie"),
              py::arg("dir"), py::arg("lyrot"), py::arg("velot"), py::arg("lblot")
+         )
+     .def("zder",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<float, py::array::c_style> lblin,
+             py::array_t<float, py::array::c_style> lblot
+             )
+             {
+               ec8.zder(nz,lblin.mutable_data(),lblot.mutable_data());
+             },
+             py::arg("nz"), py::arg("lblin"), py::arg("lblot")
          );
+
 }
