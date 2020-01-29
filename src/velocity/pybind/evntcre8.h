@@ -15,6 +15,9 @@ class evntcre8 {
         float band1, float band2, float band3,
         float var, float layerT, float layer_rand, float dev_layer, float dev_pos,
         int nzot, int *lyrot, float *velot);
+    void fault(int nz, int *lyrin, float *velin, float azim, float begx, float begy, float begz, float dz, float daz,
+        float thetashift, float perpdie, float distdie, float thetadie, float dir,
+        int *lyrot, float *velot, float *lblout);
     int find_max_deposit(int n1, int n2, int n3, int *lyrin);
     void fill_random(int n1, int n2, int n3, float *velot);
     void bandpass(float f1, float f2, float f3, int n1, int n2, int n3, float *velin);

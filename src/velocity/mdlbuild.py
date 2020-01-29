@@ -19,6 +19,7 @@ class mdlbuild:
     # Create the basement layer
     self.vel = np.zeros([self.__ny,self.__nx,nbase],dtype='float32')
     self.lyr = np.zeros([self.__ny,self.__nx,nbase],dtype='int32')
+    self.lbl = np.zeros([self.__ny,self.__nx,nbase],dtype='float32')
     self.vel[:] = basevel; self.lyr[:] = 0
     self.enum = 1 # Geological event number
     # Event creating object
@@ -56,4 +57,50 @@ class mdlbuild:
     # Update the layer and velocity models
     self.vel = velot
     self.lyr = lyrot
+
+  def fault(self,begx=0.5,begy=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
+      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1):
+    """
+    Creates a fault event in the geologic model
+
+    Parameters:
+      azim        - Azimuth of fault [180]
+      begx        - Relative location of the beginning of the fault in x [0.5]
+      begy        - Relative location of the beginning of the fault in y [0.5]
+      begz        - Relative location of the beginning of the fault in z [0.5]
+      dz          - Distance away from the center of a circle in z [7000]
+      daz         - Distance away in azimuth [8000]
+      perp_die    - Dieoff of fault in perpindicular distance [0.5]
+      dist_die    - Distance dieoff of fault [0.3]
+      theta_die   - Distance dieoff in theta [12]
+      theta_shift - Shift in theta for fault [4.0]
+      dirf        - Direction of fault movement [0.1]
+    """
+    # Create the output velocity, layermodel and label
+    nz = self.vel.shape[2]
+    velot = np.zeros(self.vel.shape,dtype='float32')
+    lyrot = np.zeros(self.lyr.shape,dtype='int32')
+    lblot = np.zeros(self.vel.shape,dtype='float32')
+    # Create the fault
+    self.ec8.fault(nz,self.lyr,self.vel,
+                   azim,begx,begy,begz,dz,daz,
+                   theta_shift,perp_die,dist_die,theta_die,dirf,
+                   lyrot,velot,lblot)
+    # Update layer and velocity models and label
+    self.vel = velot
+    self.lyr = lyrot
+    self.lbl = lblot
+
+  def get_label(self):
+    """
+    Gets the fault labels and ensures the label is the same size
+    as the current velocity model size
+    """
+    nzv = self.vel.shape[2]
+    nzl = self.lbl.shape[2]
+    if(nzv == nzl):
+      return self.lbl
+    else:
+      ndiff = nzv - nzl
+      return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
 

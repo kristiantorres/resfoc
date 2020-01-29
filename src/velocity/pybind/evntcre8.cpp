@@ -105,6 +105,166 @@ void evntcre8::deposit(float vel,
   delete[] vtmp;
 }
 
+void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, float begy, float begz, float dz, float daz,
+    float thetashift, float perpdie, float distdie, float thetadie, float dir,
+    int *lyrot, float *velot, float *lblot) {
+
+  float dst1 = nz*_d1;
+  float dst2 = _n2*_d2;
+  float dst3 = _n3*_d3;
+
+  /* Location of the beginning of the tear */
+  float zbeg = dst1 * begz;
+  float ybeg = dst3 * begy;
+  float xbeg = dst2 * begx;
+
+  // Die off distance from the tear perpendicular to the tear and radius direction
+  distdie *= dst3;
+  perpdie *= dst3;
+
+  // Definition of pi
+  float pi = atan(1.) * 4;
+
+  float theta0 = atan2f(dz, daz);
+  theta0 = theta0 + 2 * pi;
+  theta0 = theta0 * 180. / pi;
+
+  /* Azimuth normal to fault */
+  if (azim < 0.) azim += 360.;  // Put azimuth in the 0-360
+  azim *= pi / 180.;            // convert to radians
+  float naz1   =  cosf(azim);   // Rotation matrix 1
+  float naz2   = -sinf(azim);   // Rotation matrix 2
+  float nperp1 =  sinf(azim);   // Rotation matrix 3
+  float nperp2 =  cosf(azim);   // Rotation matrix 4
+
+  /* Cylindrical coordinate 0,0,0 is at */
+  float zcenter = zbeg - dz;
+  float xcenter = xbeg - daz * cosf(azim);
+  float ycenter = ybeg - daz * sinf(azim);
+
+  float fullRadius = sqrtf(dz * dz + daz * daz);
+
+  /* Create shift matrices */
+  float *shiftx = new float[nz*_n2*_n3]();
+  float *shifty = new float[nz*_n2*_n3]();
+  float *shiftz = new float[nz*_n2*_n3]();
+
+  /* Compute shifts */
+  for (int i3 = 0; i3 < _n3; i3++) {
+    float p3 = _d3 * i3 - ycenter;
+    for (int i2 = 0; i2 < _n2; i2++) {
+      float p2 = _d2 * i2 - xcenter;
+
+      // Rotate coordinate x,y to along azimuth and perpendicular
+      float azP = naz1 * p2 - naz2 * p3;
+      float perpP = -nperp1 * p2 + nperp2 * p3;
+
+      // Ratio die off along azimuth in 2D
+      float ratioAz = fabsf(fullRadius - azP) / distdie;
+      // Ratio die off along perp
+      float ratioPerp = perpP / perpdie;
+
+      float scalePerp = 1. - fabsf(ratioPerp);
+
+      // If we are less than die off in perp and along azimuth
+      for (int i1 = 0; i1 < nz; i1++) {
+        shiftz[i3*_n2*nz + i2*nz + i1] = 0;
+        shiftx[i3*_n2*nz + i2*nz + i1] = 0;
+        shifty[i3*_n2*nz + i2*nz + i1] = 0;
+      }
+
+      if (fabsf(ratioPerp) < 1.) {
+        for (int i1 = 0; i1 < nz; i1++) {
+          float p1 = _d1 * i1 - zcenter;  // Distance away in z
+
+          // Theta of our current point
+          float thetaOld = atan2f(p1, azP) * 180. / pi;
+          thetaOld += 360;
+          float thetaCompare = atanf(p1 / azP) * 180. / pi + 360.;
+
+          // True radius of current point
+          float radius = sqrtf(azP * azP + p1 * p1);
+
+          ratioAz = fabsf(fullRadius - radius) / distdie;
+          float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
+
+          if (ratioAz < 1. && ratioTheta < 1.) {
+            float scaleAz = 1. - ratioAz;
+            float scaleTheta = 1. - ratioTheta;
+
+            // Shift in theta
+            float shiftTheta = thetashift * scaleAz * scaleTheta * scalePerp;
+
+            // New theta location
+            float thetaNew = thetaOld + shiftTheta;
+            if (dir < 0. || radius > fullRadius)
+              thetaNew = thetaOld - shiftTheta;
+
+            // Convert to polar coordinates
+            float dPR = radius * cosf(thetaNew * pi / 180.);
+            float newZ = radius * sinf(thetaNew * pi / 180.) + zcenter;
+
+            // Now rotate back to standard coordinate system
+            float newX = naz1 * dPR + naz2 * perpP + xcenter;
+            float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
+
+            shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
+            lblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
+            shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
+            //lblot[i3*nz*_n2 + i2*nz + i1] = shiftx[i3*nz*_n2 + i2*nz + i1];
+            shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
+            //lblot[i3*nz*_n2 + i2*nz + i1] = shifty[i3*nz*_n2 + i2*nz + i1];
+          }
+        }
+        bool found = false;
+        int i1 = 0;
+        while (i1 < nz - 1 && !found) {
+          if (fabs(shiftz[i3*nz*_n2 + i2*nz + i1]) > 0.)
+            found = true;
+          else
+            i1++;
+        }
+        if (found) {
+          for (int i = 0; i <= i1; i++) {
+            shiftz[i3*nz*_n2 + i2*nz + i] = shiftz[i3*nz*_n2 + i2*nz + i1];
+            //lblot[i3*nz*_n2 + i2*nz + i]  = shiftz[i3*nz*_n2 + i2*nz + i1];
+          }
+        }
+      }
+    }
+  }
+
+  /* Compute output layer and velocity arrays */
+  tbb::parallel_for(
+      tbb::blocked_range<size_t>(0, _n3),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i3 = r.begin(); i3 != r.end(); ++i3) {
+      for (int i2 = 0; i2 < _n2; i2++) {
+        for (int i1 = 0; i1 < nz; i1++) {
+          int l1 = std::max(0, (int)(i1 - shiftz[i3*nz*_n2 + i2*nz + i1] / _d1 + .5));
+          int l2 = std::max(0, (int)(i2 - shiftx[i3*nz*_n2 + i2*nz + i1] / _d2 + .5));
+          int l3 = std::max(0, (int)(i3 - shifty[i3*nz*_n2 + i2*nz + i1] / _d3 + .5));
+          if (l1 >=  nz) l1 =  nz - 1;
+          if (l2 >= _n2) l2 = _n2 - 1;
+          if (l3 >= _n3) l3 = _n3 - 1;
+          if (l1 >= 0) {
+            lyrot[i3*nz*_n2 + i2*nz + i1] = lyrin[l3*nz*_n2 + l2*nz + l1];
+            velot[i3*nz*_n2 + i2*nz + i1] = velin[l3*nz*_n2 + l2*nz + l1];
+          }
+          else {
+            lyrot[i3*nz*_n2 + i2*nz + i1] = -1;
+            velot[i3*nz*_n2 + i2*nz + i1] =  0;
+          }
+        }
+      }
+    }
+  });
+
+  /* Free memory */
+  delete[] shiftx; delete[] shifty; delete[] shiftz;
+
+}
+
 int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
   int mx = tbb::parallel_reduce(
       tbb::blocked_range<size_t>(0, n3), int(0),

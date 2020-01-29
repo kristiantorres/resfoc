@@ -10,8 +10,8 @@ def vel_structure(n):
   outdict = {}
   ### First deposit
   ## Deposit
-  thick1min = 50
-  thick1max = 100
+  thick1min = 100
+  thick1max = 200
   thick1 = np.random.rand()*(thick1max - thick1min) + thick1min
   thick1 = int(thick1)
   outdict['thick1'] = thick1
@@ -40,8 +40,8 @@ def vel_structure(n):
 
   ### Second thin set of layers (covers the faults)
   ## Deposit
-  thick2min = 50
-  thick2max = 100
+  thick2min = 100
+  thick2max = 200
   outdict['thick2'] = int(np.random.rand()*(thick2max - thick2min) + thick2min)
   #outdict['thick2'] = 450 - thick1
 
@@ -69,8 +69,8 @@ def vel_structure(n):
 
   ### Third set of layers
   # Deposit
-  thick3min = 50
-  thick3max = 100
+  thick3min = 100
+  thick3max = 200
   outdict['thick3'] = int(np.random.rand()*(thick3max - thick3min) + thick3min)
 
   ## Gentle folding
@@ -97,8 +97,8 @@ def vel_structure(n):
 
   ### Fourth set of layers
   ## Deposit
-  thick4min = 50
-  thick4max = 100
+  thick4min = 100
+  thick4max = 200
   outdict['thick4'] = int(np.random.rand()*(thick4max - thick4min) + thick4min)
 
   ## Gentle folding

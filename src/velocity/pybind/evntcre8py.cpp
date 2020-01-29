@@ -60,5 +60,34 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("band1"), py::arg("band2"), py::arg("band3"),
              py::arg("var"), py::arg("layer"), py::arg("layer_rand"), py::arg("dev_layer"),
              py::arg("dev_pos"), py::arg("nzot"), py::arg("lyrot"), py::arg("velot")
-      );
+      )
+     .def("fault",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<int, py::array::c_style> lyrin,
+             py::array_t<float, py::array::c_style> velin,
+             float azim,
+             float begx,
+             float begy,
+             float begz,
+             float dz,
+             float daz,
+             float thetashift,
+             float perpdie,
+             float distdie,
+             float thetadie,
+             float dir,
+             py::array_t<int, py::array::c_style> lyrot,
+             py::array_t<float, py::array::c_style> velot,
+             py::array_t<float, py::array::c_style> lblot
+             )
+             {
+               ec8.fault(nz,lyrin.mutable_data(),velin.mutable_data(),azim,begx,begy,begz,dz,daz,
+                   thetashift, perpdie, distdie, thetadie, dir,
+                   lyrot.mutable_data(), velot.mutable_data(), lblot.mutable_data());
+             },
+             py::arg("nz"), py::arg("lyrin"), py::arg("velin"), py::arg("azim"), py::arg("begx"),
+             py::arg("begy"), py::arg("begz"), py::arg("dz"), py::arg("daz"),
+             py::arg("thetashift"), py::arg("perpdie"), py::arg("distdie"), py::arg("thetadie"),
+             py::arg("dir"), py::arg("lyrot"), py::arg("velot"), py::arg("lblot")
+         );
 }
