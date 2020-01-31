@@ -1,0 +1,13 @@
+[defaults]
+#IO
+path=/scr2/joseph29/velmodels/headers
+out=/scr2/joseph29/velmodels.h5
+prefix=
+# Processing
+nx=400
+nz=256
+rad=10
+# Other arguments
+nprint=100
+verb=y
+

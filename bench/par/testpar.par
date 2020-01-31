@@ -1,0 +1,23 @@
+[defaults]
+# IO
+outdir=./dat/ptscat0/
+datapath=/scr1/joseph29/ptscat0/
+nwrite=10
+beg=20
+end=10999
+prefix=
+# Imaging parameters
+nsx=41
+osx=0
+nz=256
+nx=400
+nh=10
+# Residual migration
+nro=6
+oro=1.000000
+dro=0.010000
+# ML parameters
+nex=10
+# Other
+verb=y
+nprint=1
