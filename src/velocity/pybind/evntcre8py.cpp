@@ -41,7 +41,6 @@ PYBIND11_MODULE(evntcre8,m) {
              float band1,
              float band2,
              float band3,
-             float var,
              float layer,
              float layer_rand,
              float dev_layer,
@@ -53,12 +52,12 @@ PYBIND11_MODULE(evntcre8,m) {
              {
                ec8.deposit(vel,
                    band1, band2, band3,
-                   var, layer, layer_rand, dev_layer, dev_pos,
+                   layer, layer_rand, dev_layer, dev_pos,
                    nzot, lyrot.mutable_data(), velot.mutable_data());
              },
              py::arg("vel"),
              py::arg("band1"), py::arg("band2"), py::arg("band3"),
-             py::arg("var"), py::arg("layer"), py::arg("layer_rand"), py::arg("dev_layer"),
+             py::arg("layer"), py::arg("layer_rand"), py::arg("dev_layer"),
              py::arg("dev_pos"), py::arg("nzot"), py::arg("lyrot"), py::arg("velot")
       )
      .def("fault",[](evntcre8 &ec8,

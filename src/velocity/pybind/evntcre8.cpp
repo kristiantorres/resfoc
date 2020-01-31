@@ -44,7 +44,7 @@ void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, in
 //TODO:  probably need to pass in the current event number
 void evntcre8::deposit(float vel,
     float band1, float band2, float band3,
-    float var, float layerT, float layer_rand, float dev_layer, float dev_pos,
+    float layerT, float layer_rand, float dev_layer, float dev_pos,
     int nzot, int *lyrot, float *velot) {
 
   /* Find the thickness of the deposit based on the output layer and layer model*/
@@ -69,9 +69,11 @@ void evntcre8::deposit(float vel,
 
   /* Start by filling with bandpassed random numbers */
   float *vtmp = new float[n1use*_n2*_n3]();
-  fill_random(n1use, _n2, _n3, vtmp);
-  bandpass(band1, band2, band3, n1use, _n2, _n3, vtmp);
-  norm(n1use,_n2,_n3,vtmp,1);
+  if(dev_pos != 0.0) {
+    fill_random(n1use, _n2, _n3, vtmp);
+    bandpass(band1, band2, band3, n1use, _n2, _n3, vtmp);
+    norm(n1use,_n2,_n3,vtmp,1);
+  }
 
   /* First compute the entire temporary array based on the max computed height */
   tbb::parallel_for(tbb::blocked_range<size_t>(0, _n3),
@@ -209,11 +211,9 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
             float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
 
             shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
-            lblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
+            lblot[i3*nz*_n2 + i2*nz + i1]  = shiftz[i3*nz*_n2 + i2*nz + i1]; // Save label
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
-            //lblot[i3*nz*_n2 + i2*nz + i1] = shiftx[i3*nz*_n2 + i2*nz + i1];
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
-            //lblot[i3*nz*_n2 + i2*nz + i1] = shifty[i3*nz*_n2 + i2*nz + i1];
           }
         }
         bool found = false;

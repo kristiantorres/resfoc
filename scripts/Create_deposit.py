@@ -36,7 +36,7 @@ stctr = vel_structure(nx)
 for ilyr in range(4):
   tag = str(ilyr+1)
   print(stctr['thick'+tag])
-  mb.deposit(velval=props[ilyr],thick=stctr['thick'+tag],band2=0.01,band3=0.05,var=0.3,layer=25,layer_rand=0.3,dev_layer=0.3,dev_pos=0.1)
+  mb.deposit(velval=props[ilyr],thick=stctr['thick'+tag],band2=0.01,band3=0.05,dev_pos=0.1,layer=25,layer_rand=0.3,dev_layer=0.3)
 
 # Water layer
 mb.deposit(velval=1500,thick=10,dev_layer=0,layer_rand=0,layer=100,dev_pos=0.0)

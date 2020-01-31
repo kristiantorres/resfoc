@@ -13,7 +13,7 @@ class evntcre8 {
     void expand(int itop, int ibot, int nzin, int *lyrin, float *velin, int nzot, int *lyrot, float *velot);
     void deposit(float vel,
         float band1, float band2, float band3,
-        float var, float layerT, float layer_rand, float dev_layer, float dev_pos,
+        float layerT, float layer_rand, float dev_layer, float dev_pos,
         int nzot, int *lyrot, float *velot);
     void fault(int nz, int *lyrin, float *velin, float azim, float begx, float begy, float begz, float dz, float daz,
         float thetashift, float perpdie, float distdie, float thetadie, float dir,

@@ -11,7 +11,7 @@ lbl = lbl.reshape(laxes.n,order='F')
 vaxes,vel = sep.read_file(None,ifname='me.H')
 vel = vel.reshape(vaxes.n,order='F')
 
-idx = lbl < -50
+idx = np.abs(lbl) > 50
 lbl[ idx] = 1
 lbl[~idx] = 0
 

@@ -25,23 +25,34 @@ class mdlbuild:
     # Event creating object
     self.ec8 = evntcre8.evntcre8(self.__nx,self.__ny,self.__dx,self.__dy,self.__dz)
 
-  def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,
-              var=0.0,layer=23,layer_rand=0.3,dev_layer=0.26,dev_pos=0.0):
+  def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,dev_pos=0.0,
+              layer=23,layer_rand=0.3,dev_layer=0.26):
     """
-    Creates a deposition event in the geological model
+    Creates a deposition event in the geological model. 
     
     Parameters:
+      A general summary of the parameters. 
+      
+      Lateral variation:
+      The band1-3 parameters basically are three parameters used
+      to define a 3D bandpass filter which is applied to a cube of random numbers. The different
+      bands allow for different amounts of variation in each direction. These and dev_pos control
+      the variation of the deposit in all dimensions. Setting dev_pos to 0 will result in no
+      lateral variation and the code will run much faster
+
+      Vertical variation:
+      The
       
       velval     - base value of velocity in the layer in m/s [1400]
       thick      - thickness of the layer in samples [30]
       band1      - bandpass parameter for axis 1 [0.4]
       band2      - bandpass parameter for axis 2 [0.02]
       band3      - bandpass parameter for axis 3 [0.02]
-      var        - Variance from main parameter [0.0]
-      layer      - Forthcoming... [23]
-      layer_rand - Randomness variation within layer [0.3]
-      dev_layer  - Forthcoming... [0.26]
-      dev_pos    - Forthcoming... [0.0]
+      layer      - Changes the thickness of the thin layering (bigger number is thicker) [23]
+      layer_rand - Also change the thickness of the thin layering
+      dev_layer  - Changes the variation of the velocity within a layer. Larger values lead to more variation
+                   Set to 0 will result in homogeonous layer [0.26]
+      dev_pos    - Determines the strength of the varation of the velocity (setting to 0 will make it much faster) [0.0]
     """
     # First, expand the model
     nzin = self.vel.shape[2]
@@ -52,14 +63,14 @@ class mdlbuild:
     # Next create the deposit
     self.ec8.deposit(velval,
                      band1,band2,band3,
-                     var,layer,layer_rand,dev_layer,dev_pos,
+                     layer,layer_rand,dev_layer,dev_pos,
                      nzot,lyrot,velot)
     # Update the layer and velocity models
     self.vel = velot
     self.lyr = lyrot
 
   def fault(self,begx=0.5,begy=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,thresh=50):
     """
     Creates a fault event in the geologic model
 
@@ -90,9 +101,21 @@ class mdlbuild:
     # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
-    # Compute z-derivative of label and update label
+    # Compute z-derivative of label
     self.ec8.zder(nz,lbltp,lblot)
-    self.lbl = lblot
+    # Apply a threshold
+    idx = np.abs(lblot) > thresh
+    lblot[ idx] = 1; lblot[~idx] = 0
+    # Update label
+    if(self.lbl.shape[2] != lblot.shape[2]):
+      ndiff = lblot.shape[2] - self.lbl.shape[2]
+      self.lbl = np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
+      self.lbl += lblot
+    else:
+      self.lbl += lblot
+    # Apply final threshold to label
+    idx = self.lbl > 1
+    self.lbl[idx] = 1
 
   def get_label(self):
     """
