@@ -1,0 +1,18 @@
+[defaults]
+# IO
+trdat=/net/fantastic/scr2/joseph29/ptscatresmig_tr.h5
+vadat=/net/fantastic/scr2/joseph29/ptscatresmig_va.h5
+wgtout=ptscatresmignoskips_wgts.h5
+arcout=ptscatresmignoskips_arch.json
+# Training parameters
+lr=0.001
+bsize=20
+nepochs=100
+# CNN design parameters
+nflts=32
+fltsize=5
+unet=n
+drpout=0.0
+# Other
+verb=y
+gpus=0,1,2,3,4,5,6,7
