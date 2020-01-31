@@ -1,0 +1,12 @@
+*.o
+*.so
+*.H
+*.h5
+*.json
+*.pdf
+*.png
+bench/dat/nnhistory
+bench/dat/vels
+bench/dat/ptscat0
+bench/dat/networks
+__pycache__
