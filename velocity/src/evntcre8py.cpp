@@ -98,6 +98,16 @@ PYBIND11_MODULE(evntcre8,m) {
                ec8.zder(nz,lblin.mutable_data(),lblot.mutable_data());
              },
              py::arg("nz"), py::arg("lblin"), py::arg("lblot")
+         )
+     .def("laplacian",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<float, py::array::c_style> lblin,
+             py::array_t<float, py::array::c_style> lblot
+             )
+             {
+               ec8.laplacian(nz,lblin.mutable_data(),lblot.mutable_data());
+             },
+             py::arg("nz"), py::arg("lblin"), py::arg("lblot")
          );
 
 }

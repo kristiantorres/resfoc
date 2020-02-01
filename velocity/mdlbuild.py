@@ -3,7 +3,7 @@ import velocity.evntcre8 as evntcre8
 import matplotlib.pyplot as plt
 
 class mdlbuild:
-  """
+  """ 
   Builds random geologically feasible velocity models.
   Based on the syntheticModel code from Bob Clapp
 
@@ -28,11 +28,11 @@ class mdlbuild:
   def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,dev_pos=0.0,
               layer=23,layer_rand=0.3,dev_layer=0.26):
     """
-    Creates a deposition event in the geological model.
-
+    Creates a deposition event in the geological model. 
+    
     Parameters:
-      A general summary of the parameters.
-
+      A general summary of the parameters. 
+      
       Lateral variation:
       The band1-3 parameters basically are three parameters used
       to define a 3D bandpass filter which is applied to a cube of random numbers. The different
@@ -42,7 +42,7 @@ class mdlbuild:
 
       Vertical variation:
       The
-
+      
       velval     - base value of velocity in the layer in m/s [1400]
       thick      - thickness of the layer in samples [30]
       band1      - bandpass parameter for axis 1 [0.4]
@@ -102,7 +102,7 @@ class mdlbuild:
     self.vel = velot
     self.lyr = lyrot
     # Compute z-derivative of label
-    self.ec8.zder(nz,lbltp,lblot)
+    self.ec8.laplacian(nz,lbltp,lblot)
     # Apply a threshold
     idx = np.abs(lblot) > thresh
     lblot[ idx] = 1; lblot[~idx] = 0
@@ -125,8 +125,8 @@ class mdlbuild:
     nzv = self.vel.shape[2]
     nzl = self.lbl.shape[2]
     if(nzv == nzl):
-      return self.lbl.astype(int)
+      return self.lbl
     else:
       ndiff = nzv - nzl
-      return (np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')).astype(int)
+      return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
 
