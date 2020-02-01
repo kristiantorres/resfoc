@@ -451,3 +451,18 @@ void evntcre8::zder(int nz, float *lblin, float *lblot) {
   }
 
 }
+
+void evntcre8::laplacian(int nz, float *lblin, float *lblot) {
+
+  for(int i3 = 1; i3 < _n3-1; ++i3) {
+    for(int i2 = 1; i2 < _n2-1; ++i2) {
+      for(int i1 = 1; i1 < nz-1; ++i1) {
+        lblot[i3*nz*_n2 + i2*nz + i1] = -6*lblin[i3*nz*_n2 + i2*nz + i1] +
+            lblin[(i3-1)*nz*_n2 + (i2  )*nz + i1  ] +  lblin[(i3+1)*nz*_n2 + (i2  )*nz + i1  ] +
+            lblin[(i3  )*nz*_n2 + (i2-1)*nz + i1  ] +  lblin[(i3  )*nz*_n2 + (i2+1)*nz + i1  ] +
+            lblin[(i3  )*nz*_n2 + (i2  )*nz + i1-1] +  lblin[(i3  )*nz*_n2 + (i2  )*nz + i1+1];
+      }
+    }
+  }
+
+}

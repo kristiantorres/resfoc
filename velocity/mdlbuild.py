@@ -102,7 +102,7 @@ class mdlbuild:
     self.vel = velot
     self.lyr = lyrot
     # Compute z-derivative of label
-    self.ec8.zder(nz,lbltp,lblot)
+    self.ec8.laplacian(nz,lbltp,lblot)
     # Apply a threshold
     idx = np.abs(lblot) > thresh
     lblot[ idx] = 1; lblot[~idx] = 0
