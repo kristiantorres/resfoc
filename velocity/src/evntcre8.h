@@ -29,6 +29,7 @@ class evntcre8 {
     void scale(int n1, int n2, int n3, float *arr, float sc);
     void norm(int n1, int n2, int n3, float *arr, float sc);
     void zder(int nz, float *lblin, float *lblot);
+    void laplacian(int nz, float *lblin, float *lblot);
 
   private:
     int _n2, _n3;
