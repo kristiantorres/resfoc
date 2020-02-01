@@ -101,7 +101,7 @@ class mdlbuild:
     # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
-    # Compute z-derivative of label
+    # Compute laplacian of label
     self.ec8.laplacian(nz,lbltp,lblot)
     # Apply a threshold
     idx = np.abs(lblot) > thresh
