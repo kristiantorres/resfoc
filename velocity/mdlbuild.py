@@ -125,8 +125,8 @@ class mdlbuild:
     nzv = self.vel.shape[2]
     nzl = self.lbl.shape[2]
     if(nzv == nzl):
-      return self.lbl
+      return self.lbl.astype(int)
     else:
       ndiff = nzv - nzl
-      return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
+      return (np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')).astype(int)
 
