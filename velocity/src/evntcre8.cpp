@@ -191,7 +191,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           ratioAz = fabsf(fullRadius - radius) / distdie;
           float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
 
-          //TODO: compute distance from xbeg, ybeg, zbeg
+          // Compute distance from xbeg, ybeg and zbeg
           float diffx = xbeg - (p2 + xcenter);
           float diffy = ybeg - (p3 + ycenter);
           float diffz = zbeg - (p1 + zcenter);
@@ -217,12 +217,12 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
             float newX = naz1   * dPR + naz2   * perpP + xcenter;
             float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
 
-            /* Compute shifts to be applied */
+            // Compute shifts to be applied
             shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
 
-            /* Save label */
+            // Save label
             lblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
