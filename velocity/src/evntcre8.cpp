@@ -150,12 +150,15 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
   /* Compute shifts */
   for (int i3 = 0; i3 < _n3; i3++) {
+    // Y component of distance from center
     float p3 = _d3 * i3 - ycenter;
     for (int i2 = 0; i2 < _n2; i2++) {
+      // X component of distance from center
       float p2 = _d2 * i2 - xcenter;
 
       // Rotate coordinate x,y to along azimuth and perpendicular
-      float azP = naz1 * p2 - naz2 * p3;
+      // Applies rotation here to rotate into the desired azimuth
+      float azP   =  naz1   * p2 - naz2   * p3;
       float perpP = -nperp1 * p2 + nperp2 * p3;
 
       // Ratio die off along azimuth in 2D
@@ -174,7 +177,8 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
       if (fabsf(ratioPerp) < 1.) {
         for (int i1 = 0; i1 < nz; i1++) {
-          float p1 = _d1 * i1 - zcenter;  // Distance away in z
+          // Z component of distance from center
+          float p1 = _d1 * i1 - zcenter;
 
           // Theta of our current point
           float thetaOld = atan2f(p1, azP) * 180. / pi;
@@ -187,8 +191,14 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           ratioAz = fabsf(fullRadius - radius) / distdie;
           float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
 
-          if (ratioAz < 1. && ratioTheta < 1.) {
-            float scaleAz = 1. - ratioAz;
+          // Compute distance from xbeg, ybeg and zbeg
+          float diffx = xbeg - (p2 + xcenter);
+          float diffy = ybeg - (p3 + ycenter);
+          float diffz = zbeg - (p1 + zcenter);
+          float distbeg = sqrtf(diffx*diffx + diffy*diffy + diffz*diffz);
+
+          if (ratioAz < 1. && ratioTheta < 1. && distbeg < 10000) {
+            float scaleAz    = 1. - ratioAz;
             float scaleTheta = 1. - ratioTheta;
 
             // Shift in theta
@@ -200,17 +210,20 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
               thetaNew = thetaOld - shiftTheta;
 
             // Convert to polar coordinates
-            float dPR = radius * cosf(thetaNew * pi / 180.);
+            float dPR  = radius * cosf(thetaNew * pi / 180.);
             float newZ = radius * sinf(thetaNew * pi / 180.) + zcenter;
 
             // Now rotate back to standard coordinate system
-            float newX = naz1 * dPR + naz2 * perpP + xcenter;
+            float newX = naz1   * dPR + naz2   * perpP + xcenter;
             float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
 
+            // Compute shifts to be applied
             shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
-            lblot[i3*nz*_n2 + i2*nz + i1]  = shiftz[i3*nz*_n2 + i2*nz + i1]; // Save label
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
+
+            // Save label
+            lblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
         bool found = false;
@@ -224,7 +237,6 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
         if (found) {
           for (int i = 0; i <= i1; i++) {
             shiftz[i3*nz*_n2 + i2*nz + i] = shiftz[i3*nz*_n2 + i2*nz + i1];
-            //lblot[i3*nz*_n2 + i2*nz + i]  = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
       }
