@@ -108,8 +108,6 @@ class mdlbuild:
                    azim,begx,begy,begz,dz,daz,
                    theta_shift,perp_die,dist_die,theta_die,dirf,
                    lyrot,velot,lbltp)
-    #plt.imshow(lbltp[150,:,:].T,cmap='jet')
-    #plt.show()
     # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
