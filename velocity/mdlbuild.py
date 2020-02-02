@@ -9,7 +9,7 @@ class mdlbuild:
   Based on the syntheticModel code from Bob Clapp
 
   @author: Joseph Jennings
-  @version: 2020.01.22
+  @version: 2020.02.01
   """
 
   def __init__(self,nx,dx,ny,dy,dz,nbase=50,basevel=4000):
