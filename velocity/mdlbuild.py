@@ -1,6 +1,6 @@
 import numpy as np
 import velocity.evntcre8 as evntcre8
-from utils.pprint import progressbar
+from utils.pprint import progressbar,printprogress
 import matplotlib.pyplot as plt
 
 class mdlbuild:
@@ -101,28 +101,29 @@ class mdlbuild:
     nz = self.vel.shape[2]
     velot = np.zeros(self.vel.shape,dtype='float32')
     lyrot = np.zeros(self.lyr.shape,dtype='int32')
-    lbltp = np.zeros(self.vel.shape,dtype='float32')
+    lblto = np.zeros(self.vel.shape,dtype='float32')
+    lbltn = np.zeros(self.vel.shape,dtype='float32')
     lblot = np.zeros(self.vel.shape,dtype='float32')
+    if(self.lbl.shape[2] != lblot.shape[2]):
+      ndiff = lblot.shape[2] - self.lbl.shape[2]
+      self.lbl = np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
     # Create the fault
-    self.ec8.fault(nz,self.lyr,self.vel,
+    self.ec8.fault(nz,self.lyr,self.vel,self.lbl,
                    azim,begx,begy,begz,dz,daz,
                    theta_shift,perp_die,dist_die,theta_die,dirf,
-                   lyrot,velot,lbltp)
+                   lyrot,velot,lblto,lbltn)
+    # Update old label with shifted version
+    self.lbl = lblto
     # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
-    # Compute z-derivative of label
-    self.ec8.laplacian(nz,lbltp,lblot)
+    # Compute laplacian of output shift map
+    self.ec8.laplacian(nz,lbltn,lblot)
     # Apply a threshold
     idx = np.abs(lblot) > thresh
     lblot[ idx] = 1; lblot[~idx] = 0
     # Update label
-    if(self.lbl.shape[2] != lblot.shape[2]):
-      ndiff = lblot.shape[2] - self.lbl.shape[2]
-      self.lbl = np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
-      self.lbl += lblot
-    else:
-      self.lbl += lblot
+    self.lbl += lblot
     # Apply final threshold to label
     idx = self.lbl > 1
     self.lbl[idx] = 1
@@ -140,6 +141,8 @@ class mdlbuild:
       ndiff = nzv - nzl
       return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
 
+  #TODO: add some small random variation to each of these functions below
+
   def smallfault_block(self,nfault=5,azim=0.0,begz=0.3,begx=0.3,begy=0.3,xdir=True):
     """
     Puts in a small fault block system. For now, only will give nice faults along
@@ -154,7 +157,6 @@ class mdlbuild:
       xdir   - move along the x direction [True]. If False, will move the fault
                system in the y direction (all faults will still have same azimuth)
     """
-    #TODO: might be a good idea to have small variation in z
     dx = 0.0; dy = 0.0
     signx = 1; signy = 1
     if(xdir):
@@ -170,14 +172,115 @@ class mdlbuild:
       # Move along x or y
       begx += signx*dx; begy += signy*dy
 
-  def largefault_block(nfault,azim,begz):
-    pass
+  def largefault_block(self,nfault=3,azim=0.0,begz=0.6,begx=0.5,begy=0.5,xdir=True):
+    """
+    Puts in a large fault block system. For now, only will give nice faults along
+    0,90,180,270 azimuths
 
-  def sliding_block(nfault,azim,begz):
-    pass
+    Parameters:
+      nfault - number of faults in the system [3]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.6]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      xdir   - move along the x direction [True]. If False, will move the fault
+               system in the y direction (all faults will still have same azimuth)
+      """
+    dx = 0.0; dy = 0.0
+    signx = 1; signy = 1
+    if(xdir):
+      dx = 0.2
+    else:
+      dy = 0.2
+    if(begx > 0.5):
+      signx = -1
+    if(begy > 0.5):
+      signy = -1
+    for ifl in progressbar(range(nfault), "nfaults:", 40):
+      self.fault(begx=begx,begy=begy,begz=begz,daz=25000,dz=10000,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      # Move along x or y
+      begx += signx*dx; begy += signy*dy
 
-  def graben_block(begz,azim):
-    pass
+  def sliding_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,xdir=True):
+    """
+    Puts in sliding fault block system. For now, only will give nice faults along
+    0,90,180,270 azimuths
+
+    Parameters:
+      nfault - number of faults in the system [5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.6]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      xdir   - move along the x direction [True]. If False, will move the fault
+               system in the y direction (all faults will still have same azimuth)
+    """
+    dx = 0.0; dy = 0.0
+    signx = 1; signy = 1
+    if(xdir):
+      dx = 0.2
+    else:
+      dy = 0.2
+    if(begx > 0.5):
+      signx = -1
+    if(begy > 0.5):
+      signy = -1
+    for ifl in progressbar(range(nfault), "nfaults:", 40):
+      self.fault(begx=begx,begy=begy,begz=begz,daz=10000,dz=25000,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      # Move along x or y
+      begx += signx*dx; begy += signy*dy
+
+  def smallgraben_block(self,azim=0.0,begz=0.5,begx=0.5,begy=0.5,xdir=True):
+    """
+    Puts in a small graben fault block system. For now only will give nice faults along
+    0,90,180,270 azimuths
+
+    Parameters
+      azim - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.6]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      xdir   - move along the x direction [True]. If False, will move the fault
+               system in the y direction (all faults will still have same azimuth)
+    """
+    if(xdir):
+      printprogress("nfaults",0,2)
+      self.fault(begx=begx    ,begy=begy,begz=begz,daz=6000.0,dz=3000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",1,2)
+      self.fault(begx=begx+0.1,begy=begy,begz=begz,daz=6000.0,dz=3000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",2,2)
+    else:
+      printprogress("nfaults",0,2)
+      self.fault(begx=begx,begy=begy    ,begz=begz,daz=6000.0,dz=3000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",1,2)
+      self.fault(begx=begx,begy=begy+0.1,begz=begz,daz=6000.0,dz=3000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",2,2)
+
+  def largegraben_block(self,azim=0.0,begz=0.6,begx=0.3,begy=0.5,xdir=True):
+    """
+    Puts in a large graben fault block system. For now only will give nice faults along
+    0,90,180,270 azimuths
+
+    Parameters
+      azim - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.6]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      xdir   - move along the x direction [True]. If False, will move the fault
+               system in the y direction (all faults will still have same azimuth)
+    """
+    if(xdir):
+      printprogress("nfaults",0,2)
+      self.fault(begx=begx    ,begy=begy,begz=begz,daz=25000.0,dz=10000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",1,2)
+      self.fault(begx=begx+0.3,begy=begy,begz=begz,daz=25000.0,dz=10000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",2,2)
+    else:
+      printprogress("nfaults",0,2)
+      self.fault(begx=begx,begy=begy    ,begz=begz,daz=20000.0,dz=25000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",1,2)
+      self.fault(begx=begx,begy=begy+0.3,begz=begz,daz=20000.0,dz=25000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      printprogress("nfaults",2,2)
 
   def horstgraben_block(begz,azim):
     pass

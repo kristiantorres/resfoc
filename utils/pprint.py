@@ -16,8 +16,6 @@ def create_inttag(numin,totnum):
   else:
     return str(numin)
 
-import time, sys
-
 def update_progress(progress):
   """
   update_progress() : Displays or updates a console progress bar
@@ -29,7 +27,7 @@ def update_progress(progress):
   @author: Brian Khuu
   @source: https://stackoverflow.com/questions/3160699/python-progress-bar
   """
-  barLength = 10 # Modify this to change the length of the progress bar
+  barLength = 40 # Modify this to change the length of the progress bar
   status = ""
   if isinstance(progress, int):
     progress = float(progress)
@@ -46,6 +44,18 @@ def update_progress(progress):
   text = "\rPercent: [{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), round(progress*100,2), status)
   sys.stdout.write(text)
   sys.stdout.flush()
+
+def printprogress(prefix,j,count,size=40,file=sys.stdout):
+  """
+  A modified version of progressbar
+
+  @author: Joseph Jennings
+  """
+  x = int(size*j/count)
+  file.write("%s:[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), j, count))
+  if(j == count):
+    file.write("\n")
+  file.flush()
 
 def progressbar(it, prefix="", size=60, file=sys.stdout):
   """
