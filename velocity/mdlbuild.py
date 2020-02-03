@@ -117,7 +117,7 @@ class mdlbuild:
     # Update layer and velocity models
     self.vel = velot
     self.lyr = lyrot
-    # Compute z-derivative of output shift map
+    # Compute laplacian of output shift map
     self.ec8.laplacian(nz,lbltn,lblot)
     # Apply a threshold
     idx = np.abs(lblot) > thresh
