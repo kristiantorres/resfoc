@@ -104,9 +104,9 @@ void evntcre8::deposit(float vel,
   delete[] vtmp;
 }
 
-void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, float begy, float begz, float dz, float daz,
+void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim, float begx, float begy, float begz, float dz, float daz,
     float thetashift, float perpdie, float distdie, float thetadie, float dir,
-    int *lyrot, float *velot, float *lblot) {
+    int *lyrot, float *velot, float *olblot, float *nlblot) {
 
   float dst1 = nz*_d1;
   float dst2 = _n2*_d2;
@@ -197,7 +197,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           float diffz = zbeg - (p1 + zcenter);
           float distbeg = sqrtf(diffx*diffx + diffy*diffy + diffz*diffz);
 
-          if (ratioAz < 1. && ratioTheta < 1. && distbeg < 10000) {
+          if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
             float scaleAz    = 1. - ratioAz;
             float scaleTheta = 1. - ratioTheta;
 
@@ -222,8 +222,8 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
 
-            // Save label
-            lblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
+            // Save new label out
+            nlblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
         bool found = false;
@@ -257,12 +257,14 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           if (l2 >= _n2) l2 = _n2 - 1;
           if (l3 >= _n3) l3 = _n3 - 1;
           if (l1 >= 0) {
-            lyrot[i3*nz*_n2 + i2*nz + i1] = lyrin[l3*nz*_n2 + l2*nz + l1];
-            velot[i3*nz*_n2 + i2*nz + i1] = velin[l3*nz*_n2 + l2*nz + l1];
+            lyrot [i3*nz*_n2 + i2*nz + i1] = lyrin[l3*nz*_n2 + l2*nz + l1];
+            velot [i3*nz*_n2 + i2*nz + i1] = velin[l3*nz*_n2 + l2*nz + l1];
+            olblot[i3*nz*_n2 + i2*nz + i1] = lblin[l3*nz*_n2 + l2*nz + l1];
           }
           else {
-            lyrot[i3*nz*_n2 + i2*nz + i1] = -1;
-            velot[i3*nz*_n2 + i2*nz + i1] =  0;
+            lyrot [i3*nz*_n2 + i2*nz + i1] = -1;
+            velot [i3*nz*_n2 + i2*nz + i1] =  0;
+            olblot[i3*nz*_n2 + i2*nz + i1] =  0;
           }
         }
       }
