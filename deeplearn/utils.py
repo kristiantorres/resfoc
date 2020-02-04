@@ -66,3 +66,37 @@ def resample(img,new_shape,kind='linear'):
 def next_power_of_2(x):  
   """ Gets the nearest power of two to x """
   return 1 if x == 0 else 2**(x - 1).bit_length()
+
+def thresh(arr,thresh,mode='gt',absval=True):
+  """ Applies a threshold to an array """
+  out = np.zeros(arr.shape,dtype='float32')
+  if(mode == 'eq'):
+    idx = arr == thresh
+    out[idx] = 1; out[~idx] = 0
+  elif(mode == 'gt'):
+    if(absval == True):
+      idx = np.abs(arr) > thresh
+    else:
+      idx = arr > thresh
+    out[idx] = 1; out[~idx] = 0
+  elif(mode == 'ge'):
+    if(absval == True):
+      idx = np.abs(arr) >= thresh
+    else:
+      idx = arr >= thresh
+    out[idx] = 1; out[~idx] = 0
+  elif(mode == 'lt'):
+    if(absval == True):
+      idx = np.abs(arr) < thresh
+    else:
+      idx = arr < thresh
+    out[idx] = 1; out[~idx] = 0
+  elif(mode == 'le'):
+    if(absval == True):
+      idx = np.abs(arr) <= thresh
+    else:
+      idx = arr <= thresh
+    out[idx] = 1; out[~idx] = 0
+
+  return out
+
