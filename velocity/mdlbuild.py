@@ -10,7 +10,7 @@ class mdlbuild:
   Based on the syntheticModel code from Bob Clapp
 
   @author: Joseph Jennings
-  @version: 2020.02.01
+  @version: 2020.02.04
   """
 
   def __init__(self,nx,dx,ny,dy,dz,nbase=50,basevel=4000):
@@ -295,8 +295,7 @@ class mdlbuild:
   def slidingfault(azim=0.0,begz=0.5):
     pass
 
-  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,mode='cos'):
-    #TODO: add the perlin parameters to this function
+  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='cos'):
     """
     Folds the current geologic model along a specific azimuth.
 
@@ -322,7 +321,6 @@ class mdlbuild:
       mode = 0
     elif(mode == 'perlin'):
       mode = 1
-      npts = 3; octaves = 3; persist = 0.6
       shf1d = noise_generator.perlin(x=np.linspace(0,npts,nn), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=2)
       shf1d -= np.mean(shf1d); shf1d *= 10*amp
       shf = np.ascontiguousarray(np.tile(shf1d,(nn,1)).T).astype('float32')
@@ -332,3 +330,23 @@ class mdlbuild:
     # Update the model
     self.lyr = lyrot
     self.vel = velot
+
+  def trim(self,top=0,bot=1000):
+    """
+    Trims the model in depth.
+    This is useful for faulting large models and only portion of
+    the model is desired and needs to be faulted
+
+    Parameters:
+      top: the top sample number at which to begin trimming
+      bot: the bottom sample number at which to end trimming
+    """
+    nz = self.vel.shape[2]
+    assert(bot > top),"Bottom sample %d must be larger than top %d"%(bot,top)
+    assert(bot - top < nz), "Cannot trim more samples %d the current model size %d"%(bot-top,nz)
+    # Only trim the label if it has been created
+    if(self.lbl.shape[2] == nz):
+      self.lbl = self.lbl[:,:,top:bot]
+    self.vel = self.vel[:,:,top:bot]
+    self.lyr = self.lyr[:,:,top:bot]
+
