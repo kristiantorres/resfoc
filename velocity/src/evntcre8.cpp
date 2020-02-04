@@ -362,14 +362,17 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
   float *top = new float[_n2*_n3]();
   float *bot = new float[_n2*_n3]();
 
-  fill_random(_n2, _n3, top);
-  fill_random(_n2, _n3, bot);
-  for(int k = 0; k < 3; ++k) {
-    smooth(_n2, _n3, top, 25, 25);
-    smooth(_n2, _n3, bot, 25, 25);
+  /* Apply random shifts for cosine mode */
+  if(mode == 0) {
+    fill_random(_n2, _n3, top);
+    fill_random(_n2, _n3, bot);
+    for(int k = 0; k < 3; ++k) {
+      smooth(_n2, _n3, top, 25, 25);
+      smooth(_n2, _n3, bot, 25, 25);
+    }
+    scale(_n2, _n3, top, 0.45); scale(_n2, _n3, bot, 0.45);
+    add  (_n2, _n3, top, 0.55); add  (_n2, _n3, bot, 0.55);
   }
-  scale(_n2, _n3, top, 0.45); scale(_n2, _n3, bot, 0.45);
-  add  (_n2, _n3, top, 0.55); add  (_n2, _n3, bot, 0.55);
 
   /* Apply shifts */
   for (int i3 = 0; i3 < _n3; i3++) {
