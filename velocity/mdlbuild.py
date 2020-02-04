@@ -346,7 +346,6 @@ class mdlbuild:
     assert(bot - top < nz), "Cannot trim more samples %d the current model size %d"%(bot-top,nz)
     # Only trim the label if it has been created
     if(self.lbl.shape[2] == nz):
-      print("here")
       self.lbl = self.lbl[:,:,top:bot]
     self.vel = self.vel[:,:,top:bot]
     self.lyr = self.lyr[:,:,top:bot]
