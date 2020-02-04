@@ -1,6 +1,7 @@
 import numpy as np
 import velocity.evntcre8 as evntcre8
 from utils.pprint import progressbar,printprogress
+import scaas.noise_generator as noise_generator
 import matplotlib.pyplot as plt
 
 class mdlbuild:
@@ -294,5 +295,40 @@ class mdlbuild:
   def slidingfault(azim=0.0,begz=0.5):
     pass
 
-  def fold():
-    pass
+  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,mode='cos'):
+    #TODO: add the perlin parameters to this function
+    """
+    Folds the current geologic model along a specific azimuth.
+
+    Parameters:
+      amp     - The maximum amplitude of the folded event [100]
+      azim    - The azimuth along which the event should be folded [90]
+      lam     - The wavelength (lambda) of the fold
+      rinline - Amount of random variation in the inline (fast spatial axis) direction
+      rxline  - Amount of random variation in the crossline (sloww spatial axis) direction
+    """
+    # Compute the new size based on the amplitude
+    maxshift = int(amp/self.__dz)
+    nzin = self.vel.shape[2]
+    nzot = nzin + 2*maxshift
+    # Expand the model
+    velot = np.zeros([self.__ny,self.__nx,nzot],dtype='float32')
+    lyrot = np.zeros([self.__ny,self.__nx,nzot],dtype='int32')
+    self.ec8.expand(maxshift,maxshift,nzin,self.lyr,self.vel,nzot,lyrot,velot)
+    # Check what mode is desired
+    nn = 3*max(self.__nx,self.__nx)
+    shf = np.zeros([nn,nn],dtype='float32')
+    if(mode == 'cos'):
+      mode = 0
+    elif(mode == 'perlin'):
+      mode = 1
+      npts = 3; octaves = 3; persist = 0.6
+      shf1d = noise_generator.perlin(x=np.linspace(0,npts,nn), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=2)
+      shf1d -= np.mean(shf1d); shf1d *= 10*amp
+      shf = np.ascontiguousarray(np.tile(shf1d,(nn,1)).T).astype('float32')
+    # Fold the deposits on the expanded model
+    self.ec8.squish(nzin,self.lyr,self.vel,shf,mode,
+                    azim,amp,lam,rinline,rxline,nzot,lyrot,velot)
+    # Update the model
+    self.lyr = lyrot
+    self.vel = velot

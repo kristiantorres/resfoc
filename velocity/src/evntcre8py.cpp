@@ -91,6 +91,30 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("thetashift"), py::arg("perpdie"), py::arg("distdie"), py::arg("thetadie"),
              py::arg("dir"), py::arg("lyrot"), py::arg("velot"), py::arg("olblot"), py::arg("nlblot")
          )
+     .def("squish",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<int, py::array::c_style> lyrin,
+             py::array_t<float, py::array::c_style> velin,
+             py::array_t<float, py::array::c_style> shftin,
+             int mode,
+             float azim,
+             float maxshift,
+             float lambda,
+             float rinline,
+             float rxline,
+             int nzot,
+             py::array_t<int, py::array::c_style> lyrot,
+             py::array_t<float, py::array::c_style> velot
+             )
+             {
+               ec8.squish(nz, lyrin.mutable_data(), velin.mutable_data(), shftin.mutable_data(),
+                   mode, azim, maxshift, lambda, rinline, rxline,
+                   nzot, lyrot.mutable_data(), velot.mutable_data());
+             },
+             py::arg("nz"), py::arg("lyrin"), py::arg("velin"), py::arg("shftin"), py::arg("mode"),
+             py::arg("azim"), py::arg("maxshift"), py::arg("lambda"), py::arg("rinline"), py::arg("rxline"),
+             py::arg("nzot"), py::arg("lyrot"), py::arg("velot")
+         )
      .def("zder",[](evntcre8 &ec8,
              int nz,
              py::array_t<float, py::array::c_style> lblin,
