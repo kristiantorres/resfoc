@@ -306,27 +306,37 @@ class mdlbuild:
       rinline - Amount of random variation in the inline (fast spatial axis) direction
       rxline  - Amount of random variation in the crossline (sloww spatial axis) direction
     """
-    # Compute the new size based on the amplitude
-    maxshift = int(amp/self.__dz)
     nzin = self.vel.shape[2]
-    nzot = nzin + 2*maxshift
-    # Expand the model
-    velot = np.zeros([self.__ny,self.__nx,nzot],dtype='float32')
-    lyrot = np.zeros([self.__ny,self.__nx,nzot],dtype='int32')
-    self.ec8.expand(maxshift,maxshift,nzin,self.lyr,self.vel,nzot,lyrot,velot)
-    # Check what mode is desired
-    nn = 3*max(self.__nx,self.__nx)
+    # Allocate shift array
+    nn = 3*max(self.__nx,self.__ny)
     shf = np.zeros([nn,nn],dtype='float32')
     if(mode == 'cos'):
-      mode = 0
+      # Compute the maximum shift
+      maxshift = int(amp/self.__dz)
+      nzot = nzin + 2*maxshift
+      # Expand the model
+      velot = np.zeros([self.__ny,self.__nx,nzot],dtype='float32')
+      lyrot = np.zeros([self.__ny,self.__nx,nzot],dtype='int32')
+      self.ec8.expand(maxshift,maxshift,nzin,self.lyr,self.vel,nzot,lyrot,velot)
+      # Fold the deposits on the expanded model
+      self.ec8.squish(nzin,self.lyr,self.vel,shf,0,
+                      azim,amp,lam,rinline,rxline,nzot,lyrot,velot)
     elif(mode == 'perlin'):
-      mode = 1
-      shf1d = noise_generator.perlin(x=np.linspace(0,npts,nn), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=2)
+      # Compute the perlin shift function
+      shf1d = noise_generator.perlin(x=np.linspace(0,npts,nn), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=1)
       shf1d -= np.mean(shf1d); shf1d *= 10*amp
       shf = np.ascontiguousarray(np.tile(shf1d,(nn,1)).T).astype('float32')
-    # Fold the deposits on the expanded model
-    self.ec8.squish(nzin,self.lyr,self.vel,shf,mode,
-                    azim,amp,lam,rinline,rxline,nzot,lyrot,velot)
+      # Find the maximum shift to be applied
+      pamp = np.max(np.abs(shf1d))
+      maxshift = int(pamp/self.__dz)
+      # Expand the model
+      nzot = nzin + 2*maxshift
+      velot = np.zeros([self.__ny,self.__nx,nzot],dtype='float32')
+      lyrot = np.zeros([self.__ny,self.__nx,nzot],dtype='int32')
+      self.ec8.expand(maxshift,maxshift,nzin,self.lyr,self.vel,nzot,lyrot,velot)
+      # Fold the deposits on the expanded model
+      self.ec8.squish(nzin,self.lyr,self.vel,shf,1,
+                      azim,pamp,lam,rinline,rxline,nzot,lyrot,velot)
     # Update the model
     self.lyr = lyrot
     self.vel = velot

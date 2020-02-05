@@ -29,8 +29,8 @@ void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, in
           velot[i3*nzot*_n2 + i2*nzot + i1 + itop] = velin[i3*nzin*_n2 + i2*nzin + i1];
         }
         for (int i1 = 0; i1 < ibot; ++i1) {
-          lyrot[i3*nzot*_n2 + i2*nzot + i1 + nzot + itop] = -1;
-          velot[i3*nzot*_n2 + i2*nzot + i1 + nzot + itop] = -1.0;
+          lyrot[i3*nzot*_n2 + i2*nzot + i1 + nzin + itop] = -1;
+          velot[i3*nzot*_n2 + i2*nzot + i1 + nzin + itop] = -1.0;
         }
       }
     }
@@ -292,7 +292,7 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
   // Maximum shift in samples (nzot should be nzin + 2*iMaxShift)
   int iMaxShift = maxshift / _d1;
   if(nzot != nz + 2*iMaxShift) {
-    fprintf(stderr,"squish: Ouptut nz must be nzin + 2*maxshift/dz");
+    fprintf(stderr,"squish: Ouptut nz must be nzin + 2*maxshift/dz\n");
     exit(EXIT_FAILURE);
   }
 
@@ -332,6 +332,7 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
       }
     }
 
+    /* Scale by max shift */
     for (int i3 = 0; i3 < nn; i3++) {
       for (int i2 = 0; i2 < nn; i2++) {
         shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
@@ -343,7 +344,6 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
     memcpy(shift,shftin,sizeof(float)*nn*nn);
   }
 
-  calcshift_fastaxis(nn, _d2, shift, dist);
 
   /* Rotate shift into azimuth */
   float *shiftrot = new float[_n2*_n3]();
@@ -353,7 +353,10 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
   float sn = sinf(azim * atan(1.) / 45.);
 
   rotate_array(cs, sn, nn, shift, _n2, _d2, _n3, _d3, shiftrot);
-  rotate_array(cs, sn, nn, dist , _n2, _d2, _n3, _d3, distrot );
+  if(mode == 0) {
+    calcshift_fastaxis(nn, _d2, shift, dist);
+    rotate_array(cs, sn, nn, dist , _n2, _d2, _n3, _d3, distrot );
+  }
 
   /* Create top and bottom arrays */
   float *top = new float[_n2*_n3]();
@@ -377,8 +380,8 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
       int ib = std::min(std::max(i3 + (int)(sn * shiftrot[i3*_n2 + i2] / _d3), 0), _n3 - 1);
       int ia = std::min(std::max(i2 + (int)(cs * shiftrot[i3*_n2 + i2] / _d3), 0), _n2 - 1);
 
-      int i1 = shiftrot[i3*_n2 + i2] / _d1;
-      int ibeg = iMaxShift + i1;
+      int i1 = shiftrot[i3*_n2 + i2] / _d1; // Rotated shift to be applied
+      int ibeg = iMaxShift + i1;            // Loop up to maximum shift
       for (int i = 0; i < ibeg; i++) {
         lyrot[i3*nzot*_n2 + i2*nzot + i] = -1;
         velot[i3*nzot*_n2 + i2*nzot + i] = -1;
