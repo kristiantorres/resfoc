@@ -24,7 +24,7 @@ nx = 400; ox = 0.0; dx = 20.0
 modval  = 2500.0
 modvel  = np.zeros([nz,nx],dtype='float32') + modval
 romin = 0.91; romax = 1.0
-rhos = vel.create_randomptb(nz,nx,romin,romax,ncpu=10)
+rhos = vel.create_randomptb(nz,nx,romin,romax,ncpu=1)
 modvel = modvel/rhos
 # Create migration velocity
 migval  = 2500.0

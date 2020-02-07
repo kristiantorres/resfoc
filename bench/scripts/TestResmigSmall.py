@@ -123,6 +123,7 @@ if(roout != None):
       nex = pred.shape[0]; nz = pred.shape[1]; nx = pred.shape[2]
       hf.create_dataset('pred', (nex,nz,nx), data=pred, dtype=np.float32)
 
+#TODO: remigrate with the new prediction
 if(qc):
   with h5py.File(tsdat,'r') as hf:
     keys = list(hf.keys());
@@ -132,10 +133,26 @@ if(qc):
       nbatches = nb
     for ib in range(nbatches):
       for iex in range(bsize):
-        f,ax = plt.subplots(1,2,figsize=(10,5),gridspec_kw={'width_ratios': [1, 1]})
-        ax[0].imshow(pred[k,:,:],cmap='jet',vmin=0.95,vmax=1.05)
-        ax[1].imshow(ally[k,:,:],cmap='jet',vmin=0.95,vmax=1.05)
-        plt.savefig('./fig/ex%d.png'%(iex),bbox_inches='tight',dpi=150)
+        f,ax = plt.subplots(1,3,figsize=(15,8),gridspec_kw={'width_ratios': [1, 1, 1]})
+        im1 = ax[0].imshow(allx[k,:,:,5],cmap='gray',extent=[0,255*20/1000,127*20/1000,0.0])
+        ax[0].set_xlabel('X (km)',fontsize=18)
+        ax[0].set_ylabel('Z (km)',fontsize=18)
+        ax[0].set_title(r'$\rho$=1',fontsize=18)
+        ax[0].tick_params(labelsize=18)
+        im2 = ax[1].imshow(ally[k,:,:],cmap='jet',vmin=0.95,vmax=1.05,extent=[0,255*20/1000,127*20/1000,0.0])
+        ax[1].set_xlabel('X (km)',fontsize=18)
+        ax[1].set_title('Label',fontsize=18)
+        ax[1].tick_params(labelsize=18)
+        im3 = ax[2].imshow(pred[k,:,:],cmap='jet',vmin=0.95,vmax=1.05,extent=[0,255*20/1000,127*20/1000,0.0])
+        ax[2].set_xlabel('X (km)',fontsize=18)
+        ax[2].set_title('Prediction',fontsize=18)
+        ax[2].tick_params(labelsize=18)
+        cbar_ax = f.add_axes([0.91,0.39,0.02,0.21])
+        cbar = f.colorbar(im3,cbar_ax,format='%.2f')
+        cbar.ax.tick_params(labelsize=18)
+        cbar.set_label(r'$\rho$',fontsize=18)
+        cbar.draw_all()
+        plt.savefig('./fig/ex50-%d.png'%(k),bbox_inches='tight',dpi=150)
         plt.show()
         k += 1
 
