@@ -100,3 +100,7 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
+def plotseglabel(img,pred,thresh=0.5,color='red'):
+  """ Plots a binary segmentation prediction on top of an image """
+  pass
+

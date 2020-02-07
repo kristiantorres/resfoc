@@ -1,7 +1,8 @@
 import numpy as np
 import velocity.evntcre8 as evntcre8
-from utils.pprint import progressbar,printprogress
+from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
+from scaas.gradtaper import build_taper_ds
 import matplotlib.pyplot as plt
 
 class mdlbuild:
@@ -10,7 +11,7 @@ class mdlbuild:
   Based on the syntheticModel code from Bob Clapp
 
   @author: Joseph Jennings
-  @version: 2020.02.04
+  @version: 2020.02.05
   """
 
   def __init__(self,nx,dx,ny,dy,dz,nbase=50,basevel=4000):
@@ -74,6 +75,20 @@ class mdlbuild:
     # Update the layer and velocity models
     self.vel = velot
     self.lyr = lyrot
+
+  def vofz(self,nlayer=20,minvel=1600,maxvel=5000,npts=2,octaves=3,persist=0.3):
+    """ Generate a random v(z) that defines propagation velocities """
+    props = np.zeros(nlayer)
+    # Make sure we do not go out of bounds
+    while(np.min(props) != minvel and np.max(props) != maxvel):
+      props = np.linspace(maxvel,minvel,nlayer)
+      ptb = noise_generator.perlin(x=np.linspace(0,npts,nlayer), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=1)
+      ptb -= np.mean(ptb);
+      # Define taper so that the ends are not perturbed
+      tap,_ = build_taper_ds(1,nlayer,1,5,15,19)
+      props += 5000*(ptb*tap)
+
+    return props
 
   def fault(self,begx=0.5,begy=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
       theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,thresh=50):
@@ -142,9 +157,38 @@ class mdlbuild:
       ndiff = nzv - nzl
       return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
 
-  #TODO: add some small random variation to each of these functions below
+  def tinyfault_block(self,nfault=5,azim=0.0,begz=0.2,begx=0.3,begy=0.3,dx=0.1,dy=0.0,rand=True):
+    """
+    Puts in a tiny fault block system. For now, only will give nice faults along
+    0,90,180,270 azimuths
 
-  def smallfault_block(self,nfault=5,azim=0.0,begz=0.3,begx=0.3,begy=0.3,xdir=True):
+    Parameters:
+      nfault - number of faults in the system [5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.3]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      dx     - spacing between faults in the x direction [0.1]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
+    """
+    signx = 1; signy = 1
+    if(begx > 0.5):
+      signx = -1
+    if(begy > 0.5):
+      signy = -1
+    for ifl in progressbar(range(nfault), "nfaults:", 40):
+      daz = 3000; dz = 3000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2*1000) - 1000.0
+        dz  += np.random.rand()*(2*500)  - 500.0
+        dxi += np.random.rand()*dxi - dxi/2.0
+        dyi += np.random.rand()*dyi - dyi/2.0
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+      # Move along x or y
+      begx += signx*dxi; begy += signy*dyi
+
+  def smallfault_block(self,nfault=5,azim=0.0,begz=0.3,begx=0.3,begy=0.3,dx=0.1,dy=0.0,rand=True):
     """
     Puts in a small fault block system. For now, only will give nice faults along
     0,90,180,270 azimuths
@@ -155,25 +199,27 @@ class mdlbuild:
       begz   - beginning position in z for fault (same for all) [0.3]
       begx   - beginning position in x for system [0.5]
       begy   - beginning position in y for system [0.5]
-      xdir   - move along the x direction [True]. If False, will move the fault
-               system in the y direction (all faults will still have same azimuth)
+      dx     - spacing between faults in the x direction [0.1]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
     """
-    dx = 0.0; dy = 0.0
     signx = 1; signy = 1
-    if(xdir):
-      dx = 0.1
-    else:
-      dy = 0.1
     if(begx > 0.5):
       signx = -1
     if(begy > 0.5):
       signy = -1
     for ifl in progressbar(range(nfault), "nfaults:", 40):
-      self.fault(begx=begx,begy=begy,begz=begz,daz=8000,dz=5000,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+      daz = 8000; dz = 5000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+        dxi += np.random.rand()*dxi - dxi/2
+        dyi += np.random.rand()*dyi - dyi/2
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
       # Move along x or y
-      begx += signx*dx; begy += signy*dy
+      begx += signx*dxi; begy += signy*dyi
 
-  def largefault_block(self,nfault=3,azim=0.0,begz=0.6,begx=0.5,begy=0.5,xdir=True):
+  def largefault_block(self,nfault=3,azim=0.0,begz=0.6,begx=0.5,begy=0.5,dx=0.2,dy=0.0,rand=True):
     """
     Puts in a large fault block system. For now, only will give nice faults along
     0,90,180,270 azimuths
@@ -184,25 +230,27 @@ class mdlbuild:
       begz   - beginning position in z for fault (same for all) [0.6]
       begx   - beginning position in x for system [0.5]
       begy   - beginning position in y for system [0.5]
-      xdir   - move along the x direction [True]. If False, will move the fault
-               system in the y direction (all faults will still have same azimuth)
-      """
-    dx = 0.0; dy = 0.0
+      dx     - spacing between faults in the x direction [0.2]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
+    """
     signx = 1; signy = 1
-    if(xdir):
-      dx = 0.2
-    else:
-      dy = 0.2
     if(begx > 0.5):
       signx = -1
     if(begy > 0.5):
       signy = -1
     for ifl in progressbar(range(nfault), "nfaults:", 40):
-      self.fault(begx=begx,begy=begy,begz=begz,daz=25000,dz=10000,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      daz = 25000; dz = 10000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+        dxi += np.random.rand()*dxi - dxi/2
+        dyi += np.random.rand()*dyi - dyi/2
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
       # Move along x or y
-      begx += signx*dx; begy += signy*dy
+      begx += signx*dxi; begy += signy*dyi
 
-  def sliding_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,xdir=True):
+  def sliding_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.2,dy=0.0,rand=True):
     """
     Puts in sliding fault block system. For now, only will give nice faults along
     0,90,180,270 azimuths
@@ -213,25 +261,27 @@ class mdlbuild:
       begz   - beginning position in z for fault (same for all) [0.6]
       begx   - beginning position in x for system [0.5]
       begy   - beginning position in y for system [0.5]
-      xdir   - move along the x direction [True]. If False, will move the fault
-               system in the y direction (all faults will still have same azimuth)
+      dx     - spacing between faults in the x direction [0.2]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
     """
-    dx = 0.0; dy = 0.0
     signx = 1; signy = 1
-    if(xdir):
-      dx = 0.2
-    else:
-      dy = 0.2
     if(begx > 0.5):
       signx = -1
     if(begy > 0.5):
       signy = -1
     for ifl in progressbar(range(nfault), "nfaults:", 40):
-      self.fault(begx=begx,begy=begy,begz=begz,daz=10000,dz=25000,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      daz = 10000; dz = 25000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+        dxi += np.random.rand()*(dxi) - dxi/2
+        dyi += np.random.rand()*(dyi) - dyi/2
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
       # Move along x or y
-      begx += signx*dx; begy += signy*dy
+      begx += signx*dxi; begy += signy*dyi
 
-  def smallgraben_block(self,azim=0.0,begz=0.5,begx=0.5,begy=0.5,xdir=True):
+  def smallgraben_block(self,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.1,dy=0.0,rand=True):
     """
     Puts in a small graben fault block system. For now only will give nice faults along
     0,90,180,270 azimuths
@@ -241,61 +291,153 @@ class mdlbuild:
       begz   - beginning position in z for fault (same for all) [0.6]
       begx   - beginning position in x for system [0.5]
       begy   - beginning position in y for system [0.5]
-      xdir   - move along the x direction [True]. If False, will move the fault
-               system in the y direction (all faults will still have same azimuth)
+      dx     - spacing between faults in the x direction [0.1]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
     """
-    if(xdir):
+    assert(dx != 0.0 or dy != 0.0),"Either dx or dy must be non-zero"
+    # Throw parameters and spacing
+    daz1 = 6000; dz1 = 3000; dxi = dx; dyi = dy
+    daz2 = 6000; dz2 = 3000;
+    if(rand):
+      # First fault
+      daz1 += np.random.rand()*(2000) - 1000
+      dz1  += np.random.rand()*(1000) - 500
+      # Second fault
+      daz2 += np.random.rand()*(2000) - 1000
+      dz2  += np.random.rand()*(1000) - 500
+      # Spacing
+      dxi += np.random.rand()*(dxi) - dxi/2
+      dyi += np.random.rand()*(dyi) - dyi/2
+    if(dx != 0.0):
+      # First fault
       printprogress("nfaults",0,2)
-      self.fault(begx=begx    ,begy=begy,begz=begz,daz=6000.0,dz=3000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      self.fault(begx=begx    ,begy=begy,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",1,2)
-      self.fault(begx=begx+0.1,begy=begy,begz=begz,daz=6000.0,dz=3000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      # Second fault
+      self.fault(begx=begx+dx,begy=begy,begz=begz,daz=daz2,dz=dz2,azim=azim       ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",2,2)
     else:
+      # First fault
       printprogress("nfaults",0,2)
-      self.fault(begx=begx,begy=begy    ,begz=begz,daz=6000.0,dz=3000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      self.fault(begx=begx,begy=begy    ,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",1,2)
-      self.fault(begx=begx,begy=begy+0.1,begz=begz,daz=6000.0,dz=3000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      # Second fault
+      self.fault(begx=begx,begy=begy+dy,begz=begz,daz=daz2,dz=dz2,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",2,2)
 
-  def largegraben_block(self,azim=0.0,begz=0.6,begx=0.3,begy=0.5,xdir=True):
+  def largegraben_block(self,azim=0.0,begz=0.6,begx=0.3,begy=0.5,dx=0.3,dy=0.0,rand=True):
     """
     Puts in a large graben fault block system. For now only will give nice faults along
     0,90,180,270 azimuths
 
     Parameters
       azim - azimuth along which faults are oriented [0.0]
-      begz   - beginning position in z for fault (same for all) [0.6]
-      begx   - beginning position in x for system [0.5]
-      begy   - beginning position in y for system [0.5]
-      xdir   - move along the x direction [True]. If False, will move the fault
-               system in the y direction (all faults will still have same azimuth)
+      begz - beginning position in z for fault (same for all) [0.6]
+      begx - beginning position in x for system [0.5]
+      begy - beginning position in y for system [0.5]
+      dx   - spacing between faults in the x direction [0.3]
+      dy   - spacing between faults in the y direction [0.0]
+      rand - small random variations in the positioning and throw of the faults [True]
     """
-    if(xdir):
+    assert(dx != 0.0 or dy != 0.0),"Either dx or dy must be non-zero"
+    # Throw parameters and spacing
+    daz1 = 25000; dz1 = 10000; dxi = dx; dyi = dy
+    daz2 = 25000; dz2 = 10000
+    if(rand):
+      # First fault
+      daz1 += np.random.rand()*(2000) - 1000
+      dz1  += np.random.rand()*(2000) - 1000
+      # Second fault
+      daz2 += np.random.rand()*(2000) - 1000
+      dz2  += np.random.rand()*(2000) - 1000
+      # Spacing
+      dxi += np.random.rand()*(dxi) - dxi/2
+      dyi += np.random.rand()*(dyi) - dyi/2
+    if(dx != 0.0):
+      # First fault
       printprogress("nfaults",0,2)
-      self.fault(begx=begx    ,begy=begy,begz=begz,daz=25000.0,dz=10000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      self.fault(begx=begx    ,begy=begy,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",1,2)
-      self.fault(begx=begx+0.3,begy=begy,begz=begz,daz=25000.0,dz=10000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      # Second fault
+      self.fault(begx=begx+dx,begy=begy,begz=begz,daz=daz2,dz=dz2,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",2,2)
     else:
+      # First fault
       printprogress("nfaults",0,2)
-      self.fault(begx=begx,begy=begy    ,begz=begz,daz=20000.0,dz=25000.0,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      self.fault(begx=begx,begy=begy    ,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",1,2)
-      self.fault(begx=begx,begy=begy+0.3,begz=begz,daz=20000.0,dz=25000.0,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
+      # Second fault
+      self.fault(begx=begx,begy=begy+dy,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
       printprogress("nfaults",2,2)
 
-  def horstgraben_block(begz,azim):
-    pass
+  def smallhorstgraben_block(self,azim=0.0,begz=0.5,rand=True,xdir=True):
+    """
+    Puts in a small horst-graben block fault system.
+    Attempts to span most of the lateral range of the model.
+    For now, will only give nice faults along 0,90,180,270 azimuths
 
-  def smallfault(azim=0.0,begz=0.3):
-    pass
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault (same for all) [0.5]
+      xdir - Whether the faults should be spaced along the x direction [True]
+      rand - small random variations in the throw of the faults [True]
+    """
+    dx   = 0.0; dy   = 0.0
+    begx = 0.5; begy = 0.5
+    if(xdir):
+      dx = 0.16; begx = 0.05
+    else:
+      dy = 0.16; begy = 0.05
+    for ifl in progressbar(range(6), "ngrabens:", 40):
+      daz = 5000; dz = 3000
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+      # Put in graben pair along x or y
+      if(xdir):
+        self.fault(begx=begx     ,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+        self.fault(begx=begx+0.07,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      else:
+        self.fault(begx=begx,begy=begy     ,begz=begz,daz=daz,dz=dz,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+        self.fault(begx=begx,begy=begy+0.07,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      # Move along x or y
+      begx += dx; begy += dy
 
-  def largefault(azim=0.0,begz=0.5):
-    pass
+  def largehorstgraben_block(self,azim=0.0,begz=0.1,xdir=True,rand=True):
+    """
+    Puts in a small horst-graben block fault system.
+    Attempts to span most of the lateral range of the model.
+    For now, will only give nice faults along 0,90,180,270 azimuths
 
-  def slidingfault(azim=0.0,begz=0.5):
-    pass
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault (same for all) [0.5]
+      xdir - Whether the faults should be spaced along the x direction [True]
+      rand - small random variations in the throw of the faults [True]
+    """
+    dx   = 0.0; dy   = 0.0
+    begx = 0.5; begy = 0.5
+    if(xdir):
+      dx = 0.32; begx = 0.05
+    else:
+      dy = 0.32; begy = 0.05
+    for ifl in progressbar(range(3), "ngrabens:", 40):
+      daz = 15000; dz = 5000
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+      # Put in graben pair along x or y
+      if(xdir):
+        self.fault(begx=begx     ,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+        self.fault(begx=begx+0.16,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      else:
+        self.fault(begx=begx,begy=begy     ,begz=begz,daz=daz,dz=dz,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+        self.fault(begx=begx,begy=begy+0.16,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      # Move along x or y
+      begx += dx; begy += dy
 
-  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='cos'):
+  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
     """
     Folds the current geologic model along a specific azimuth.
 
@@ -340,6 +482,32 @@ class mdlbuild:
     # Update the model
     self.lyr = lyrot
     self.vel = velot
+
+  def findsqlyrs(self,nlyrs,ntot,mindist):
+    """
+    Finds layer indices to squish. Makes sure that they layers
+    are dist indices apart and are not the same
+
+    Parameters:
+      nlyrs - number of layers to squish
+      ntot  - total number of layers to be deposited
+      mindist - minimum distance between lay
+    """
+    # Get the first layer
+    sqlyrs = []
+    sqlyrs.append(np.random.randint(0,ntot))
+    # Loop until all layers are found
+    while(len(sqlyrs) < nlyrs):
+      lidx = np.random.randint(0,ntot)
+      # Compute distances
+      nsq = len(sqlyrs)
+      sqdist = np.zeros(nsq,dtype='int32')
+      for isq in range(nsq):
+        sqdist[isq] = np.abs(lidx - sqlyrs[isq])
+      if(np.all(sqdist >= mindist)):
+        sqlyrs.append(lidx)
+
+    return sqlyrs
 
   def trim(self,top=0,bot=1000):
     """
