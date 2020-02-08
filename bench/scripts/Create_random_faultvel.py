@@ -2,8 +2,10 @@ import velocity.mdlbuild as mdlbuild
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
 from utils.ptyprint import progressbar
+import utils.rand as rndut
 import numpy as np
 from deeplearn.utils import resample, thresh
+from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 
 nx = 1000; ox=0.0; dx=25.0
@@ -70,9 +72,43 @@ mb.trim(0,1100)
 #mb.tinyfault_block(nfault=5,azim=180.0,begz=0.15,begx=0.7,begy=0.3)
 
 #mb.smallhorstgraben_block(azim=0.0,begz=0.5)
-mb.largehorstgraben_block(azim=0.0,begz=0.7)
-mb.sliding_block(nfault=3,azim=0.0,begz=0.3,begx=0.3,begy=0.5)
-mb.tinyfault_block(nfault=5,azim=0.0,begz=0.1,begx=0.3,begy=0.3)
+#mb.largehorstgraben_block(azim=0.0,begz=0.7)
+#mb.sliding_block(nfault=3,azim=0.0,begz=0.3,begx=0.3,begy=0.5)
+#mb.tinyfault_block(nfault=5,azim=0.0,begz=0.1,begx=0.3,begy=0.3)
+
+## Fault it up!
+azims = [0.0,180.0]
+
+#TODO: put in sliding faults
+# Large faults
+nlf = np.random.randint(1,4)
+for ifl in progressbar(range(nlf), "nlfaults:", 40):
+  azim = np.random.choice(azims)
+  xpos = rndut.randfloat(0.1,0.9)
+  mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5)
+
+# Medium faults
+nmf = np.random.randint(2,6)
+for ifl in progressbar(range(nmf), "nmfaults:", 40):
+  azim = np.random.choice(azims)
+  xpos = rndut.randfloat(0.1,0.9)
+  mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5)
+
+# Small faults (sliding or small)
+nsf = np.random.randint(5,10)
+for ifl in progressbar(range(nsf), "nsfaults:", 40):
+  azim = np.random.choice(azims)
+  xpos = rndut.randfloat(0.1,0.9)
+  zpos = rndut.randfloat(0.2,0.5)
+  mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5)
+
+## Tiny faults
+ntf = np.random.randint(5,10)
+for ifl in progressbar(range(ntf), "ntfaults:", 40):
+  azim = np.random.choice(azims)
+  xpos = rndut.randfloat(0.1,0.9)
+  zpos = rndut.randfloat(0.15,0.3)
+  mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5)
 
 # Get model
 vel = mb.vel.T
@@ -81,13 +117,8 @@ nz = vel.shape[0]
 lbl = mb.get_label().T
 
 plt.figure(1)
-plt.imshow(vel[:1000,:,100],cmap='jet')
-plt.figure(2)
-plt.imshow(lbl[:1000,:,100],cmap='jet')
-plt.show()
-
-plt.figure(1)
 velwind = mb.vel[100,:,:1000]
+velwind = gaussian_filter(velwind,sigma=0.8)
 velresm = resample(velwind,[1024,512],kind='linear')
 plt.imshow(velresm.T,cmap='jet')
 
@@ -95,5 +126,16 @@ plt.figure(2)
 lblwind = mb.get_label()[100,:,:1000]
 lblresm = thresh(resample(lblwind,[1024,512],kind='linear'),0)
 plt.imshow(lblresm.T,cmap='jet')
-plt.show()
 
+velwindsm = gaussian_filter(velwind,sigma=20)
+velwindsmresm = resample(velwindsm,[1024,512],kind='linear')
+plt.figure(3)
+plt.imshow(velwindsmresm.T,cmap='jet')
+
+#TODO: compute reflectivity with Z-derivative
+dvel = velwind - velwindsm
+dvelresm = resample(dvel,[1024,512],kind='linear')
+plt.figure(4)
+plt.imshow(dvelresm.T,cmap='gray')
+
+plt.show()
