@@ -57,7 +57,7 @@ def printprogress(prefix,j,count,size=40,file=sys.stdout):
     file.write("\n")
   file.flush()
 
-def progressbar(it, prefix="", size=60, file=sys.stdout):
+def progressbar(it, prefix="", size=40, file=sys.stdout):
   """
   Progress bar
 
