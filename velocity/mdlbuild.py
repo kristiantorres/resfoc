@@ -80,7 +80,7 @@ class mdlbuild:
     """ Generate a random v(z) that defines propagation velocities """
     props = np.zeros(nlayer)
     # Make sure we do not go out of bounds
-    while(np.min(props) != minvel and np.max(props) != maxvel):
+    while(np.min(props) != minvel or np.max(props) != maxvel):
       props = np.linspace(maxvel,minvel,nlayer)
       ptb = noise_generator.perlin(x=np.linspace(0,npts,nlayer), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=1)
       ptb -= np.mean(ptb);
@@ -177,7 +177,7 @@ class mdlbuild:
       signx = -1
     if(begy > 0.5):
       signy = -1
-    for ifl in progressbar(range(nfault), "nfaults:", 40):
+    for ifl in progressbar(range(nfault), "ntfaults:", 40):
       daz = 3000; dz = 3000; dxi = dx; dyi = dy
       if(rand):
         daz += np.random.rand()*(2*1000) - 1000.0
@@ -208,7 +208,7 @@ class mdlbuild:
       signx = -1
     if(begy > 0.5):
       signy = -1
-    for ifl in progressbar(range(nfault), "nfaults:", 40):
+    for ifl in progressbar(range(nfault), "nsfaults:", 40):
       daz = 8000; dz = 5000; dxi = dx; dyi = dy
       if(rand):
         daz += np.random.rand()*(2000) - 1000
@@ -239,7 +239,7 @@ class mdlbuild:
       signx = -1
     if(begy > 0.5):
       signy = -1
-    for ifl in progressbar(range(nfault), "nfaults:", 40):
+    for ifl in progressbar(range(nfault), "nlfaults:", 40):
       daz = 25000; dz = 10000; dxi = dx; dyi = dy
       if(rand):
         daz += np.random.rand()*(2000) - 1000
@@ -270,7 +270,7 @@ class mdlbuild:
       signx = -1
     if(begy > 0.5):
       signy = -1
-    for ifl in progressbar(range(nfault), "nfaults:", 40):
+    for ifl in progressbar(range(nfault), "ndfaults:", 40):
       daz = 10000; dz = 25000; dxi = dx; dyi = dy
       if(rand):
         daz += np.random.rand()*(2000) - 1000
@@ -311,20 +311,20 @@ class mdlbuild:
       dyi += np.random.rand()*(dyi) - dyi/2
     if(dx != 0.0):
       # First fault
-      printprogress("nfaults",0,2)
+      printprogress("nsfaults",0,2)
       self.fault(begx=begx    ,begy=begy,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",1,2)
+      printprogress("nsfaults",1,2)
       # Second fault
       self.fault(begx=begx+dx,begy=begy,begz=begz,daz=daz2,dz=dz2,azim=azim       ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",2,2)
+      printprogress("nsfaults",2,2)
     else:
       # First fault
-      printprogress("nfaults",0,2)
+      printprogress("nsfaults",0,2)
       self.fault(begx=begx,begy=begy    ,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",1,2)
+      printprogress("nsfaults",1,2)
       # Second fault
       self.fault(begx=begx,begy=begy+dy,begz=begz,daz=daz2,dz=dz2,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",2,2)
+      printprogress("nsfaults",2,2)
 
   def largegraben_block(self,azim=0.0,begz=0.6,begx=0.3,begy=0.5,dx=0.3,dy=0.0,rand=True):
     """
@@ -356,20 +356,20 @@ class mdlbuild:
       dyi += np.random.rand()*(dyi) - dyi/2
     if(dx != 0.0):
       # First fault
-      printprogress("nfaults",0,2)
+      printprogress("nlfaults",0,2)
       self.fault(begx=begx    ,begy=begy,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",1,2)
+      printprogress("nlfaults",1,2)
       # Second fault
       self.fault(begx=begx+dx,begy=begy,begz=begz,daz=daz2,dz=dz2,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",2,2)
+      printprogress("nlfaults",2,2)
     else:
       # First fault
-      printprogress("nfaults",0,2)
+      printprogress("nlfaults",0,2)
       self.fault(begx=begx,begy=begy    ,begz=begz,daz=daz1,dz=dz1,azim=azim+180.0,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",1,2)
+      printprogress("nlfaults",1,2)
       # Second fault
       self.fault(begx=begx,begy=begy+dy,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.2,perp_die=1.0)
-      printprogress("nfaults",2,2)
+      printprogress("nlfaults",2,2)
 
   def smallhorstgraben_block(self,azim=0.0,begz=0.5,rand=True,xdir=True):
     """
@@ -436,6 +436,92 @@ class mdlbuild:
         self.fault(begx=begx,begy=begy+0.16,begz=begz,daz=daz,dz=dz,azim=azim      ,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
       # Move along x or y
       begx += dx; begy += dy
+
+  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,rand=True):
+    """
+    Puts in a tiny fault
+    For now, will only give nice faults along 0,90,180,270 azimuths
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.2]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+      rand - small random variations in the throw of faults [True]
+    """
+    daz=3000.0; dz = 3000.0
+    if(rand):
+      daz += np.random.rand()*(2*1000) - 1000.0
+      dz  += np.random.rand()*(2*500)  - 500.0
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+
+  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,rand=True):
+    """
+    Puts in a small fault
+    For now, will only give nice faults along 0,90,180,270 azimuths
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.3]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+    """
+    daz = 8000; dz = 5000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+
+  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
+    """
+    Puts in a medium fault
+    For now, will only give nice faults along 0,90,180,270 azimuths
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.6]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+    """
+    daz = 15000; dz = 12000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0)
+
+  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
+    """
+    Puts in a large fault
+    For now, will only give nice faults along 0,90,180,270 azimuths
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.6]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+    """
+    daz = 25000; dz = 10000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+
+  def slidingfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5):
+    """
+    Puts in a sliding fault
+    For now, will only give nice faults along 0,90,180,270
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.6]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+    """
+    daz = 10000; dz = 25000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
 
   def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
     """
