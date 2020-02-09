@@ -3,6 +3,7 @@ import velocity.evntcre8 as evntcre8
 from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
+from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
 
 class mdlbuild:
@@ -91,7 +92,7 @@ class mdlbuild:
     return props
 
   def fault(self,begx=0.5,begy=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,thresh=50):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,throwsc=1.0,thresh=50):
     """
     Creates a fault event in the geologic model
 
@@ -112,6 +113,8 @@ class mdlbuild:
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
       dirf        - Direction of fault movement [0.1]
+      throwsc     - The total shift in z is divided by this amount (leads to smaller throw) [1.0]
+      thresh      - Threshold applied for obtaining the fault labels [50]
     """
     # Create the output velocity, layermodel and label
     nz = self.vel.shape[2]
@@ -126,8 +129,9 @@ class mdlbuild:
     # Create the fault
     self.ec8.fault(nz,self.lyr,self.vel,self.lbl,
                    azim,begx,begy,begz,dz,daz,
-                   theta_shift,perp_die,dist_die,theta_die,dirf,
+                   theta_shift,perp_die,dist_die,theta_die,dirf,throwsc,
                    lyrot,velot,lblto,lbltn)
+   # plt.imshow(lbltn[100,:,:].T,cmap='jet'); plt.show()
     # Update old label with shifted version
     self.lbl = lblto
     # Update layer and velocity models
@@ -437,7 +441,7 @@ class mdlbuild:
       # Move along x or y
       begx += dx; begy += dy
 
-  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,rand=True):
+  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,tscale=1.0,rand=True):
     """
     Puts in a tiny fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -447,6 +451,7 @@ class mdlbuild:
       begz - beginning position in z for fault [0.2]
       begx - beginning position in x for fault [0.5]
       begy - beginning position in x for fault [0.5]
+      tscale - divides the shift in z by this amount
       rand - small random variations in the throw of faults [True]
     """
     daz=3000.0; dz = 3000.0
@@ -455,58 +460,70 @@ class mdlbuild:
       dz  += np.random.rand()*(2*500)  - 500.0
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
 
-  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,rand=True):
+  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True):
     """
     Puts in a small fault
     For now, will only give nice faults along 0,90,180,270 azimuths
 
     Parameters:
-      azim - azimuth along which faults are oriented [0.0]
-      begz - beginning position in z for fault [0.3]
-      begx - beginning position in x for fault [0.5]
-      begy - beginning position in x for fault [0.5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault [0.3]
+      begx   - beginning position in x for fault [0.5]
+      begy   - beginning position in x for fault [0.5]
+      tscale - divides the shift in z by this amount
+      rand   - small random variations in the throw of faults [True]
     """
     daz = 8000; dz = 5000
     if(rand):
-      daz += np.random.rand()*(2000) - 1000
-      dz  += np.random.rand()*(2000) - 1000
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+      daz    += np.random.rand()*(2000) - 1000
+      dz     += np.random.rand()*(2000) - 1000
+      tscale += np.random.rand()*2
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+        theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
+  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True):
     """
     Puts in a medium fault
     For now, will only give nice faults along 0,90,180,270 azimuths
 
     Parameters:
-      azim - azimuth along which faults are oriented [0.0]
-      begz - beginning position in z for fault [0.6]
-      begx - beginning position in x for fault [0.5]
-      begy - beginning position in x for fault [0.5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault [0.6]
+      begx   - beginning position in x for fault [0.5]
+      begy   - beginning position in x for fault [0.5]
+      tscale - divides the shift z by this amount [10.0]
+      rand   - small random variations in the throw of faults [True]
     """
     daz = 15000; dz = 12000
     if(rand):
-      daz += np.random.rand()*(2000) - 1000
-      dz  += np.random.rand()*(2000) - 1000
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0)
+      daz    += np.random.rand()*(2000) - 1000
+      dz     += np.random.rand()*(2000) - 1000
+      tscale += np.random.rand()*(2)
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+        theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
+  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=6.0,rand=True):
     """
     Puts in a large fault
     For now, will only give nice faults along 0,90,180,270 azimuths
 
     Parameters:
-      azim - azimuth along which faults are oriented [0.0]
-      begz - beginning position in z for fault [0.6]
-      begx - beginning position in x for fault [0.5]
-      begy - beginning position in x for fault [0.5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault [0.6]
+      begx   - beginning position in x for fault [0.5]
+      begy   - beginning position in x for fault [0.5]
+      tscale - divides the shift z by this amount [10.0]
+      rand   - small random variations in the throw of faults [True]
     """
     daz = 25000; dz = 10000
     if(rand):
-      daz += np.random.rand()*(2000) - 1000
-      dz  += np.random.rand()*(2000) - 1000
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
+      daz    += np.random.rand()*(2000) - 1000
+      dz     += np.random.rand()*(2000) - 1000
+      tscale += np.random.rand()*(3)
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+        theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=200/tscale)
 
-  def slidingfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5):
+  def slidingfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
     """
     Puts in a sliding fault
     For now, will only give nice faults along 0,90,180,270
@@ -516,6 +533,7 @@ class mdlbuild:
       begz - beginning position in z for fault [0.6]
       begx - beginning position in x for fault [0.5]
       begy - beginning position in x for fault [0.5]
+      rand - small random variations in the throw of faults [True]
     """
     daz = 10000; dz = 25000
     if(rand):
@@ -613,4 +631,12 @@ class mdlbuild:
       self.lbl = self.lbl[:,:,top:bot]
     self.vel = self.vel[:,:,top:bot]
     self.lyr = self.lyr[:,:,top:bot]
+
+  def get_refl(self):
+    """ Computes the reflectivity for the current velocity model """
+    nz = self.vel.shape[2]
+    ref = np.zeros(self.vel.shape,dtype='float32')
+    velsm = gaussian_filter(self.vel,sigma=0.8).astype('float32')
+    self.ec8.calcref(nz,velsm,ref)
+    return ref
 

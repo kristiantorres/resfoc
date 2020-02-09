@@ -108,7 +108,7 @@ void evntcre8::deposit(float vel,
 }
 
 void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim, float begx, float begy, float begz, float dz, float daz,
-    float thetashift, float perpdie, float distdie, float thetadie, float dir,
+    float thetashift, float perpdie, float distdie, float thetadie, float dir, float scalethrw,
     int *lyrot, float *velot, float *olblot, float *nlblot) {
 
   float dst1 = nz*_d1;
@@ -221,7 +221,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
             float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
 
             // Compute shifts to be applied
-            shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
+            shiftz[i3*nz*_n2 + i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
 
@@ -635,6 +635,25 @@ void evntcre8::zder(int nz, float *lblin, float *lblot) {
           lblot[i3*nz*_n2 + i2*nz + i1] = lblin[i3*nz*_n2 + i2*nz + i1+0] - lblin[i3*nz*_n2 + i2*nz + i1-1];
         } else {
           lblot[i3*nz*_n2 + i2*nz + i1] = 0.5*lblin[i3*nz*_n2 + i2*nz + i1+1] - 0.5*lblin[i3*nz*_n2 + i2*nz + i1-1];
+        }
+      }
+    }
+  }
+
+}
+
+void evntcre8::calcref(int nz, float *vel, float *ref) {
+
+  for(int i3 = 0; i3 < _n3; ++i3) {
+    for(int i2 = 0; i2 < _n2; ++i2) {
+      for(int i1 = 0; i1 < nz; ++i1) {
+        /* One-sided derivatives at the ends */
+        if(i1 == 0) {
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+1] - vel[i3*nz*_n2 + i2*nz + i1-0];
+        } else if(i1 == nz-1) {
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+0] - vel[i3*nz*_n2 + i2*nz + i1-1];
+        } else {
+          ref[i3*nz*_n2 + i2*nz + i1] = 0.5*vel[i3*nz*_n2 + i2*nz + i1+1] - 0.5*vel[i3*nz*_n2 + i2*nz + i1-1];
         }
       }
     }

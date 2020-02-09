@@ -1,8 +1,16 @@
-# Utility functions for processing data before 
-# inputting to a neural network
+"""
+Deep learning utility functions.
+Perform pre and post processing of training data
+Also some plotting utlities
+
+@author: Joseph Jennings
+@version: 2002.02.08
+"""
 import sys
 import numpy as np
 from scipy import interpolate
+import matplotlib.pyplot as plt
+from matplotlib import colors
 
 def normalize(img,eps=sys.float_info.epsilon):
   """ 
@@ -100,7 +108,26 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,pred,thresh=0.5,color='red'):
-  """ Plots a binary segmentation prediction on top of an image """
-  pass
+def plotseglabel(img,lbl,show=False,color='red',**kwargs):
+  """ Plots a binary label on top of an image """
+  assert(img.shape == lbl.shape),'Input image and label must be same size'
+  # Get mask
+  mask = np.ma.masked_where(lbl == 0, lbl)
+  # Select colormap
+  cmap = colors.ListedColormap(['red','white'])
+  fig = plt.figure(figsize=(kwargs.get('fsize1',8),kwargs.get('fsize2',6)))
+  ax = fig.add_subplot(111)
+  # Plot image
+  ax.imshow(img,cmap=kwargs.get('cmap','gray'),
+      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)])
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  ax.set_aspect(kwargs.get('aratio',1.0))
+  # Plot label
+  ax.imshow(mask,cmap=cmap)
+  if(show):
+    plt.show()
 
