@@ -19,7 +19,7 @@ class evntcre8 {
         float layerT, float layer_rand, float dev_layer, float dev_pos,
         int nzot, int *lyrot, float *velot);
     void fault(int nz, int *lyrin, float *velin, float *lblin, float azim, float begx, float begy, float begz, float dz, float daz,
-        float thetashift, float perpdie, float distdie, float thetadie, float dir,
+        float thetashift, float perpdie, float distdie, float thetadie, float dir, float scalethrw,
         int *lyrot, float *velot, float *olblot, float *nlblot);
     void squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
         float azim, float maxshift, float lambda, float rinline, float rxline,
@@ -47,6 +47,8 @@ class evntcre8 {
     void smooth(int n1, int n2, float *arr, int rect1, int rect2);
     void recForward (std::vector<float> &vec1, std::vector<float> &vec2, const int len);
     void recBackward(std::vector<float> &vec1, std::vector<float> &vec2, const int len);
+    /* Other functions */
+    void calcref(int nz, float *vel, float *ref);
 
   private:
     int _n2, _n3;
