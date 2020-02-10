@@ -6,7 +6,7 @@ from scaas.gradtaper import build_taper_ds
 from scipy.ndimage import gaussian_filter
 
 class mdlbuild:
-  """ 
+  """
   Builds random geologically feasible velocity models.
   Based on the syntheticModel code from Bob Clapp
 
@@ -31,11 +31,11 @@ class mdlbuild:
   def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,dev_pos=0.0,
               layer=23,layer_rand=0.3,dev_layer=0.26):
     """
-    Creates a deposition event in the geological model. 
-    
+    Creates a deposition event in the geological model.
+
     Parameters:
-      A general summary of the parameters. 
-      
+      A general summary of the parameters.
+
       Lateral variation:
       The band1-3 parameters basically are three parameters used
       to define a 3D bandpass filter which is applied to a cube of random numbers. The different
@@ -45,9 +45,9 @@ class mdlbuild:
 
       Vertical variation:
       The parameters layer,layer_rand and dev_layer dertermine the variation of the layering
-      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a 
+      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a
       fine tuning parameter
-      
+
       velval     - base value of velocity in the layer in m/s [1400]
       thick      - thickness of the layer in samples [30]
       band1      - bandpass parameter for axis 1 [0.4]
@@ -105,10 +105,10 @@ class mdlbuild:
       perp_die    - Controls the die off perpendicular to the fault
                     (e.g., if fault is visible in x, die off is in y).
                     Large number results in slower dieoff [0.5]
-      dist_die    - Controls the die off in the same plane of the fault 
+      dist_die    - Controls the die off in the same plane of the fault
                     (e.g., if fault is visible in x, die off is also in x)
                     Large number results in slower dieoff [0.3]
-      theta_die   - Controls the die off along the fault (essentially the throw). The larger 
+      theta_die   - Controls the die off along the fault (essentially the throw). The larger
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
       dirf        - Direction of fault movement [0.1]
@@ -634,7 +634,7 @@ class mdlbuild:
     """ Computes the reflectivity for the current velocity model """
     nz = self.vel.shape[2]
     ref = np.zeros(self.vel.shape,dtype='float32')
-    velsm = gaussian_filter(self.vel,sigma=0.8).astype('float32')
+    velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
     self.ec8.calcref(nz,velsm,ref)
     return ref
 
