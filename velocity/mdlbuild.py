@@ -636,7 +636,7 @@ class mdlbuild:
     """ Computes the reflectivity for the current velocity model """
     nz = self.vel.shape[2]
     ref = np.zeros(self.vel.shape,dtype='float32')
-    velsm = gaussian_filter(self.vel,sigma=0.8).astype('float32')
+    velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
     self.ec8.calcref(nz,velsm,ref)
     return ref
 
