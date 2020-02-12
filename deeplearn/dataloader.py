@@ -85,13 +85,19 @@ def load_alldata(trfile,vafile,dsize):
   for itr in range(ntr):
     for iex in range(dsize):
       allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
-      ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
+      if(len(yshape) == 3):
+        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
+      else:
+        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:,0]
       k += 1
   # Get all validation examples
   for iva in range(nva):
     for iex in range(dsize):
       allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
-      ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
+      if(len(yshape) == 3):
+        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
+      else:
+        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:,0]
       k += 1
   # Close the files
   hftr.close()
