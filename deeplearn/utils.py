@@ -114,7 +114,7 @@ def plotseglabel(img,lbl,show=False,color='red',**kwargs):
   # Get mask
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
-  cmap = colors.ListedColormap(['red','white'])
+  cmap = colors.ListedColormap([color,'white'])
   fig = plt.figure(figsize=(kwargs.get('fsize1',8),kwargs.get('fsize2',6)))
   ax = fig.add_subplot(111)
   # Plot image
