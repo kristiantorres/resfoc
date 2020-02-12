@@ -5,7 +5,7 @@ class velfltjob(job.pbsjob):
 
   def __init__(self,pars,jobname,parpath=".",logpath=".",user='joseph29',verb=False):
     # Inherit from job class
-    super(veljob,self).__init__(logpath,user,verb)
+    super(velfltjob,self).__init__(logpath,user,verb)
     # Create the par file for this job
     self.pfname = parpath + '/' + jobname + self.jobid + '.par'
     self.write_velfltpar(self.pfname,pars)

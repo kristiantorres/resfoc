@@ -8,11 +8,10 @@ override these parameters in the cluster arguments section
 @author: Joseph Jennings
 @version: 2020.02.09
 """
-
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-import cluster.velbuild as velbuild
+import cluster.velfltbuild as velfltbuild
 import cluster.pbshelper as pbs
 import time
 import subprocess
@@ -33,12 +32,14 @@ defaults = {
     "oz": 0.0,
     "dz": 12.5,
     "rect": 0.8,
+    "slcy": 100,
     "nmodels": 1,
     "prefix": "",
     "beg": 0,
     "end": 9999,
     "tjobs": 600,
     "ajobs": 200,
+    "nprocs": 8,
     "nsubmit": 5,
     "logpath": ".",
     "parpath": ".",
@@ -83,6 +84,7 @@ prcArgs = parser.add_argument_group("Velocity model processing")
 prcArgs.add_argument("-nzo",help="Ouput number of depth samples for interpolation [1000]",type=int)
 prcArgs.add_argument("-nxo",help="Ouput number of lateral samples for interpolation [1000]",type=int)
 prcArgs.add_argument("-rect",help="Window radius for smoother [0.8]",type=float)
+prcArgs.add_argument("-slcy",help="Index at which to slice the velocity model in y [100]",type=int)
 # Other arguments
 othArgs = parser.add_argument_group('Other parameters')
 othArgs.add_argument("-verb",help="Verbosity flag [y]",type=str)
@@ -90,6 +92,7 @@ othArgs.add_argument("-verb",help="Verbosity flag [y]",type=str)
 cluArgs = parser.add_argument_group('Cluster parameters')
 cluArgs.add_argument("-tjobs",help="Total number of jobs to run [600]",type=int)
 cluArgs.add_argument("-ajobs",help="Number of jobs either in queue or running at once [200]",type=int)
+cluArgs.add_argument("-nprocs",help="Number of processors to use per node [8]",type=int)
 cluArgs.add_argument("-nsubmit",help="Number of times to attempt a job submission [5]",type=int)
 cluArgs.add_argument("-logpath",help="Path to logfile [current directory]",type=str)
 cluArgs.add_argument("-parpath",help="Path to parfile [current directory]",type=str)
@@ -105,6 +108,7 @@ sep = seppy.sep(sys.argv)
 
 # Get command line arguments
 tjobs = args.tjobs; ajobs = args.ajobs
+nprocs = args.nprocs
 nmodels = args.nmodels
 logpath = args.logpath; parpath = args.parpath
 jobprefix = args.jobprefix
@@ -126,10 +130,10 @@ for ijob in range(tjobs):
   if(ijob < ajobs):
     # Create job
     args.beg += nmodels
-    actjobs.append(velbuild.veljob(args,jobprefix,parpath,logpath,verb=verb))
+    actjobs.append(velfltbuild.velfltjob(args,jobprefix,parpath,logpath,verb=verb))
     # Submit job
     cmd = bcmd + actjobs[ijob].pfname
-    actjobs[ijob].submit(jobprefix,cmd,nprocs=16,queue=squeue,sleep=3.0)
+    actjobs[ijob].submit(jobprefix,cmd,nprocs=nprocs,queue=squeue,sleep=0.5)
     # Get the status of the queues
     qlines = pbs.qstat()
     sepq = pbs.get_numjobs('sep',qfile=qlines)
@@ -140,27 +144,27 @@ for ijob in range(tjobs):
     if(sepq['Q'] >= 2):
       squeue = 'default'
       sepqfull = True
-    elif(defq['Q'] >= 2):
+    if(defq['Q'] >= 2):
       ajobs = sepq['R'] + defq['R']
       defqfull = True
     if(verb): print("Job=%d %s"%(ijob, actjobs[ijob].jobid))
   else:
     # Leftover jobs, to be submitted
     args.beg += nmodels
-    lefjobs.append(velbuild.veljob(args,jobprefix,parpath,logpath,verb=verb))
+    lefjobs.append(velfltbuild.velfltjob(args,jobprefix,parpath,logpath,verb=verb))
 
 if(verb): print("%d jobs submitted, %d jobs waiting. Managing jobs now...\n"%(len(actjobs),len(lefjobs)))
 
 # Loop until all jobs have completed
 while len(actjobs) > 0:
   todel = []
-  # First update qstat and squeue
-  qlines = pbs.qstat(); qqueue = pbs.squeue()
+  # First update qstat
+  qlines = pbs.qstat()
   sepq = pbs.get_numjobs('sep',qfile=qlines)
   defq = pbs.get_numjobs('default',qfile=qlines)
   # Check the status of each job
   for ijob in range(len(actjobs)):
-    actjobs[ijob].getstatus_fast(qlines,qqueue)
+    actjobs[ijob].getstatus_fast(qlines)
     if(verb):
       print("Job=%d %s sep: %s %s default: %s %s"%(ijob, actjobs[ijob].jobid,
         actjobs[ijob].status['sep'],     actjobs[ijob].nodes['sep'],
@@ -169,11 +173,11 @@ while len(actjobs) > 0:
       # Resubmit if None and None
       if(sepq['Q'] < nleft):
         cmd = bcmd + actjobs[ijob].pfname
-        actjobs[ijob].submit(jobprefix,cmd,nprocs=16,queue='sep',sleep=2.5)
+        actjobs[ijob].submit(jobprefix,cmd,nprocs=nprocs,queue='sep',sleep=0.5)
         if(verb): print("Resubmitting stale Job=%d %s to queue sep..."%(ijob,actjobs[ijob].jobid))
       elif(defq['Q'] < nleft):
         cmd = bcmd + actjobs[ijob].pfname
-        actjobs[ijob].submit(jobprefix,cmd,nprocs=16,queue='default',sleep=2.5)
+        actjobs[ijob].submit(jobprefix,cmd,nprocs=nprocs,queue='default',sleep=0.5)
         if(verb): print("Resubmitting stale Job=%d %s to queue default..."%(ijob,actjobs[ijob].jobid))
       todel.append(False)
     if('C' in actjobs[ijob].status.values()):
@@ -189,11 +193,11 @@ while len(actjobs) > 0:
           print("Job=%d %s failed %d times on node %s"%(ijob, actjobs[ijob].jobid, actjobs[ijob].nsub, actjobs[ijob].nodes[myqueue]))
         if(sepq['Q'] < nleft):
           cmd = bcmd + actjobs[ijob].pfname
-          actjobs[ijob].submit(jobprefix,cmd,nprocs=16,queue='sep',sleep=2.5)
+          actjobs[ijob].submit(jobprefix,cmd,nprocs=nprocs,queue='sep',sleep=0.5)
           if(verb): print("Resubmitting failed Job=%d %s to queue sep..."%(ijob,actjobs[ijob].jobid))
         elif(defq['Q'] < nleft):
           cmd = bcmd + actjobs[ijob].pfname
-          actjobs[ijob].submit(jobprefix,cmd,nprocs=16,queue='default',sleep=2.5)
+          actjobs[ijob].submit(jobprefix,cmd,nprocs=nprocs,queue='default',sleep=0.5)
           if(verb): print("Resubmitting failed Job=%d %s to queue default..."%(ijob,actjobs[ijob].jobid))
         todel.append(False)
       else:
@@ -220,12 +224,12 @@ while len(actjobs) > 0:
     cmd = bcmd + lefjobs[0].pfname
     # Don't submit to a queue that is full
     if(sepq['Q'] < 2):
-      lefjobs[0].submit(jobprefix,cmd,nprocs=16,queue='sep',sleep=2.5)
+      lefjobs[0].submit(jobprefix,cmd,nprocs=nprocs,queue='sep',sleep=0.5)
       actjobs.append(lefjobs[0])
       if(verb): print("Submitting waiting Job %s to sep queue..."%(lefjobs[0].jobid))
       del lefjobs[0]
     elif(defq['Q'] < 2):
-      lefjobs[0].submit(jobprefix,cmd,nprocs=16,queue='default',sleep=2.5)
+      lefjobs[0].submit(jobprefix,cmd,nprocs=nprocs,queue='default',sleep=0.5)
       actjobs.append(lefjobs[0])
       if(verb): print("Submitting waiting Job %s to default queue..."%(lefjobs[0].jobid))
       del lefjobs[0]
@@ -238,7 +242,7 @@ while len(actjobs) > 0:
   if(sepqfull and sepq['Q'] < nleft and len(lefjobs) > 0):
     for ijob in range(nleft - sepq['Q'] - 1):
       cmd = bcmd + lefjobs[0].pfname
-      lefjobs[0].submit(jobprefix,cmd,nprocs=16,queue='sep',sleep=2.5)
+      lefjobs[0].submit(jobprefix,cmd,nprocs=nprocs,queue='sep',sleep=0.5)
       actjobs.append(lefjobs[0])
       if(verb): print("Submitting waiting Job %s in sep for queuing..."%(lefjobs[0].jobid))
       del lefjobs[0]
@@ -246,7 +250,7 @@ while len(actjobs) > 0:
   if(defqfull and defq['Q'] < nleft and len(lefjobs) > 0):
     for ijob in range(nleft - defq['Q'] - 1):
       cmd = bcmd + lefjobs[0].pfname
-      lefjobs[0].submit(jobprefix,cmd,nprocs=16,queue='default',sleep=2.5)
+      lefjobs[0].submit(jobprefix,cmd,nprocs=nprocs,queue='default',sleep=0.5)
       actjobs.append(lefjobs[0])
       if(verb): print("Submitting waiting Job %s in default for queuing..."%(lefjobs[0].jobid))
       del lefjobs[0]

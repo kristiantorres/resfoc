@@ -133,7 +133,7 @@ cd $PBS_O_WORKDIR
         self.status[attrs[2]] = attrs[9]
         # Get the time elapsed
         if(attrs[9] == 'R'):
-          self.times[attrs[2]] = self.toseconds(attrs[-1])
+          self.times[attrs[2]] = self.toseconds(attrs[10])
           self.nodes[attrs[2]] = attrs[-1][:6]
 
     return self.status

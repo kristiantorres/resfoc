@@ -5,7 +5,7 @@ datapath=/data/sep/joseph29/scratch/velflts
 beg=0
 end=9999
 prefix=
-nmodels=10
+nmodels=1
 # Velocity model
 nx=1000
 ox=0.0
@@ -24,8 +24,8 @@ slcy=100
 # Other
 verb=y
 # Cluster arguments
-tjobs=1000
-ajobs=100
+tjobs=10
+ajobs=10
 nprocs=8
 nsubmit=5
 logpath=./log/velflts
