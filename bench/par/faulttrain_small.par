@@ -1,0 +1,18 @@
+[defaults]
+# IO
+trdat=/net/fantastic/scr2/joseph29/fltclass.h5
+vadat=
+wgtout=./dat/networks/qtest10000.h5
+arcout=./dat/networks/qtest10000.json
+# Training parameters
+lr=0.001
+bsize=20
+nepochs=20
+# CNN design parameters
+nflts=32
+fltsize=5
+unet=y
+drpout=0.0
+# Other
+verb=y
+gpus=6
