@@ -131,7 +131,6 @@ class mdlbuild:
                    azim,begx,begy,begz,dz,daz,
                    theta_shift,perp_die,dist_die,theta_die,dirf,throwsc,
                    lyrot,velot,lblto,lbltn)
-   # plt.imshow(lbltn[100,:,:].T,cmap='jet'); plt.show()
     # Update old label with shifted version
     self.lbl = lblto
     # Update layer and velocity models
