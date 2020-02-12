@@ -29,8 +29,8 @@ void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, in
           velot[i3*nzot*_n2 + i2*nzot + i1 + itop] = velin[i3*nzin*_n2 + i2*nzin + i1];
         }
         for (int i1 = 0; i1 < ibot; ++i1) {
-          lyrot[i3*nzot*_n2 + i2*nzot + i1 + nzot + itop] = -1;
-          velot[i3*nzot*_n2 + i2*nzot + i1 + nzot + itop] = -1.0;
+          lyrot[i3*nzot*_n2 + i2*nzot + i1 + nzin + itop] = -1;
+          velot[i3*nzot*_n2 + i2*nzot + i1 + nzin + itop] = -1.0;
         }
       }
     }
@@ -104,9 +104,9 @@ void evntcre8::deposit(float vel,
   delete[] vtmp;
 }
 
-void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, float begy, float begz, float dz, float daz,
-    float thetashift, float perpdie, float distdie, float thetadie, float dir,
-    int *lyrot, float *velot, float *lblot) {
+void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim, float begx, float begy, float begz, float dz, float daz,
+    float thetashift, float perpdie, float distdie, float thetadie, float dir, float scalethrw,
+    int *lyrot, float *velot, float *olblot, float *nlblot) {
 
   float dst1 = nz*_d1;
   float dst2 = _n2*_d2;
@@ -150,12 +150,15 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
   /* Compute shifts */
   for (int i3 = 0; i3 < _n3; i3++) {
+    // Y component of distance from center
     float p3 = _d3 * i3 - ycenter;
     for (int i2 = 0; i2 < _n2; i2++) {
+      // X component of distance from center
       float p2 = _d2 * i2 - xcenter;
 
       // Rotate coordinate x,y to along azimuth and perpendicular
-      float azP = naz1 * p2 - naz2 * p3;
+      // Applies rotation here to rotate into the desired azimuth
+      float azP   =  naz1   * p2 - naz2   * p3;
       float perpP = -nperp1 * p2 + nperp2 * p3;
 
       // Ratio die off along azimuth in 2D
@@ -174,7 +177,8 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
       if (fabsf(ratioPerp) < 1.) {
         for (int i1 = 0; i1 < nz; i1++) {
-          float p1 = _d1 * i1 - zcenter;  // Distance away in z
+          // Z component of distance from center
+          float p1 = _d1 * i1 - zcenter;
 
           // Theta of our current point
           float thetaOld = atan2f(p1, azP) * 180. / pi;
@@ -187,8 +191,14 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           ratioAz = fabsf(fullRadius - radius) / distdie;
           float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
 
-          if (ratioAz < 1. && ratioTheta < 1.) {
-            float scaleAz = 1. - ratioAz;
+          // Compute distance from xbeg, ybeg and zbeg
+          float diffx = xbeg - (p2 + xcenter);
+          float diffy = ybeg - (p3 + ycenter);
+          float diffz = zbeg - (p1 + zcenter);
+          float distbeg = sqrtf(diffx*diffx + diffy*diffy + diffz*diffz);
+
+          if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
+            float scaleAz    = 1. - ratioAz;
             float scaleTheta = 1. - ratioTheta;
 
             // Shift in theta
@@ -200,17 +210,20 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
               thetaNew = thetaOld - shiftTheta;
 
             // Convert to polar coordinates
-            float dPR = radius * cosf(thetaNew * pi / 180.);
+            float dPR  = radius * cosf(thetaNew * pi / 180.);
             float newZ = radius * sinf(thetaNew * pi / 180.) + zcenter;
 
             // Now rotate back to standard coordinate system
-            float newX = naz1 * dPR + naz2 * perpP + xcenter;
+            float newX = naz1   * dPR + naz2   * perpP + xcenter;
             float newY = nperp1 * dPR + nperp2 * perpP + ycenter;
 
-            shiftz[i3*nz*_n2 + i2*nz + i1] = newZ - (_d1 * i1);
-            lblot[i3*nz*_n2 + i2*nz + i1]  = shiftz[i3*nz*_n2 + i2*nz + i1]; // Save label
+            // Compute shifts to be applied
+            shiftz[i3*nz*_n2 + i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
             shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
             shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
+
+            // Save new label out
+            nlblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
         bool found = false;
@@ -224,7 +237,6 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
         if (found) {
           for (int i = 0; i <= i1; i++) {
             shiftz[i3*nz*_n2 + i2*nz + i] = shiftz[i3*nz*_n2 + i2*nz + i1];
-            //lblot[i3*nz*_n2 + i2*nz + i]  = shiftz[i3*nz*_n2 + i2*nz + i1];
           }
         }
       }
@@ -245,12 +257,14 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
           if (l2 >= _n2) l2 = _n2 - 1;
           if (l3 >= _n3) l3 = _n3 - 1;
           if (l1 >= 0) {
-            lyrot[i3*nz*_n2 + i2*nz + i1] = lyrin[l3*nz*_n2 + l2*nz + l1];
-            velot[i3*nz*_n2 + i2*nz + i1] = velin[l3*nz*_n2 + l2*nz + l1];
+            lyrot [i3*nz*_n2 + i2*nz + i1] = lyrin[l3*nz*_n2 + l2*nz + l1];
+            velot [i3*nz*_n2 + i2*nz + i1] = velin[l3*nz*_n2 + l2*nz + l1];
+            olblot[i3*nz*_n2 + i2*nz + i1] = lblin[l3*nz*_n2 + l2*nz + l1];
           }
           else {
-            lyrot[i3*nz*_n2 + i2*nz + i1] = -1;
-            velot[i3*nz*_n2 + i2*nz + i1] =  0;
+            lyrot [i3*nz*_n2 + i2*nz + i1] = -1;
+            velot [i3*nz*_n2 + i2*nz + i1] =  0;
+            olblot[i3*nz*_n2 + i2*nz + i1] =  0;
           }
         }
       }
@@ -262,6 +276,147 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float azim, float begx, f
 
 }
 
+void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
+    float azim, float maxshift, float lambda, float rinline, float rxline,
+    int nzot, int *lyrot, float *velot) {
+
+  /* Compute model lengths */
+  float dst2 = _d2 * _n2;
+  float dst3 = _d3 * _n3;
+
+  /* Allocate shift and dist arrays */
+  int nn = std::max(_n2, _n3) * 3;
+  float *shift = new float[nn*nn]();
+  float *dist  = new float[nn*nn]();
+
+  // Maximum shift in samples (nzot should be nzin + 2*iMaxShift)
+  int iMaxShift = maxshift / _d1;
+  if(nzot != nz + 2*iMaxShift) {
+    fprintf(stderr,"squish: Ouptut nz must be nzin + 2*maxshift/dz\n");
+    exit(EXIT_FAILURE);
+  }
+
+  float wavelength = std::max(dst2, dst3)*lambda;
+
+  /* Use cosine to compute the shift action */
+  if(mode == 0) {
+    /* Compute shift and dist arrays */
+    float w[] = {1.2, 5., 1.9, 2.4, 3.8, 1.4, 4.2, 3.1, 3.4, 2.0};
+    std::vector<float> wv(w, w + sizeof(w) / sizeof(float));
+    for (auto a = wv.begin(); a != wv.end(); ++a) *a *= wavelength;
+    float pi = atan(1.) * 4;
+    for (int i2 = 0; i2 < nn; i2++) {
+      for (int i1 = 0; i1 < nn; i1++) {
+        shift[i2*nn + i1] = cosf(_d2 / wavelength * pi * i2);
+      }
+    }
+
+    /* Add some randomness to shift */
+    std::vector<float> rands(20);
+    for (int i = 0; i < 20; i++) {
+      rands[i] = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - .5) * 2.;
+    }
+
+    float mxv = 0;
+    for (int iw = 0; iw < 10; iw++) {
+      float d2 = 0;
+      for (int i3 = 0; i3 < nn; i3++) {
+        float dd = cosf(d2 / wv[iw] * pi) * rands[10 + iw] * rxline;
+        float d = 0;
+        for (int i2 = 0; i2 < nn; i2++) {
+          shift[i3*nn + i2] += dd * cosf(d / wv[iw] * pi) * rands[iw] * rinline;
+
+          if (iw == 9) mxv = std::max(mxv, fabsf(shift[i3*nn + i2]));
+          d += _d2;
+        }
+      }
+    }
+
+    /* Scale by max shift */
+    for (int i3 = 0; i3 < nn; i3++) {
+      for (int i2 = 0; i2 < nn; i2++) {
+        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
+      }
+    }
+
+  } else{
+    /* Copy input shift function */
+    memcpy(shift,shftin,sizeof(float)*nn*nn);
+  }
+
+
+  /* Rotate shift into azimuth */
+  float *shiftrot = new float[_n2*_n3]();
+  float *distrot  = new float[_n2*_n3]();
+
+  float cs = cosf(azim * atan(1.) / 45.);
+  float sn = sinf(azim * atan(1.) / 45.);
+
+  rotate_array(cs, sn, nn, shift, _n2, _d2, _n3, _d3, shiftrot);
+  if(mode == 0) {
+    calcshift_fastaxis(nn, _d2, shift, dist);
+    rotate_array(cs, sn, nn, dist , _n2, _d2, _n3, _d3, distrot );
+  }
+
+  /* Create top and bottom arrays */
+  float *top = new float[_n2*_n3]();
+  float *bot = new float[_n2*_n3]();
+
+  /* Apply random shifts for cosine mode */
+  if(mode == 0) {
+    fill_random(_n2, _n3, top);
+    fill_random(_n2, _n3, bot);
+    for(int k = 0; k < 3; ++k) {
+      smooth(_n2, _n3, top, 25, 25);
+      smooth(_n2, _n3, bot, 25, 25);
+    }
+    scale(_n2, _n3, top, 0.45); scale(_n2, _n3, bot, 0.45);
+    add  (_n2, _n3, top, 0.55); add  (_n2, _n3, bot, 0.55);
+  }
+
+  /* Apply shifts */
+  for (int i3 = 0; i3 < _n3; i3++) {
+    for (int i2 = 0; i2 < _n2; i2++) {
+      int ib = std::min(std::max(i3 + (int)(sn * shiftrot[i3*_n2 + i2] / _d3), 0), _n3 - 1);
+      int ia = std::min(std::max(i2 + (int)(cs * shiftrot[i3*_n2 + i2] / _d3), 0), _n2 - 1);
+
+      int i1 = shiftrot[i3*_n2 + i2] / _d1; // Rotated shift to be applied
+      int ibeg = iMaxShift + i1;            // Loop up to maximum shift
+      for (int i = 0; i < ibeg; i++) {
+        lyrot[i3*nzot*_n2 + i2*nzot + i] = -1;
+        velot[i3*nzot*_n2 + i2*nzot + i] = -1;
+      }
+
+      for (i1 = 0; i1 < nz; i1++) {
+        float f2 = (float)(i1 - 1) / (float)nz;
+        float f3 = top[i3*_n2 + i2]*(1.-f2) + f2 * bot[i3*_n2 + i2];
+
+        f3 *= distrot[i3*_n2 + i2];
+
+        int ix = i1 - (int)(f3 / _d1);
+
+        if (ix < 1) {
+          lyrot[i3*nzot*_n2 + i2*nzot + ibeg+i1] = -1;
+          velot[i3*nzot*_n2 + i2*nzot + ibeg+i1] = -1;
+        } else {
+          ix = std::min(ix, nz - 1);
+          lyrot[i3*nzot*_n2 + i2*nzot + ibeg+i1] = lyrin[i3*nz*_n2 + i2*nz + ix];
+          velot[i3*nzot*_n2 + i2*nzot + ibeg+i1] = velin[i3*nz*_n2 + i2*nz + ix];
+        }
+      }
+      for (int i1 = nz + ibeg; i1 < nzot; i1++) {
+        lyrot[i3*nzot*_n2 + i2*nzot + i1] = lyrin[ib*nz*_n2 + ia*nz + nz-1];
+        velot[i3*nzot*_n2 + i2*nzot + i1] = velin[ib*nz*_n2 + ia*nz + nz-1];
+      }
+    }
+  }
+
+  /* Free memory */
+  delete[] shift;    delete[] dist;
+  delete[] shiftrot; delete[] distrot;
+  delete[] top;      delete[] bot;
+
+}
 
 int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
   int mx = tbb::parallel_reduce(
@@ -281,6 +436,19 @@ int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
     return b;
   });
   return mx + 1;
+}
+
+void evntcre8::fill_random(int n1, int n2, float *velin) {
+  tbb::parallel_for(
+      tbb::blocked_range<size_t>(0, n2),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i2 = r.begin(); i2 != r.end(); ++i2) {
+      for (int i1 = 0; i1 < n1; ++i1) {
+        velin[i2*n1 + i1] = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) - 0.5;
+      }
+    }
+  });
+
 }
 
 void evntcre8::fill_random(int n1, int n2, int n3, float *velin) {
@@ -425,6 +593,28 @@ void evntcre8::scale(int n1, int n2, int n3, float *arr, float sc) {
   });
 }
 
+void evntcre8::scale(int n1, int n2, float *arr, float sc) {
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, n2),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i2 = r.begin(); i2 != r.end(); ++i2) {
+      for (int i1 = 0; i1 < n1; i1++) {
+        arr[i2*n1 + i1] *= sc;
+      }
+    }
+  });
+}
+
+void evntcre8::add(int n1, int n2, float *arr, float ad) {
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, n2),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i2 = r.begin(); i2 != r.end(); ++i2) {
+      for (int i1 = 0; i1 < n1; i1++) {
+        arr[i2*n1 + i1] += ad;
+      }
+    }
+  });
+}
+
 void evntcre8::norm(int n1, int n2, int n3, float *arr, float sc) {
   float mx = find_absmax(n1,n2,n3,arr);
   scale(n1,n2,n3,arr,sc/mx);
@@ -449,6 +639,25 @@ void evntcre8::zder(int nz, float *lblin, float *lblot) {
 
 }
 
+void evntcre8::calcref(int nz, float *vel, float *ref) {
+
+  for(int i3 = 0; i3 < _n3; ++i3) {
+    for(int i2 = 0; i2 < _n2; ++i2) {
+      for(int i1 = 0; i1 < nz; ++i1) {
+        /* One-sided derivatives at the ends */
+        if(i1 == 0) {
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+1] - vel[i3*nz*_n2 + i2*nz + i1-0];
+        } else if(i1 == nz-1) {
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+0] - vel[i3*nz*_n2 + i2*nz + i1-1];
+        } else {
+          ref[i3*nz*_n2 + i2*nz + i1] = 0.5*vel[i3*nz*_n2 + i2*nz + i1+1] - 0.5*vel[i3*nz*_n2 + i2*nz + i1-1];
+        }
+      }
+    }
+  }
+
+}
+
 void evntcre8::laplacian(int nz, float *lblin, float *lblot) {
 
   for(int i3 = 1; i3 < _n3-1; ++i3) {
@@ -460,6 +669,142 @@ void evntcre8::laplacian(int nz, float *lblin, float *lblot) {
             lblin[(i3  )*nz*_n2 + (i2  )*nz + i1-1] +  lblin[(i3  )*nz*_n2 + (i2  )*nz + i1+1];
       }
     }
+  }
+
+}
+
+void evntcre8::calcshift_fastaxis(int nn, float d2, float *shift, float *dist) {
+
+  int center2 = nn / 2 * d2;
+  float *bb = new float[nn*nn]();
+  for (int i3 = 0; i3 < nn; i3++) {
+    float d = 0;
+    for (int i2 = 0; i2 < nn - 1; i2++) {
+      d += d2 / cosf(atanf( (shift[i3*nn + i2+1] - shift[i3*nn + i2]) / d2 ));
+      bb[i3*nn + i2] = d;
+    }
+    d += d2 / cosf(atanf( (shift[i3*nn + nn-1] - shift[i3*nn + nn-2]) / d2 ));
+    bb[i3*nn + nn-1] = d;
+  }
+
+  for (int i3 = 0; i3 < nn; i3++) {
+    float dd = bb[i3*nn + nn/2];
+    float d  = 0;
+    for (int i2 = 0; i2 < nn; i2++) {
+      d += d2;
+      dist[i3*nn + i2] = bb[i3*nn + i2] - dd + center2 - d;
+    }
+  }
+
+  delete[] bb;
+
+}
+
+void evntcre8::rotate_array(float cs, float sn, int nn, float *shift, int n2, float d2, int n3, float d3, float *shiftrot) {
+
+  tbb::parallel_for(
+      tbb::blocked_range<int>(0, _n3), [&](const tbb::blocked_range<int>& r) {
+    for (int i3 = r.begin(); i3 != r.end(); ++i3) {
+      float p3 = ((float)(i3 - _n3) / 2.) * _d3;
+      for (int i2 = 0; i2 < _n2; i2++) {
+        float p2 = (i2 - _n2 / 2) * _d2;
+        /* Multiply with rotation matrix */
+        float d  = cs * p2 - sn * p3;
+        float d2 = sn * p2 + cs * p3;
+        /* Linear interpolation */
+        float f2 = d  / _d2 + nn / 2;
+        float f3 = d2 / _d2 + nn / 2;
+        int ia = f2;
+        int ib = f3;
+        f2 -= ia;
+        f3 -= ib;
+
+        if (ib >= 0 && ib < nn - 1 && ia >= 0 && ia < nn - 1) {
+          shiftrot[i3*n2 + i2] = (1.-f2)*(1.-f3)*shift[ib*nn + ia] + (1.-f2)*f3*shift[ib*nn + ia+1] +
+              f2*(1.-f3)*shift[ib*nn + ia+1] + f2*f3*shift[(ib+1)*nn + ia+1];
+        } else
+          shiftrot[i3*n2 + i2] = 0;
+      }
+    }
+  });
+}
+
+void evntcre8::smooth(int n1, int n2, float *arr, int len1, int len2) {
+
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, n2),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i2 = r.begin(); i2 != r.end(); ++i2) {
+      std::vector<float> vec1(2 * len1 + n1, 0.), vec2(2 * len1 + n1, 0.);
+
+      for (int i1 = 0; i1 < n1; i1++) {
+        vec1[i1 + len1] = arr[i2*n1 + i1];
+      }
+
+      recForward(vec1, vec2, len1);
+      recBackward(vec2, vec1, len1);
+
+      for (int i1 = 0; i1 < n1; i1++) {
+        arr[i2*n1 + i1] = vec1[i1 + len1];
+      }
+    }
+
+  });
+
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, n1),
+      [&](const tbb::blocked_range<size_t>& r) {
+    for (size_t i1 = r.begin(); i1 != r.end(); ++i1) {
+      std::vector<float> vec1(2 * len2 + n2, 0.), vec2(2 * len2 + n2, 0.);
+
+      for (int i2 = 0; i2 < n2; i2++) {
+        vec1[i2 + len2] = arr[i2*n1 + i1];
+      }
+
+      recForward(vec1, vec2, len2);
+      recBackward(vec2, vec1, len2);
+
+      for (int i2 = 0; i2 < n2; i2++) {
+        arr[i2*n1 + i1] = vec1[i2 + len2];
+      }
+    }
+  });
+}
+
+void evntcre8::recForward(std::vector<float>& vecIn, std::vector<float>& vecOut, const int len) {
+  float t = 0;
+  float mul = 1. / (float)(2 * len + 1.);
+
+  for (int i = 0; i < len; i++) {
+    vecIn[i] = vecIn[len];
+    vecIn[vecIn.size() - i - 1] = vecIn[vecIn.size() - 1 - len];
+  }
+
+  for (int i = 0; i < 2 * len; i++) t += vecIn[i];
+  size_t n = vecIn.size() - 2 * len;
+
+  for (size_t i = 0; i < n; i++) {
+    t += vecIn[i + 2 * len];
+    vecOut[i + len] = t * mul;
+    t -= vecIn[i];
+  }
+
+}
+
+void evntcre8::recBackward(std::vector<float>& vecIn, std::vector<float>& vecOut, const int len) {
+  float t = 0;
+  float mul = 1. / (float)(2 * len + 1.);
+
+  for (int i = 0; i < len; i++) {
+    vecIn[i] = vecIn[len];
+    vecIn[vecIn.size() - i - 1] = vecIn[vecIn.size() - 1 - len];
+  }
+
+  for (int i = 0; i < 2 * len; i++) t += vecIn[vecIn.size() - 2 * len + i];
+  size_t n = vecIn.size() - 2 * len;
+
+  for (int i = n - 1; i >= 0; i--) {
+    t += vecIn[i];
+    vecOut[i + len] = t * mul;
+    t -= vecIn[i + 2 * len];
   }
 
 }
