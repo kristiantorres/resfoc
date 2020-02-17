@@ -594,7 +594,7 @@ class mdlbuild:
     Parameters:
       nlyrs - number of layers to squish
       ntot  - total number of layers to be deposited
-      mindist - minimum distance between lay
+      mindist - minimum distance between layers
     """
     # Get the first layer
     sqlyrs = []

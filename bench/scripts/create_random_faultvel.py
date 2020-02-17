@@ -201,16 +201,19 @@ for imodel in range(nmodels):
     nze = dlut.normalize(bandpass(np.random.rand(nz,nx)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
     imgs[:,:,imodel] = img + nze
   else:
-    vels[:,:,imodel] = dlut.resample(mb.vel[slcy,:,:nz],[nxo,nzo],kind='linear')
-    lbls[:,:,imodel] = dlut.resample(mb.get_label()[slcy,:,:nz],[nxo,nzo],kind='linear')
-    refs[:,:,imodel] = dlut.resample(mb.get_refl()[slcy,:,:nz].T,[nxo,nzo],kind='linear')
+    velsm = gaussian_filter(mb.vel[slcy,:,:nz],sigma=0.5)
+    vels[:,:,imodel] = dlut.resample(velsm,[nxo,nzo],kind='linear').astype('float32').T
+    lbls[:,:,imodel] = dlut.thresh(dlut.resample(mb.get_label()[slcy,:,:nz],[nxo,nzo],kind='linear'),0.0).T
+    ref = mb.get_refl()[slcy,:,:nz]
+    refs[:,:,imodel] = dlut.resample(ref,[nxo,nzo],kind='linear').T
     # Create normalized image
     f = rndut.randfloat(minf,maxf)
     wav = ricker(nt,dt,f,amp,dly)
-    img = dlut.normalize(np.array([np.convolve(refs[:,ix,imodel],wav) for ix in range(nx)])[:,ns:1000+ns].T)
+    img = np.array([np.convolve(ref[ix,:],wav) for ix in range(nx)])[:,ns:1000+ns]
+    imgo = dlut.normalize(dlut.resample(img,[nxo,nzo],kind='linear')).T
     # Create noise
     nze = dlut.normalize(bandpass(np.random.rand(nzo,nxo)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
-    imgs[:,:,imodel] = img + nze
+    imgs[:,:,imodel] = imgo + nze
 
 # Write the velocity model and the label
 maxes = seppy.axes([nz,nx,nmodels],[0.0,0.0,0.0],[dz,dx,1.0])
