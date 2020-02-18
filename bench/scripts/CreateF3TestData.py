@@ -97,7 +97,7 @@ hf = h5py.File(sep.get_fname("out"),'w')
 nxo = args.nxo; nto = args.nto
 dout = np.zeros([nto,nxo,ny])
 k = 0
-for iy in progressbar(range(ny), "xline: "):
+for iy in progressbar(range(ny), "xline"):
   dout[:,:,k] = (dlut.resample(datawind[iy,:,:],[nxo,nto],kind='cubic')).T
   # Extract the patches
   iptch = pe.extract(dout[:,:,k])
