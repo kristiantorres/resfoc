@@ -32,7 +32,7 @@ defaults = {
     "verb": "y",
     "lr": 0.001,
     "nepochs": 10,
-    "classwgt": 0.5,
+    "classwgt1": 0.5,
     "nflts": 32,
     "fltsize": 5,
     "unet": "y",
@@ -62,7 +62,7 @@ trainArgs = parser.add_argument_group('Training parameters')
 trainArgs.add_argument('-lr',help='Learning rate [0.001]',type=float)
 trainArgs.add_argument('-bsize',help='Batch size [20]',type=int)
 trainArgs.add_argument('-nepochs',help='Number of passes over training data [10]',type=int)
-trainArgs.add_argument('-classwgt',help='Class weight to balance cross entropy loss [0.5]',type=float)
+trainArgs.add_argument('-classwgt1',help='Class weight to balance cross entropy loss [0.5]',type=float)
 netargs = parser.add_argument_group('CNN design parameters')
 netargs.add_argument('-nflts',help='Number of filters that will be created after first conv [32]',type=int)
 netargs.add_argument('-fltsize', help='Size of square convolutional filter [5]',type=int)
@@ -107,7 +107,7 @@ opt = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=Fal
 
 # Compile the model
 #model.compile( loss='binary_crossentropy', optimizer=opt )
-model.compile( loss=wgtbce(args.classwgt), optimizer=opt , metrics=['accuracy'] )
+model.compile( loss=wgtbce(args.classwgt1), optimizer=opt , metrics=['accuracy'] )
 
 # Set GPUs
 tf.compat.v1.GPUOptions(allow_growth=True)

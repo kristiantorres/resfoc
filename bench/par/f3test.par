@@ -1,0 +1,11 @@
+[defaults]
+# IO
+tsdat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+vadat=
+wgtin=./dat/networks/fltclass-gpu20ep.h5
+arcin=./dat/networks/fltclass-gpu20ep.json
+# Data parameters
+bsize=105
+# Other
+verb=y
+gpus=5
