@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 import random
 import subprocess
+from utils.ptyprint import progressbar
 
 class resmig_generator_h5(Sequence):
 
@@ -44,7 +45,7 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
     idxs = random.sample(choices,nf1)
   else:
     idxs = list(range(nf1))
-  for idx in range(nb):
+  for idx in progressbar(range(nb), "nbatches"):
     if idx in idxs:
       hfin.copy(keys[idx],hf1)
       hfin.copy(keys[idx+nb],hf1)
@@ -82,7 +83,7 @@ def load_alldata(trfile,vafile,dsize):
   ally = np.zeros([(ntr+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
   k = 0
   # Get all training examples
-  for itr in range(ntr):
+  for itr in progressbar(range(ntr), "numtr"):
     for iex in range(dsize):
       allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
       if(len(yshape) == 3):
@@ -91,7 +92,7 @@ def load_alldata(trfile,vafile,dsize):
         ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:,0]
       k += 1
   # Get all validation examples
-  for iva in range(nva):
+  for iva in progressbar(range(nva), "numva"):
     for iex in range(dsize):
       allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
       if(len(yshape) == 3):

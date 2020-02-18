@@ -11,7 +11,7 @@ out the model architecture as well as the model weights
 and biases which can then be used subsequently for validation/testing.
 
 @author: Joseph Jennings
-@version: 2020.02.17
+@version: 2020.02.10
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
@@ -37,7 +37,6 @@ defaults = {
     "fltsize": 5,
     "unet": "y",
     "drpout": 0.0,
-    "gpus": []
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -62,7 +61,7 @@ trainArgs = parser.add_argument_group('Training parameters')
 trainArgs.add_argument('-lr',help='Learning rate [0.001]',type=float)
 trainArgs.add_argument('-bsize',help='Batch size [20]',type=int)
 trainArgs.add_argument('-nepochs',help='Number of passes over training data [10]',type=int)
-trainArgs.add_argument('-classwgt',help='Class weight to balance cross entropy loss [0.5]',type=float)
+trainArgs.add_argument('-classwgt',help='Class weight for the weighted cross entropy loss [0.5]',type=float)
 netargs = parser.add_argument_group('CNN design parameters')
 netargs.add_argument('-nflts',help='Number of filters that will be created after first conv [32]',type=int)
 netargs.add_argument('-fltsize', help='Size of square convolutional filter [5]',type=int)
@@ -70,17 +69,15 @@ netargs.add_argument('-unet',help='Create a network with skip connects [y]',type
 netargs.add_argument('-drpout',help='Dropout percent from 0 - 1 [0.0]',type=float)
 # Other arguments
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
-parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
 sep = seppy.sep(sys.argv)
 
+tf.compat.v1.disable_eager_execution()
+
 # Get command line arguments
 verb  = sep.yn2zoo(args.verb)
-gpus  = sep.read_list(args.gpus,[])
-if(len(gpus) != 0):
-  for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
 
 # Training arguments
 lr      = args.lr
@@ -98,7 +95,7 @@ allx,ally = load_alldata(args.trdat,None,105)
 xshape = allx.shape[1:]
 yshape = ally.shape[1:]
 
-# Create the keras model
+# Create the keras model for classification
 model = auto_encoder(yshape, xshape[2], 1, nf, fsize, unet, drpot, False)
 if(verb): model.summary()
 
@@ -106,11 +103,8 @@ if(verb): model.summary()
 opt = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 # Compile the model
-#model.compile( loss='binary_crossentropy', optimizer=opt )
+#model.compile( loss='binary_crossentropy', optimizer=opt , metrics=['accuracy'] )
 model.compile( loss=wgtbce(args.classwgt), optimizer=opt , metrics=['accuracy'] )
-
-# Set GPUs
-tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Train the model
 history = model.fit(allx,ally,epochs=nepochs,batch_size=bsize,verbose=1,shuffle=True,validation_split=0.2)

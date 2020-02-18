@@ -1,0 +1,18 @@
+[defaults]
+# IO
+trdat=/net/fantastic/scr2/joseph29/fltclasssmall1.h5
+vadat=
+wgtout=./dat/networks/fltclass-sepcpu-1ep.h5
+arcout=./dat/networks/fltclass-sepcpu.-1epjson
+# Training parameters
+lr=0.001
+bsize=20
+nepochs=1
+classwgt=0.5
+# CNN design parameters
+nflts=32
+fltsize=5
+unet=y
+drpout=0.0
+# Other
+verb=y

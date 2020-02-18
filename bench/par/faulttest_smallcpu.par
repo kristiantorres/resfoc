@@ -2,10 +2,9 @@
 # IO
 tsdat=/net/fantastic/scr2/joseph29/fltclass_va.h5
 vadat=
-wgtin=./dat/networks/fltclass.h5
-arcin=./dat/networks/fltclass.json
+wgtin=./dat/networks/fltclass-sepcpu-1ep.h5
+arcin=./dat/networks/fltclass-sepcpu-1ep.json
 # Data parameters
 bsize=105
 # Other
 verb=y
-gpus=2

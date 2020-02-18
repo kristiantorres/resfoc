@@ -31,7 +31,6 @@ defaults = {
     "fltsize": 5,
     "unet": "y",
     "drpout": 0.0,
-    "gpus": []
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -56,17 +55,15 @@ parser.add_argument("-qc",help="Plots the true label against the prediction [y]"
 parser.add_argument("-nbatches",help="Number of batches on which to make predictions [default is all]",type=int)
 parser.add_argument("-bsize",help="Batch size for creating data generator [20]",type=int)
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
-parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
 sep = seppy.sep(sys.argv)
 
+tf.compat.v1.disable_eager_execution()
+
 # Get command line arguments
 verb  = sep.yn2zoo(args.verb)
-gpus  = sep.read_list(args.gpus,[])
-if(len(gpus) != 0):
-  for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
 qc = sep.yn2zoo(args.qc)
 
 # Prediction arguments
@@ -87,9 +84,6 @@ if(verb): model.summary()
 # Load all data
 allx,ally = load_alldata(tsdat,None,bsize)
 ally = np.squeeze(ally)
-
-# Set GPUs
-tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Evaluate on test data (predict on all examples)
 pred = model.predict(allx,verbose=1)
@@ -118,8 +112,12 @@ if(qc):
     oprd = oprd.reshape([7,15,128,128])
     rprd = pe.reconstruct(oprd)
     # Apply two sided threshold
-    tprd = thresh(rprd,0.3)
-    plotseglabel(rimg,tprd,color='blue')
+    idxb = rprd < 0.5
+    idxt = rprd > 1.5
+    rprd[idxb] = 0.0; rprd[idxt] = 0.0
+    idxf = rprd != 0.0
+    rprd[idxf] = 1
+    plotseglabel(rimg,rprd,color='blue')
     plt.show()
     beg += 105; end += 105
 
