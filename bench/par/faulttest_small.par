@@ -1,0 +1,11 @@
+[defaults]
+# IO
+tsdat=./dat/fltclass_va.h5
+vadat=
+wgtin=./dat/networks/fltclass.h5
+arcin=./dat/networks/fltclass.json
+# Data parameters
+bsize=105
+# Other
+verb=y
+gpus=0
