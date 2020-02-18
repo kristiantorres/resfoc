@@ -75,9 +75,9 @@ slcs = sep.read_list(args.yslcs, [21,42,68,102,193], dtype='int')
 # Read in the segy
 with segyio.open(sep.get_fname("in"),ignore_geometry=True) as f: 
   data = f.trace.raw[:]
-  dt = f.attributes(segyio.TraceField.TRACE_SAMPLE_INTERVAL)[0][0]
-  dx = f.attributes(segyio.TraceField.CDP_X)[1][0] - f.attributes(segyio.TraceField.CDP_X)[0][0]
-  dy = f.attributes(segyio.TraceField.CDP_Y)[1][0] - f.attributes(segyio.TraceField.CDP_Y)[0][0]
+  dt = f.attributes(segyio.TraceField.TRACE_SAMPLE_INTERVAL)[0][0]/1e6
+  dx = (f.attributes(segyio.TraceField.CDP_X)[1][0] - f.attributes(segyio.TraceField.CDP_X)[0][0])/1000.0
+  dy = (f.attributes(segyio.TraceField.CDP_Y)[1][0] - f.attributes(segyio.TraceField.CDP_Y)[0][0])/1000.0
 
 # Reshape the data so it is a regular cube
 nt = data.shape[1]; nx = 951; ny = args.ny
