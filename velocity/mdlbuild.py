@@ -221,6 +221,38 @@ class mdlbuild:
       # Move along x or y
       begx += signx*dxi; begy += signy*dyi
 
+  def verticalfault_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.02,dy=0.0,tscale=6.0,rand=True):
+    """
+    Puts in a small fault block system. For now, only will give nice faults along
+    0,90,180,270 azimuths
+
+    Parameters:
+      nfault - number of faults in the system [5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.3]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      dx     - spacing between faults in the x direction [0.1]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
+    """
+    signx = 1; signy = 1
+    if(begx > 0.5):
+      signx = -1
+    if(begy > 0.5):
+      signy = -1
+    for ifl in progressbar(range(nfault), "nvfaults", 40):
+      daz = 8000; dz = 1000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+        dxi += np.random.rand()*dxi - dxi/2
+        dyi += np.random.rand()*dyi - dyi/2
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+                 theta_die=11.0,theta_shift=2.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+      # Move along x or y
+      begx += signx*dxi; begy += signy*dyi
+
   def largefault_block(self,nfault=3,azim=0.0,begz=0.6,begx=0.5,begy=0.5,dx=0.2,dy=0.0,rand=True):
     """
     Puts in a large fault block system. For now, only will give nice faults along
