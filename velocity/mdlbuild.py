@@ -539,6 +539,25 @@ class mdlbuild:
       dz  += np.random.rand()*(2000) - 1000
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
 
+  def verticalfault(self,azim=0.0,begz=0.5,begx=0.5,begy=0.5,tscale=3.0,rand=True):
+    """
+    Puts in a vertical fault
+    For now, will only give nice faults along 0,90,180,270
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.6]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+      rand - small random variations in the throw of faults [True]
+    """
+    daz = 8000; dz = 1000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+        theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+
   def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
     """
     Folds the current geologic model along a specific azimuth.
