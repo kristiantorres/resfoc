@@ -221,7 +221,7 @@ class mdlbuild:
       # Move along x or y
       begx += signx*dxi; begy += signy*dyi
 
-  def verticalfault_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.02,dy=0.0,tscale=6.0,rand=True):
+  def verticalfault_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.03,dy=0.0,tscale=6.0,rand=True):
     """
     Puts in a small fault block system. For now, only will give nice faults along
     0,90,180,270 azimuths
