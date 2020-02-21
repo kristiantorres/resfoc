@@ -158,13 +158,14 @@ for imodel in range(nmodels):
   azims = [0.0,180.0]
 
   # Only vertical faults
-  nb = 3
-  for ib in range(nb):
-    #TODO: need to make sure they don't interact with eachother
+  nb = 8
+  # Create x and z pairs of where faults were appear
+  poss = mb.find_faultpos(nb,0.2)
+  print(poss)
+  for ipos in poss:
     nfl = np.random.randint(5,8)
     azim = np.random.choice(azims)
-    zpos = rndut.randfloat(0.2,0.8); xpos = rndut.randfloat(0.05,0.95)
-    mb.verticalfault_block(nfault=nfl,azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=3.0,rand=True)
+    mb.verticalfault_block(nfault=nfl,azim=azim,begz=ipos[0],begx=ipos[1],begy=0.5,tscale=3.0,rand=True)
 
   # Get model
   if(nxo == nx and nzo == nz):

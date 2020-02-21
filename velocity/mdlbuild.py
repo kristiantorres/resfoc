@@ -4,6 +4,7 @@ from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
 from scipy.ndimage import gaussian_filter
+from utils.rand import randfloat
 
 class mdlbuild:
   """ 
@@ -689,3 +690,38 @@ class mdlbuild:
     self.ec8.calcref(nz,velsm,ref)
     return ref
 
+  def find_faultpos(self,nfaults,mindist,begx=0.05,endx=0.95,begz=0.05,endz=0.95):
+    """ 
+    Finds random fault positions between the begx, endx, begz and endz positions 
+  
+    Parameters: 
+      nfaults: number of fault positions to find
+      mindist: minimum distance between faults
+      begx: minimum x position for placing faults
+      endx: maximum x position for placing faults
+      begz: minimum z position for placing faults
+      endz: maximum z position for placing faults
+    """
+    pts = []; k = 0
+    while(len(pts) < nfaults):
+      # Create a coordinate
+      pt = []
+      pt.append(randfloat(begx,endx))
+      pt.append(randfloat(begz,endz))
+      if(k == 0):
+        pts.append(pt)
+      else:
+        keeppoint = True
+        for opt in pts:
+          if(self.distance(pt,opt) < mindist):
+            keeppoint = False
+            break
+        if(keeppoint == True):
+          pts.append(pt)
+      k += 1
+  
+    return pts
+  
+  def distance(self,pt1,pt2):
+    """ Compute the distance between two points """
+    return np.linalg.norm(np.asarray(pt1)-np.asarray(pt2))
