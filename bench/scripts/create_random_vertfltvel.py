@@ -95,7 +95,7 @@ nz = args.nz; dz = args.dz
 # Parameters for ricker wavelet
 nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
 amp = 1.0; dly = 0.125
-minf = 30.0; maxf = 60.0
+minf = 60.0; maxf = 80.0
 
 # Output nz and nx
 nzo = args.nzo; nxo = args.nxo
@@ -140,7 +140,7 @@ for imodel in range(nmodels):
     if(ilyr in sqlyrs):
       if(sqlyrs[csq] < 15):
         # Random amplitude variation in the folding
-        amp = np.random.rand()*(3000-500) + 500
+        amp = np.random.rand()*(1800-500) + 500
         mb.squish(amp=amp,azim=90.0,lam=0.4,rinline=0.0,rxline=0.0,mode='perlin')
       elif(sqlyrs[csq] >= 15 and sqlyrs[csq] < 18):
         amp = np.random.rand()*(1800-500) + 500
@@ -155,16 +155,16 @@ for imodel in range(nmodels):
   # Trim model before faulting
   mb.trim(0,1100)
 
-  # Fault it up!
   azims = [0.0,180.0]
 
-  #TODO: make vertical fault blocks
   # Only vertical faults
-  for ifl in progressbar(range(10), "nvfaults"):
+  nb = 3
+  for ib in range(nb):
+    #TODO: need to make sure they don't interact with eachother
+    nfl = np.random.randint(5,8)
     azim = np.random.choice(azims)
-    xpos = rndut.randfloat(0.05,0.95)
-    zpos = rndut.randfloat(0.15,0.95)
-    mb.verticalfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=3.0)
+    zpos = rndut.randfloat(0.2,0.8); xpos = rndut.randfloat(0.05,0.95)
+    mb.verticalfault_block(nfault=nfl,azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=3.0,rand=True)
 
   # Get model
   if(nxo == nx and nzo == nz):
@@ -176,7 +176,7 @@ for imodel in range(nmodels):
     wav = ricker(nt,dt,f,amp,dly)
     img = dlut.normalize(np.array([np.convolve(refs[:,ix,imodel],wav) for ix in range(nx)])[:,ns:1000+ns].T)
     # Create noise
-    nze = dlut.normalize(bandpass(np.random.rand(nz,nx)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
+    nze = dlut.normalize(bandpass(np.random.rand(nz,nx)*2-1, 2.0, 0.01, 2, pxd=43))/10.0
     imgs[:,:,imodel] = img + nze
   else:
     velsm = gaussian_filter(mb.vel[slcy,:,:nz],sigma=0.5)
@@ -195,41 +195,44 @@ for imodel in range(nmodels):
 
   # Plot the faulted model
   fsize=18
-  fig = plt.figure(1,figsize=(12,10))
+  fig = plt.figure(1,figsize=(11,7))
   ax = fig.add_subplot(111)
   im = ax.imshow((vels[:,:,imodel]/1000.0),cmap='jet',extent=[0,(nx-1)*dx/1000.0,(nz+100-1)*dz/1000.0,0.0],interpolation='bilinear')
   ax.set_xlabel('X (km)',fontsize=fsize)
   ax.set_ylabel('Z (km)',fontsize=fsize)
   ax.tick_params(labelsize=fsize)
-  cbar_ax = fig.add_axes([0.93,0.3,0.02,0.4])
+  cbar_ax = fig.add_axes([0.9,0.3,0.02,0.6])
   cbar = fig.colorbar(im,cbar_ax,format='%.2f')
   cbar.ax.tick_params(labelsize=fsize)
   cbar.set_label('velocity (km/s)',fontsize=fsize)
   
   ## Plot reflectivity and image with labels
-  f,axarr = plt.subplots(1,2,figsize=(15,8))
+  fig = plt.figure(2,figsize=(9,7))
   # Image
-  axarr[0].imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz+100-1)*dz/1000.0,0.0],interpolation='sinc')
-  axarr[0].set_xlabel('X (km)',fontsize=fsize)
-  axarr[0].set_ylabel('Z (km)',fontsize=fsize)
-  axarr[0].tick_params(labelsize=fsize)
+  ax = fig.add_subplot(111)
+  ax.imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0],interpolation='sinc',vmin=-3,vmax=3)
+  ax.set_xlabel('X (km)',fontsize=fsize)
+  ax.set_ylabel('Z (km)',fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
   # Create mask
   mask = np.ma.masked_where(lbls[:,:,imodel] == 0, lbls[:,:,imodel])
   cmap = colors.ListedColormap(['red','white'])
   # Image with label
-  axarr[1].imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz+100-1)*dz/1000.0,0.0],interpolation='sinc')
-  axarr[1].imshow(mask,cmap,extent=[0,(nx-1)*dx/1000.0,(nz+100-1)*dz/1000.0,0.0])
-  axarr[1].set_xlabel('X (km)',fontsize=fsize)
-  axarr[1].set_yticks([])
-  axarr[1].tick_params(labelsize=fsize)
+  fig = plt.figure(3, figsize=(10,7))
+  ax = fig.add_subplot(111)
+  ax.imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0],interpolation='sinc',vmin=-3,vmax=3)
+  ax.imshow(mask,cmap,extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0])
+  ax.set_ylabel('Z (km)',fontsize=fsize)
+  ax.set_xlabel('X (km)',fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
   plt.subplots_adjust(hspace=-0.1)
 
-  fig = plt.figure(3,figsize=(10,10))
+  fig = plt.figure(4,figsize=(9,7))
   ax = fig.add_subplot(111)
-  im = ax.imshow((f3dat[:,:,0]),cmap='gray',extent=[0,(n3x-1)*d3x,(n3t)*d3t,0.0],interpolation='sinc',vmin=-10000,vmax=10000)
+  im = ax.imshow((f3dat[:,:,100]),cmap='gray',extent=[0,(n3x-1)*d3x,(n3t)*d3t,0.0],interpolation='sinc',vmin=-10000,vmax=10000)
   ax.set_xlabel('X (km)',fontsize=fsize)
   ax.set_ylabel('Time (seconds)',fontsize=fsize)
   ax.tick_params(labelsize=fsize)
-  ax.set_aspect(3.0)
+  ax.set_aspect(6.5)
   plt.show()
 
