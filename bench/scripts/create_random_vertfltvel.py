@@ -3,7 +3,7 @@ Creates heavily faulted and folded pseudo random velocity models.
 Based on the software by Bob Clapp
 
 @author: Joseph Jennings
-@version: 2020.02.09
+@version: 2020.02.20
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
