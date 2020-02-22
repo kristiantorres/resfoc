@@ -1,0 +1,16 @@
+[defaults]
+# IO
+sgyin=./dat/Seismic_data.sgy
+h5out=./dat/f3tstdat.h5
+# Processing parameters
+ny=500
+nto=512
+nxo=1024
+ptchz=128
+ptchx=128
+strdz=64
+strdx=64
+norm=y
+wrtcube=y
+fs=0
+gridqc=n
