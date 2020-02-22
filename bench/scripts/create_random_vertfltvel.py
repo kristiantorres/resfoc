@@ -85,6 +85,14 @@ sep = seppy.sep(sys.argv)
 
 ## Get commandline arguments
 # Inputs and outputs
+beg     = args.beg
+end     = args.end
+outdir  = args.outdir
+outmod  = outdir + "/" + "velvertfltmod" + sep.create_inttag(beg,end) + ".H"
+outlbl  = outdir + "/" + "velvertfltlbl" + sep.create_inttag(beg,end) + ".H"
+outref  = outdir + "/" + "velvertfltref" + sep.create_inttag(beg,end) + ".H"
+outimg  = outdir + "/" + "velvertfltimg" + sep.create_inttag(beg,end) + ".H"
+prefix  = args.prefix
 nmodels = args.nmodels
 
 # Get the parameters of the model
@@ -106,12 +114,6 @@ vels = np.zeros([nzo,nxo,nmodels],dtype='float32')
 lbls = np.zeros([nzo,nxo,nmodels],dtype='float32')
 refs = np.zeros([nzo,nxo,nmodels],dtype='float32')
 imgs = np.zeros([nzo,nxo,nmodels],dtype='float32')
-
-# Read in the F3 dataset for plotting
-f3axes,f3dat = sep.read_file(None,ifname="f3cube.H")
-f3dat = f3dat.reshape(f3axes.n,order='F')
-n3t = f3axes.n[0]; n3x = f3axes.n[1]
-d3t = f3axes.d[0]; d3x = f3axes.d[1]
 
 # Loop over models
 for imodel in range(nmodels):
@@ -193,46 +195,13 @@ for imodel in range(nmodels):
     nze = dlut.normalize(bandpass(np.random.rand(nzo,nxo)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
     imgs[:,:,imodel] = imgo + nze
 
-  # Plot the faulted model
-  fsize=18
-  fig = plt.figure(1,figsize=(11,7))
-  ax = fig.add_subplot(111)
-  im = ax.imshow((vels[:,:,imodel]/1000.0),cmap='jet',extent=[0,(nx-1)*dx/1000.0,(nz+100-1)*dz/1000.0,0.0],interpolation='bilinear')
-  ax.set_xlabel('X (km)',fontsize=fsize)
-  ax.set_ylabel('Z (km)',fontsize=fsize)
-  ax.tick_params(labelsize=fsize)
-  cbar_ax = fig.add_axes([0.9,0.3,0.02,0.6])
-  cbar = fig.colorbar(im,cbar_ax,format='%.2f')
-  cbar.ax.tick_params(labelsize=fsize)
-  cbar.set_label('velocity (km/s)',fontsize=fsize)
-  
-  ## Plot reflectivity and image with labels
-  fig = plt.figure(2,figsize=(9,7))
-  # Image
-  ax = fig.add_subplot(111)
-  ax.imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0],interpolation='sinc',vmin=-3,vmax=3)
-  ax.set_xlabel('X (km)',fontsize=fsize)
-  ax.set_ylabel('Z (km)',fontsize=fsize)
-  ax.tick_params(labelsize=fsize)
-  # Create mask
-  mask = np.ma.masked_where(lbls[:,:,imodel] == 0, lbls[:,:,imodel])
-  cmap = colors.ListedColormap(['red','white'])
-  # Image with label
-  fig = plt.figure(3, figsize=(10,7))
-  ax = fig.add_subplot(111)
-  ax.imshow(imgs[:,:,imodel],cmap='gray',extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0],interpolation='sinc',vmin=-3,vmax=3)
-  ax.imshow(mask,cmap,extent=[0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0])
-  ax.set_ylabel('Z (km)',fontsize=fsize)
-  ax.set_xlabel('X (km)',fontsize=fsize)
-  ax.tick_params(labelsize=fsize)
-  plt.subplots_adjust(hspace=-0.1)
+# Write the velocity model and the label
+maxes = seppy.axes([nz,nx,nmodels],[0.0,0.0,0.0],[dz,dx,1.0])
+sep.write_file(None,maxes,vels,ofname=outmod,dpath=args.datapath)
+sep.write_file(None,maxes,lbls,ofname=outlbl,dpath=args.datapath)
+sep.write_file(None,maxes,refs,ofname=outref,dpath=args.datapath)
+sep.write_file(None,maxes,imgs,ofname=outimg,dpath=args.datapath)
 
-  fig = plt.figure(4,figsize=(9,7))
-  ax = fig.add_subplot(111)
-  im = ax.imshow((f3dat[:,:,100]),cmap='gray',extent=[0,(n3x-1)*d3x,(n3t)*d3t,0.0],interpolation='sinc',vmin=-10000,vmax=10000)
-  ax.set_xlabel('X (km)',fontsize=fsize)
-  ax.set_ylabel('Time (seconds)',fontsize=fsize)
-  ax.tick_params(labelsize=fsize)
-  ax.set_aspect(6.5)
-  plt.show()
+# Flag for cluster manager to determine success
+print("Success!")
 
