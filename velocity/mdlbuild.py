@@ -4,9 +4,10 @@ from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
 from scipy.ndimage import gaussian_filter
+from utils.rand import randfloat
 
 class mdlbuild:
-  """
+  """ 
   Builds random geologically feasible velocity models.
   Based on the syntheticModel code from Bob Clapp
 
@@ -31,11 +32,11 @@ class mdlbuild:
   def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,dev_pos=0.0,
               layer=23,layer_rand=0.3,dev_layer=0.26):
     """
-    Creates a deposition event in the geological model.
-
+    Creates a deposition event in the geological model. 
+    
     Parameters:
-      A general summary of the parameters.
-
+      A general summary of the parameters. 
+      
       Lateral variation:
       The band1-3 parameters basically are three parameters used
       to define a 3D bandpass filter which is applied to a cube of random numbers. The different
@@ -45,9 +46,9 @@ class mdlbuild:
 
       Vertical variation:
       The parameters layer,layer_rand and dev_layer dertermine the variation of the layering
-      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a
+      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a 
       fine tuning parameter
-
+      
       velval     - base value of velocity in the layer in m/s [1400]
       thick      - thickness of the layer in samples [30]
       band1      - bandpass parameter for axis 1 [0.4]
@@ -105,10 +106,10 @@ class mdlbuild:
       perp_die    - Controls the die off perpendicular to the fault
                     (e.g., if fault is visible in x, die off is in y).
                     Large number results in slower dieoff [0.5]
-      dist_die    - Controls the die off in the same plane of the fault
+      dist_die    - Controls the die off in the same plane of the fault 
                     (e.g., if fault is visible in x, die off is also in x)
                     Large number results in slower dieoff [0.3]
-      theta_die   - Controls the die off along the fault (essentially the throw). The larger
+      theta_die   - Controls the die off along the fault (essentially the throw). The larger 
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
       dirf        - Direction of fault movement [0.1]
@@ -218,6 +219,38 @@ class mdlbuild:
         dxi += np.random.rand()*dxi - dxi/2
         dyi += np.random.rand()*dyi - dyi/2
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+      # Move along x or y
+      begx += signx*dxi; begy += signy*dyi
+
+  def verticalfault_block(self,nfault=5,azim=0.0,begz=0.5,begx=0.5,begy=0.5,dx=0.03,dy=0.0,tscale=6.0,rand=True):
+    """
+    Puts in a small fault block system. For now, only will give nice faults along
+    0,90,180,270 azimuths
+
+    Parameters:
+      nfault - number of faults in the system [5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault (same for all) [0.3]
+      begx   - beginning position in x for system [0.5]
+      begy   - beginning position in y for system [0.5]
+      dx     - spacing between faults in the x direction [0.1]
+      dy     - spacing between faults in the y direction [0.0]
+      rand   - small random variations in the positioning and throw of the faults [True]
+    """
+    signx = 1; signy = 1
+    if(begx > 0.5):
+      signx = -1
+    if(begy > 0.5):
+      signy = -1
+    for ifl in progressbar(range(nfault), "nvfaults", 40):
+      daz = 8000; dz = 1000; dxi = dx; dyi = dy
+      if(rand):
+        daz += np.random.rand()*(2000) - 1000
+        dz  += np.random.rand()*(2000) - 1000
+        dxi += np.random.rand()*dxi - dxi/2
+        dyi += np.random.rand()*dyi - dyi/2
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+                 theta_die=11.0,theta_shift=2.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
       # Move along x or y
       begx += signx*dxi; begy += signy*dyi
 
@@ -539,6 +572,25 @@ class mdlbuild:
       dz  += np.random.rand()*(2000) - 1000
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,thresh=200)
 
+  def verticalfault(self,azim=0.0,begz=0.5,begx=0.5,begy=0.5,tscale=3.0,rand=True):
+    """
+    Puts in a vertical fault
+    For now, will only give nice faults along 0,90,180,270
+
+    Parameters:
+      azim - azimuth along which faults are oriented [0.0]
+      begz - beginning position in z for fault [0.6]
+      begx - beginning position in x for fault [0.5]
+      begy - beginning position in x for fault [0.5]
+      rand - small random variations in the throw of faults [True]
+    """
+    daz = 8000; dz = 1000
+    if(rand):
+      daz += np.random.rand()*(2000) - 1000
+      dz  += np.random.rand()*(2000) - 1000
+    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+        theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+
   def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
     """
     Folds the current geologic model along a specific azimuth.
@@ -593,7 +645,7 @@ class mdlbuild:
     Parameters:
       nlyrs - number of layers to squish
       ntot  - total number of layers to be deposited
-      mindist - minimum distance between lay
+      mindist - minimum distance between layers
     """
     # Get the first layer
     sqlyrs = []
@@ -638,3 +690,38 @@ class mdlbuild:
     self.ec8.calcref(nz,velsm,ref)
     return ref
 
+  def find_faultpos(self,nfaults,mindist,begx=0.05,endx=0.95,begz=0.05,endz=0.95):
+    """ 
+    Finds random fault positions between the begx, endx, begz and endz positions 
+  
+    Parameters: 
+      nfaults: number of fault positions to find
+      mindist: minimum distance between faults
+      begx: minimum x position for placing faults
+      endx: maximum x position for placing faults
+      begz: minimum z position for placing faults
+      endz: maximum z position for placing faults
+    """
+    pts = []; k = 0
+    while(len(pts) < nfaults):
+      # Create a coordinate
+      pt = []
+      pt.append(randfloat(begx,endx))
+      pt.append(randfloat(begz,endz))
+      if(k == 0):
+        pts.append(pt)
+      else:
+        keeppoint = True
+        for opt in pts:
+          if(self.distance(pt,opt) < mindist):
+            keeppoint = False
+            break
+        if(keeppoint == True):
+          pts.append(pt)
+      k += 1
+  
+    return pts
+  
+  def distance(self,pt1,pt2):
+    """ Compute the distance between two points """
+    return np.linalg.norm(np.asarray(pt1)-np.asarray(pt2))
