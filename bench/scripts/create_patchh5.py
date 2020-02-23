@@ -73,10 +73,10 @@ norm = sep.yn2zoo(args.norm)
 verb = sep.yn2zoo(args.verb)
 
 # Get SEPlib files
-#imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))[10:nfiles+10]
-#lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))[10:nfiles+10]
-imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))[300:nfiles+300]
-lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))[300:nfiles+300]
+imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))[:nfiles]
+lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))[:nfiles]
+#imgfiles = sorted(glob.glob(sepdir + '/' + prefix + 'img*.H'))[300:nfiles+300]
+#lblfiles = sorted(glob.glob(sepdir + '/' + prefix + 'lbl*.H'))[300:nfiles+300]
 nofiles = len(imgfiles)
 
 assert(len(imgfiles) == len(lblfiles)), "Must have as many features as labels. Exiting."
@@ -104,7 +104,7 @@ hf = h5py.File(out,'w')
 
 k = 0
 # Loop over all files
-for ifile in progressbar(range(nofiles), "nfiles:", 40):
+for ifile in progressbar(range(nofiles), "nfiles", 40):
   # Read in image
   iaxes,img = sep.read_file(None,ifname=imgfiles[ifile])
   img = img.reshape(iaxes.n,order='F')
