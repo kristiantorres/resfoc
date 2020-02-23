@@ -13,7 +13,7 @@ vacout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_vacu.H
 # Training parameters
 lr=0.001
 bsize=20
-nepochs=1
+nepochs=10
 classwgt1=0.5
 # CNN design parameters
 nflts=32

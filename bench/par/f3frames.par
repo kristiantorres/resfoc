@@ -1,0 +1,21 @@
+[defaults]
+# IO
+prddir=/net/fantastic/scr2/joseph29/f3preds/ep10
+flddat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+figdir=./fig/f3frames/ep10
+# Dimensions
+nxo=1024
+nzo=512
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+nptchx=15
+nptchz=7
+xlidx=1
+# Processing
+thresh=0.2
+fs=200
+# Miscellaneous
+verb=y
+show=n
