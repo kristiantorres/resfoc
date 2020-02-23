@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 import random
 import subprocess
+from utils.ptyprint import progressbar
 
 class resmig_generator_h5(Sequence):
 
@@ -44,7 +45,7 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
     idxs = random.sample(choices,nf1)
   else:
     idxs = list(range(nf1))
-  for idx in range(nb):
+  for idx in progressbar(range(nb), "nbatches"):
     if idx in idxs:
       hfin.copy(keys[idx],hf1)
       hfin.copy(keys[idx+nb],hf1)
@@ -82,16 +83,22 @@ def load_alldata(trfile,vafile,dsize):
   ally = np.zeros([(ntr+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
   k = 0
   # Get all training examples
-  for itr in range(ntr):
+  for itr in progressbar(range(ntr), "numtr"):
     for iex in range(dsize):
       allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
-      ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
+      if(len(yshape) == 3):
+        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
+      else:
+        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:,0]
       k += 1
   # Get all validation examples
-  for iva in range(nva):
+  for iva in progressbar(range(nva), "numva"):
     for iex in range(dsize):
       allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
-      ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
+      if(len(yshape) == 3):
+        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
+      else:
+        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:,0]
       k += 1
   # Close the files
   hftr.close()
@@ -99,3 +106,24 @@ def load_alldata(trfile,vafile,dsize):
 
   return allx,ally
 
+def load_allflddata(fldfile,dsize):
+  """ Loads all field (unlabeled) data into a numpy array """
+  # Get training number of examples
+  hffld = h5py.File(fldfile,'r')
+  fldkeys = list(hffld.keys())
+  nfld = int(len(fldkeys)/2)
+  # Get shape of examples
+  xshape = hffld[fldkeys[0]].shape
+  # Allocate output arrays
+  if(len(xshape) == 4):
+    allx = np.zeros([(nfld)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
+  elif(len(xshape) == 3):
+    allx = np.zeros([(nfld)*dsize,xshape[1],xshape[2]],dtype='float32')
+  k = 0
+  # Get all field examples
+  for ifld in progressbar(range(nfld), "numfld"):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hffld[fldkeys[ifld]][iex,:,:,:]
+      k += 1
+
+  return allx
