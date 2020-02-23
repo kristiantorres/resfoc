@@ -1,0 +1,25 @@
+[defaults]
+# IO
+trdat=/net/fantastic/scr2/joseph29/vertfltclass.h5
+vadat=
+f3dat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+wgtout=./dat/networks/vrtfltclasswgt5-gpu20ep.h5
+arcout=./dat/networks/vrtfltclasswgt5-gpu20ep.json
+chkpnt=/net/fantastic/scr2/joseph29/vrtfltclasswgt5-gpu20ep-chkpnt.h5
+lssout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_loss.H
+vlsout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_vlss.H
+accout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_accu.H
+vacout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_vacu.H
+# Training parameters
+lr=0.001
+bsize=20
+nepochs=1
+classwgt1=0.5
+# CNN design parameters
+nflts=32
+fltsize=5
+unet=y
+drpout=0.0
+# Other
+verb=y
+gpus=5

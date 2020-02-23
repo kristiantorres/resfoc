@@ -20,8 +20,10 @@ import h5py
 from deeplearn.dataloader import load_alldata
 from deeplearn.kerasnets import auto_encoder
 from deeplearn.keraslosses import wgtbce
+from deeplearn.kerascallbacks import F3Pred
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)
@@ -56,8 +58,14 @@ parser.set_defaults(**defaults)
 ioArgs = parser.add_argument_group('Inputs and outputs')
 ioArgs.add_argument("-trdat",help="Input training dataset in H5 format",type=str)
 ioArgs.add_argument("-vadat",help="Input validation dataset in H5 format",type=str)
+ioArgs.add_argument("-f3dat",help="Path to F3 data for looking at predictions",type=str)
 ioArgs.add_argument("-wgtout",help="Output CNN filter coefficients",type=str)
 ioArgs.add_argument("-arcout",help="Output CNN architecture",type=str)
+ioArgs.add_argument("-chkpnt",help="Model checkpoint file",type=str)
+ioArgs.add_argument("-lssout",help="Output loss history",type=str)
+ioArgs.add_argument("-vlsout",help="Output validation loss history",type=str)
+ioArgs.add_argument("-accout",help="Output accuracy history",type=str)
+ioArgs.add_argument("-vacout",help="Output validation accuracy history",type=str)
 trainArgs = parser.add_argument_group('Training parameters')
 trainArgs.add_argument('-lr',help='Learning rate [0.001]',type=float)
 trainArgs.add_argument('-bsize',help='Batch size [20]',type=int)
@@ -94,7 +102,7 @@ unet  = sep.yn2zoo(args.unet)
 drpot = args.drpout
 
 # Load all data
-allx,ally = load_alldata(args.trdat,None,105)
+allx,ally = load_alldata(args.trdat,None,32)
 xshape = allx.shape[1:]
 yshape = ally.shape[1:]
 
@@ -112,11 +120,30 @@ model.compile( loss=wgtbce(args.classwgt1), optimizer=opt , metrics=['accuracy']
 # Set GPUs
 tf.compat.v1.GPUOptions(allow_growth=True)
 
+# Create callbacks
+checkpointer = ModelCheckpoint(filepath=args.chkpnt, verbose=1, save_best_only=True)
+f3predicter  = F3Pred(args.f3dat,105,(128,128),(64,64))
+
 # Train the model
-history = model.fit(allx,ally,epochs=nepochs,batch_size=bsize,verbose=1,shuffle=True,validation_split=0.2)
+history = model.fit(allx,ally,epochs=nepochs,batch_size=bsize,verbose=1,shuffle=True,
+                   validation_split=0.2,callbacks=[checkpointer,f3predicter])
 
 # Write the model
 model.save_weights(args.wgtout)
+
+# Save the loss history
+lossvepch = np.asarray(history.history['loss'])
+laxes = seppy.axes([len(lossvepch)],[0.0],[1.0])
+sep.write_file(None,laxes,lossvepch,args.lssout)
+vlssvepch = np.asarray(history.history['val_loss'])
+sep.write_file(None,laxes,vlssvepch,args.vlsout)
+
+# Save the accuracy history
+accvepch = np.asarray(history.history['acc'])
+aaxes = seppy.axes([len(accvepch)],[0.0],[1.0])
+sep.write_file(None,aaxes,accvepch,args.accout)
+vacvepch = np.asarray(history.history['val_acc'])
+sep.write_file(None,aaxes,vacvepch,args.vacout)
 
 # Save the model architecture
 with open(args.arcout,'w') as f:
