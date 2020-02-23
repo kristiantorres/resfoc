@@ -106,3 +106,24 @@ def load_alldata(trfile,vafile,dsize):
 
   return allx,ally
 
+def load_allflddata(fldfile,dsize):
+  """ Loads all field (unlabeled) data into a numpy array """
+  # Get training number of examples
+  hffld = h5py.File(fldfile,'r')
+  fldkeys = list(hffld.keys())
+  nfld = int(len(fldkeys)/2)
+  # Get shape of examples
+  xshape = hffld[fldkeys[0]].shape
+  # Allocate output arrays
+  if(len(xshape) == 4):
+    allx = np.zeros([(nfld)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
+  elif(len(xshape) == 3):
+    allx = np.zeros([(nfld)*dsize,xshape[1],xshape[2]],dtype='float32')
+  k = 0
+  # Get all field examples
+  for ifld in progressbar(range(nfld), "numfld"):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hffld[fldkeys[ifld]][iex,:,:,:]
+      k += 1
+
+  return allx
