@@ -4,7 +4,7 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2002.02.08
+@version: 2002.02.22
 """
 import sys
 import numpy as np
@@ -13,16 +13,16 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 
 def normalize(img,eps=sys.float_info.epsilon):
-  """ 
+  """
   Normalizes an image accross channels  by removing
   the mean and dividing by the standard deviation
   """
   return (img - np.mean(img))/(np.std(img) + eps)
 
 def resizepow2(img,kind='linear'):
-  """ 
-  Resizes an image so that its dimensions are 
-  a power of 2 
+  """
+  Resizes an image so that its dimensions are
+  a power of 2
   """
   # Get input shape
   length=img.shape[-1]
@@ -35,9 +35,9 @@ def resizepow2(img,kind='linear'):
   return resample(img,new_shape,kind)
 
 def resample(img,new_shape,kind='linear'):
-  """ 
+  """
   Resamples an image. Can work up to 4D numpy arrays.
-  assumes that the nz and nx axes are the last two (fastest) 
+  assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
   length=img.shape[-1]
@@ -71,7 +71,7 @@ def resample(img,new_shape,kind='linear'):
   return res
   #return res,[d1out,d2out]
 
-def next_power_of_2(x):  
+def next_power_of_2(x):
   """ Gets the nearest power of two to x """
   return 1 if x == 0 else 2**(x - 1).bit_length()
 
@@ -108,7 +108,7 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,lbl,show=False,color='red',**kwargs):
+def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   """ Plots a binary label on top of an image """
   assert(img.shape == lbl.shape),'Input image and label must be same size'
   # Get mask
@@ -121,13 +121,21 @@ def plotseglabel(img,lbl,show=False,color='red',**kwargs):
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)])
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
   ax.tick_params(labelsize=kwargs.get('ticksize',18))
-  ax.set_aspect(kwargs.get('aratio',1.0))
+  if(fname):
+      ax.set_aspect(kwargs.get('aratio',1.0))
+      plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
   # Plot label
-  ax.imshow(mask,cmap=cmap)
+  ax.imshow(mask,cmap=cmap,
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)])
+  ax.set_aspect(kwargs.get('aratio',1.0))
   if(show):
     plt.show()
+  if(fname):
+      plt.savefig(fname+"-lbl.png",bbox_inches='tight',dpi=150,transparent=True)
+      plt.close()
 
