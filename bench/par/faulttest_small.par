@@ -2,8 +2,8 @@
 # IO
 tsdat=/net/fantastic/scr2/joseph29/fltclass_va.h5
 vadat=
-wgtin=./dat/networks/fltclass-gpu40ep.h5
-arcin=./dat/networks/fltclass-gpu40ep.json
+wgtin=./dat/networks/fltclasswgt5-gpu10ep.h5
+arcin=./dat/networks/fltclasswgt5-gpu10ep.json
 # Data parameters
 bsize=105
 # Other

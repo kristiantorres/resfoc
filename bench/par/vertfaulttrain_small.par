@@ -1,8 +1,7 @@
 [defaults]
-# IO
+# Training inputs and outputs
 trdat=/net/fantastic/scr2/joseph29/vertfltclass.h5
 vadat=
-f3dat=/net/fantastic/scr2/joseph29/f3tstdat.h5
 wgtout=./dat/networks/vrtfltclasswgt5-gpu20ep.h5
 arcout=./dat/networks/vrtfltclasswgt5-gpu20ep.json
 chkpnt=/net/fantastic/scr2/joseph29/vrtfltclasswgt5-gpu20ep-chkpnt.h5
@@ -10,6 +9,10 @@ lssout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_loss.H
 vlsout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_vlss.H
 accout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_accu.H
 vacout=./dat/nnhistory/vrtfltclasswgt5-gpu20ep_vacu.H
+# For testing on field dataset
+f3dat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+f3prd=/net/fantastic/scr2/joseph29/f3preds/ep10
+f3fig=./fig/f3preds/ep10
 # Training parameters
 lr=0.001
 bsize=20

@@ -11,7 +11,7 @@ out the model architecture as well as the model weights
 and biases which can then be used subsequently for validation/testing.
 
 @author: Joseph Jennings
-@version: 2020.02.17
+@version: 2020.02.22
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
@@ -56,9 +56,8 @@ parser.set_defaults(**defaults)
 
 # Input files
 ioArgs = parser.add_argument_group('Inputs and outputs')
-ioArgs.add_argument("-trdat",help="Input training dataset in H5 format",type=str)
-ioArgs.add_argument("-vadat",help="Input validation dataset in H5 format",type=str)
-ioArgs.add_argument("-f3dat",help="Path to F3 data for looking at predictions",type=str)
+ioArgs.add_argument("-trdat",help="Input training dataset in H5 format",type=str,required=True)
+ioArgs.add_argument("-vadat",help="Input validation dataset in H5 format",type=str,required=True)
 ioArgs.add_argument("-wgtout",help="Output CNN filter coefficients",type=str)
 ioArgs.add_argument("-arcout",help="Output CNN architecture",type=str)
 ioArgs.add_argument("-chkpnt",help="Model checkpoint file",type=str)
@@ -66,11 +65,18 @@ ioArgs.add_argument("-lssout",help="Output loss history",type=str)
 ioArgs.add_argument("-vlsout",help="Output validation loss history",type=str)
 ioArgs.add_argument("-accout",help="Output accuracy history",type=str)
 ioArgs.add_argument("-vacout",help="Output validation accuracy history",type=str)
+# Field data
+f3Args = parser.add_argument_group("Paths for analyzing field data predictions")
+f3Args.add_argument("-f3dat",help="Path to F3 data",type=str)
+f3Args.add_argument("-f3prd",help="Path for writing predictions on F3 data",type=str)
+f3Args.add_argument("-f3fig",help="Path for writing figures of predictions on F3 data",type=str)
+# Training
 trainArgs = parser.add_argument_group('Training parameters')
 trainArgs.add_argument('-lr',help='Learning rate [0.001]',type=float)
 trainArgs.add_argument('-bsize',help='Batch size [20]',type=int)
 trainArgs.add_argument('-nepochs',help='Number of passes over training data [10]',type=int)
 trainArgs.add_argument('-classwgt1',help='Class weight to balance cross entropy loss [0.5]',type=float)
+# Network
 netargs = parser.add_argument_group('CNN design parameters')
 netargs.add_argument('-nflts',help='Number of filters that will be created after first conv [32]',type=int)
 netargs.add_argument('-fltsize', help='Size of square convolutional filter [5]',type=int)
@@ -79,6 +85,10 @@ netargs.add_argument('-drpout',help='Dropout percent from 0 - 1 [0.0]',type=floa
 # Other arguments
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
+# Enables required arguments in config file
+for action in parser._actions:
+  if(action.dest in defaults):
+    action.required = False
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
@@ -122,7 +132,7 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Create callbacks
 checkpointer = ModelCheckpoint(filepath=args.chkpnt, verbose=1, save_best_only=True)
-f3predicter  = F3Pred(args.f3dat,105,(128,128),(64,64))
+f3predicter  = F3Pred(args.f3dat,args.f3prd,args.f3fig,105,(128,128),(64,64))
 
 # Train the model
 history = model.fit(allx,ally,epochs=nepochs,batch_size=bsize,verbose=1,shuffle=True,

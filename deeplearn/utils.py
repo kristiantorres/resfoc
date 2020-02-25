@@ -108,7 +108,7 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,lbl,show=False,color='red',**kwargs):
+def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   """ Plots a binary label on top of an image """
   assert(img.shape == lbl.shape),'Input image and label must be same size'
   # Get mask
@@ -125,6 +125,9 @@ def plotseglabel(img,lbl,show=False,color='red',**kwargs):
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
   ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  if(fname):
+      ax.set_aspect(kwargs.get('aratio',1.0))
+      plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
   # Plot label
   ax.imshow(mask,cmap=cmap,
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
@@ -132,4 +135,7 @@ def plotseglabel(img,lbl,show=False,color='red',**kwargs):
   ax.set_aspect(kwargs.get('aratio',1.0))
   if(show):
     plt.show()
+  if(fname):
+      plt.savefig(fname+"-lbl.png",bbox_inches='tight',dpi=150,transparent=True)
+      plt.close()
 

@@ -1,8 +1,8 @@
 [defaults]
 # IO
-prddir=/net/fantastic/scr2/joseph29/f3preds/ep10
+prddir=/net/fantastic/scr2/joseph29/f3preds/orig10
 flddat=/net/fantastic/scr2/joseph29/f3tstdat.h5
-figdir=./fig/f3frames/ep10
+figdir=./fig/f3frames/orig10
 # Dimensions
 nxo=1024
 nzo=512
@@ -14,7 +14,7 @@ nptchx=15
 nptchz=7
 xlidx=1
 # Processing
-thresh=0.2
+thresh=0.5
 fs=200
 # Miscellaneous
 verb=y

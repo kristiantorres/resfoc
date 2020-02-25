@@ -111,7 +111,7 @@ for iep in progressbar(range(nepochs), 'nepochs'):
   tprd = thresh(rprd,args.thresh)
   # Plot the label and the image
   plotseglabel(rimg[fs:,:],tprd[fs:,:],color='blue',
-             xlabel='Inline',ylabel='Time (s)',xmin=0.0,xmax=(nxo-1)*25/1000.0,
-             zmin=(fs-1)*0.004,zmax=(nzo-1)*0.004,vmin=-2.5,vmax=2.5,aratio=6.5,show=show,interp='sinc')
-  plt.savefig(args.figdir + '/' + 'pred%s.png'%(create_inttag(iep,nepochs)),bbox_inches='tight',dpi=150)
+             xlabel='Xline (km)',ylabel='Time (s)',xmin=0.0,xmax=(nxo-1)*25/1000.0,
+             zmin=(fs-1)*0.004,zmax=(nzo-1)*0.004,vmin=-2.5,vmax=2.5,aratio=6.5,show=show,
+             interp='sinc',fname=args.figdir + '/ep%d'%(iep))
 

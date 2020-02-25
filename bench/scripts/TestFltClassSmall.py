@@ -13,7 +13,7 @@ import numpy as np
 import h5py
 from deeplearn.dataloader import load_alldata
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from deeplearn.utils import plotseglabel, thresh
+from deeplearn.utils import plotseglabel, thresh, normalize
 from tensorflow.keras.models import model_from_json
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -97,7 +97,8 @@ pred = np.squeeze(pred)
 print(pred.shape)
 
 pe = PatchExtractor((128,128),stride=(64,64))
-dummy = np.zeros([512,1024])
+nx = 1024; nz = 512
+dummy = np.zeros([nz,nx])
 dptch = pe.extract(dummy)
 
 if(qc):
@@ -113,14 +114,19 @@ if(qc):
     olbl = ally[beg:end,:,:]
     olbl = olbl.reshape([7,15,128,128])
     rlbl = pe.reconstruct(olbl)
-    plotseglabel(rimg,rlbl)
+    plotseglabel(normalize(rimg),rlbl,color='red',
+             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*10/1000.0,
+             zmin=0.0,zmax=(nz-1)*10/1000.0,vmin=-3.5,vmax=3.5,aratio=1.0,show=False,interp='sinc',
+             fname='./fig/preds/tru%d'%(iex))
     oprd = pred[beg:end,:,:]
     oprd = oprd.reshape([7,15,128,128])
     rprd = pe.reconstruct(oprd)
     # Apply two sided threshold
-    tprd = thresh(rprd,0.3)
-    plotseglabel(rimg,tprd,color='blue')
-    plt.show()
+    tprd = thresh(rprd,0.5)
+    plotseglabel(normalize(rimg),tprd,color='blue',
+             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*10/1000.0,
+             zmin=0.0,zmax=(nz-1)*10/1000.0,vmin=-3.5,vmax=3.5,aratio=1.0,show=False,interp='sinc',
+             fname='./fig/preds/prd%d'%(iex))
     beg += 105; end += 105
 
 

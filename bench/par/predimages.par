@@ -1,0 +1,16 @@
+[defaults]
+# Inputs and outputs
+imgs=fltimgprc.H
+wgts=./dat/networks/fltclasswgt5-gpu10ep.h5
+arch=./dat/networks/fltclasswgt5-gpu10ep.json
+figpfx=./fig/wrg
+# Patch parameters
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+# Other
+thresh=0.5
+verb=y
+show=n
+gpus=5

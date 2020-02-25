@@ -6,6 +6,24 @@ def tpow(dat,nt,ot,dt,nx,tpow,nh=None,nro=None,norm=True):
     return tpow4d(dat,nt,ot,dt,nx,tpow,nh,nro,norm)
   elif(nh == None and nro != None):
     return tpow3d(dat,nt,ot,dt,nx,tpow,nro,norm)
+  else:
+    return tpow2d(dat,nt,ot,dt,nx,tpow,norm)
+
+def tpow2d(dat,nt,ot,dt,nx,tpow,norm=True):
+  """ Applies a t^pow gain to the input array dat """
+  # Build the t function
+  if(ot != 0.0):
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
+  else:
+    ot = dt
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
+  tp = np.power(t,tpow)
+  # Normalize by default
+  if(norm): tp = tp/np.max(tp)
+  # Replicate it across the other axes
+  tpx   = np.tile(np.array([tp]).T,(1,nx))
+  # Scale the data
+  return(dat*tpx).astype('float32')
 
 def tpow3d(dat,nt,ot,dt,nx,tpow,nh,nro,norm=True):
   """ Applies a t^pow gain to the input array dat """
