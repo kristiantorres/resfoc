@@ -28,19 +28,5 @@ PYBIND11_MODULE(rstolt,m) {
             rst.resmig(dat.mutable_data(), img.mutable_data(), nthrd);
           },
           py::arg("dat"), py::arg("img"), py::arg("nthrd")
-      )
-      .def("convert2time",[](rstolt &rst,
-          int nt,
-          float ot,
-          float dt,
-          py::array_t<float, py::array::c_style> vel,
-          py::array_t<float, py::array::c_style> depth,
-          py::array_t<float, py::array::c_style> time
-          )
-          {
-            rst.convert2time(nt, ot, dt, vel.mutable_data(), depth.mutable_data(), time.mutable_data());
-          },
-          py::arg("nt"), py::arg("ot"), py::arg("dt"),
-          py::arg("vel"), py::arg("depth"), py::arg("time")
       );
 }
