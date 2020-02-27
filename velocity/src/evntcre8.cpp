@@ -647,13 +647,11 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
   for(int i3 = 0; i3 < _n3; ++i3) {
     for(int i2 = 0; i2 < _n2; ++i2) {
       for(int i1 = 0; i1 < nz; ++i1) {
-        /* One-sided derivatives at the ends */
-        if(i1 == 0) {
-          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+1] - vel[i3*nz*_n2 + i2*nz + i1-0];
-        } else if(i1 == nz-1) {
-          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+0] - vel[i3*nz*_n2 + i2*nz + i1-1];
+        /* Backwards derivatives at the end */
+        if(i1 == nz-1) {
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1  ] - vel[i3*nz*_n2 + i2*nz + i1-1];
         } else {
-          ref[i3*nz*_n2 + i2*nz + i1] = 0.5*vel[i3*nz*_n2 + i2*nz + i1+1] - 0.5*vel[i3*nz*_n2 + i2*nz + i1-1];
+          ref[i3*nz*_n2 + i2*nz + i1] = vel[i3*nz*_n2 + i2*nz + i1+1] - vel[i3*nz*_n2 + i2*nz + i1  ];
         }
       }
     }

@@ -139,7 +139,7 @@ def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kw
     if(qc):
       plt.show()
 
-def viewframeskey(data,transp=True,fast=True,**kwargs):
+def viewframeskey(data,transp=True,fast=True,show=True,**kwargs):
   """ 
   Provides a frame by frame interactive viewing of a numpy array via the arrow keys.
   Assumes the slow axis is the first axis.
@@ -161,6 +161,7 @@ def viewframeskey(data,transp=True,fast=True,**kwargs):
     xbar      - x position of scale bar
     barlabel  - colorbar label
     interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
+    show      - flag for calling plt.show() [True]
   """
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
@@ -221,7 +222,8 @@ def viewframeskey(data,transp=True,fast=True,**kwargs):
   else:
     ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
-  plt.show()
+  if(show):
+    plt.show()
 
 def viewframessld(data,transp=True,**kwargs):
   pass
