@@ -3,7 +3,7 @@
 imgs=fltimgprc.H
 wgts=./dat/networks/fltclasswgt5-gpu10ep.h5
 arch=./dat/networks/fltclasswgt5-gpu10ep.json
-figpfx=./fig/wrg
+figpfx=./fig/tru2
 # Patch parameters
 ptchx=128
 ptchz=128

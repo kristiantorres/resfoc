@@ -33,18 +33,23 @@ dz = 10; dx = 10
 rvelsm = gaussian_filter(rvel,sigma=20)
 
 # Scale by a random perturbation
-nro=10; oro=1.0; dro=0.01
-romin = oro - (nro-1)*dro; romax = romin + dro*(2*nro-1)
-#rho = create_randomptb(nz,nx,romin,romax,nptsz=1,nptsx=1,octaves=4,period=80,Ngrad=80,persist=0.2,ncpu=10)
-rhosm = create_randomptb_loc(nz,nx,romin,romax,350,1024,300,512,
+nro1=3; oro1=1.03; dro1=0.01
+romin1 = oro1 - (nro1-1)*dro1; romax1 = romin1 + dro1*(2*nro1-1)
+rhosm1 = create_randomptb_loc(nz,nx,romin1,romax1,150,150,200,700,
+    nptsz=2,nptsx=2,octaves=4,period=80,Ngrad=80,persist=0.2,ncpu=10)
+
+nro2=3; oro2=0.97; dro2=0.01
+romin2 = oro2 - (nro2-1)*dro1; romax2 = romin2 + dro2*(2*nro2-1)
+rhosm2 = create_randomptb_loc(nz,nx,romin2,romax2,150,150,120,300,
     nptsz=2,nptsx=2,octaves=4,period=80,Ngrad=80,persist=0.2,ncpu=10)
 #rho[:100,:] = 1.0
 #rhosm = gaussian_filter(rho,sigma=20)
-plt.figure(1); plt.imshow(rhosm,cmap='jet')
-plt.figure(2); plt.imshow(rvelsm,cmap='jet')
-plt.figure(3); plt.imshow(rvelsm*rhosm,cmap='jet')
+plt.figure(1); plt.imshow(rhosm1,cmap='jet')
+plt.figure(2); plt.imshow(rhosm2,cmap='jet')
+plt.figure(3); plt.imshow(rvelsm,cmap='jet')
+plt.figure(4); plt.imshow(rvelsm*rhosm1*rhosm2,cmap='jet')
 plt.show()
-rvelwr = rvelsm*rhosm
+rvelwr = rvelsm*rhosm1*rhosm2
 
 # Save figures
 fsize = 24
@@ -60,12 +65,12 @@ plt.savefig('./fig/migvelsm.png',bbox_inches='tight',dpi=150,transparent=True)
 plt.close()
 
 fig2 = plt.figure(2,figsize=(14,7)); ax2 = fig2.gca()
-im2 = ax2.imshow(rhosm,cmap='jet',interpolation='bilinear',extent=[0.0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0])
+im2 = ax2.imshow(rhosm1*rhosm2,cmap='jet',interpolation='bilinear',extent=[0.0,(nx-1)*dx/1000.0,(nz-1)*dz/1000.0,0.0])
 ax2.set_xlabel('X (km)',fontsize=fsize); ax2.set_ylabel('Z (km)',fontsize=fsize); ax2.tick_params(labelsize=fsize)
 cbar_ax2 = fig2.add_axes([0.91,0.11,0.02,0.77])
 cbar2 = fig2.colorbar(im2,cbar_ax2,format='%.2f')
 cbar2.ax.tick_params(labelsize=fsize)
-cbar2.set_label(r'$\rho$',fontsize=fsize)
+cbar2.set_label('% Error',fontsize=fsize)
 cbar2.draw_all()
 plt.savefig('./fig/rhosm.png',bbox_inches='tight',dpi=150,transparent=True)
 plt.close()
@@ -120,8 +125,8 @@ ntd = 1600; otd = 0.0; dtd = 0.004;
 # Create the wavelet array
 freq = 20; amp = 100.0; dly = 0.2;
 fsrc = ricker(ntu,dtu,freq,amp,dly)
-spec,fs = ampspec1d(fsrc,dtu)
-plt.plot(fs,spec); plt.show()
+#spec,fs = ampspec1d(fsrc,dtu)
+#plt.plot(fs,spec); plt.show()
 allsrcs = np.zeros([nsx,1,ntu],dtype='float32')
 for isx in range(nsx):
   allsrcs[isx,0,:] = fsrc[:]
