@@ -6,9 +6,6 @@
 #include <tbb/tbb.h>
 #include <fftw3.h>
 #include "evntcre8.h"
-#include "/opt/matplotlib-cpp/matplotlibcpp.h"
-
-namespace plt = matplotlibcpp;
 
 evntcre8::evntcre8(int nx, int ny, float dx, float dy, float dz) {
   _n2 = nx; _n3 = ny;
@@ -222,8 +219,8 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
 
             // Compute shifts to be applied
             shiftz[i3*nz*_n2 + i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
-            shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
-            shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
+            shiftx[i3*nz*_n2 + i2*nz + i1] = (newX - (_d2 * i2))/scalethrw;
+            shifty[i3*nz*_n2 + i2*nz + i1] = (newY - (_d3 * i3))/scalethrw;
 
             // Save new label out
             nlblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
