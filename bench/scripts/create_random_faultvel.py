@@ -163,14 +163,14 @@ for imodel in range(nmodels):
   for ifl in progressbar(range(nlf), "nlfaults:", 40):
     azim = np.random.choice(azims)
     xpos = rndut.randfloat(0.1,0.9)
-    mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5,tscale=6.0)
+    mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5,tscale=15.0)
 
   # Medium faults
   nmf = np.random.randint(3,6)
   for ifl in progressbar(range(nmf), "nmfaults:", 40):
     azim = np.random.choice(azims)
     xpos = rndut.randfloat(0.05,0.95)
-    mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5,tscale=3.0)
+    mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5,tscale=15.0)
 
   # Small faults (sliding or small)
   nsf = np.random.randint(5,10)
@@ -178,20 +178,23 @@ for imodel in range(nmodels):
     azim = np.random.choice(azims)
     xpos = rndut.randfloat(0.05,0.95)
     zpos = rndut.randfloat(0.2,0.5)
-    mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=2.0)
+    mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=10.0)
 
-  # Tiny faults
-  ntf = np.random.randint(5,10)
-  for ifl in progressbar(range(ntf), "ntfaults:", 40):
-    azim = np.random.choice(azims)
-    xpos = rndut.randfloat(0.05,0.95)
-    zpos = rndut.randfloat(0.15,0.3)
-    mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=2.0)
+  ## Tiny faults
+  #ntf = np.random.randint(5,10)
+  #for ifl in progressbar(range(ntf), "ntfaults:", 40):
+  #  azim = np.random.choice(azims)
+  #  xpos = rndut.randfloat(0.05,0.95)
+  #  zpos = rndut.randfloat(0.15,0.3)
+  #  mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,tscale=2.0)
 
   # Get model
   if(nxo == nx and nzo == nz):
     vels[:,:,imodel] = gaussian_filter(mb.vel[slcy,:,:nz].T,sigma=args.rect).astype('float32')
     lbls[:,:,imodel] = mb.get_label()[slcy,:,:nz].T
+    import matplotlib.pyplot as plt
+    plt.imshow(vels[:,:,imodel],cmap='jet',extent=[0.0,(nxo-1)*dx,(nzo-1)*dz,0.0],interpolation='bilinear'); plt.show()
+    plt.imshow(lbls[:,:,imodel],cmap='jet'); plt.show()
     refs[:,:,imodel] = mb.get_refl()[slcy,:,:nz].T
     # Create normalized image
     f = rndut.randfloat(minf,maxf)

@@ -222,8 +222,8 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
 
             // Compute shifts to be applied
             shiftz[i3*nz*_n2 + i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
-            shiftx[i3*nz*_n2 + i2*nz + i1] = newX - (_d2 * i2);
-            shifty[i3*nz*_n2 + i2*nz + i1] = newY - (_d3 * i3);
+            shiftx[i3*nz*_n2 + i2*nz + i1] = (newX - (_d2 * i2))/scalethrw;
+            shifty[i3*nz*_n2 + i2*nz + i1] = (newY - (_d3 * i3))/scalethrw;
 
             // Save new label out
             nlblot[i3*nz*_n2 + i2*nz + i1] = shiftz[i3*nz*_n2 + i2*nz + i1];
