@@ -4,13 +4,13 @@ import numpy as np
 def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
   """ Computes the forward cosine transform just as in Madagascar """
   if(len(dat.shape) == 1):
-    return cosft1d(dat)
+    return cosft1d(dat).astype('float32')
   elif(len(dat.shape) == 2):
-    return cosft2d(dat,axis1,axis2)
+    return cosft2d(dat,axis1,axis2).astype('float32')
   elif(len(dat.shape) == 3):
-    return cosft3d(dat,axis1,axis2,axis3)
+    return cosft3d(dat,axis1,axis2,axis3).astype('float32')
   elif(len(dat.shape) == 4):
-    return cosft4d(dat,axis1,axis2,axis3,axis4)
+    return cosft4d(dat,axis1,axis2,axis3,axis4).astype('float32')
   else:
     print("Cosine transform > 4D not yet implemented")
     return
@@ -18,13 +18,13 @@ def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
 def icosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
   """ Computes the inverse cosine transform """
   if(len(dat.shape) == 1):
-    return icosft1d(dat)
+    return icosft1d(dat).astype('float32')
   elif(len(dat.shape) == 2):
-    return icosft2d(dat,axis1,axis2)
+    return icosft2d(dat,axis1,axis2).astype('float32')
   elif(len(dat.shape) == 3):
-    return icosft3d(dat,axis1,axis2,axis3)
+    return icosft3d(dat,axis1,axis2,axis3).astype('float32')
   elif(len(dat.shape) == 4):
-    return icosft4d(dat,axis1,axis2,axis3,axis4)
+    return icosft4d(dat,axis1,axis2,axis3,axis4).astype('float32')
   else:
     print("Inverse cosine transform > 4D not yet implemented")
     return
@@ -424,13 +424,13 @@ def icosft4d4(hcub):
   # Compute inverse cosine transform
   return np.real(np.fft.irfft(phcub,axis=3))[:,:,:,0:n4]
 
-def samplings(dat,axes):
+def samplings(dat,dsin):
   """ Computes the cosine transformed samplings """
   ns = dat.shape
   ndim = len(ns)
   ds = []
   for idim in range(ndim):
-    ds.append(1/(2*next_fast_size(ns[idim]-1)*axes.d[idim]))
+    ds.append(1/(2*next_fast_size(ns[idim]-1)*dsin[idim]))
 
   return ds
 

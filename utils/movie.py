@@ -1,7 +1,8 @@
 """
 Useful functions for creating movies for presentations
+and viewing frames of a numpy array
 @author: Joseph Jennings
-@version: 2020.02.06
+@version: 2020.02.25
 """
 import os
 import inpout.seppy as seppy
@@ -14,12 +15,28 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   Saves each frame on the fast axis to a png for viewing 
 
   Parameters:
-    arr   - input array where the frames are on the fast axis
-    odir  - the output directory where to save the frames
-    ftype - the type (extension) of figure to save [png]
-    qc    - look at each frame as it is saved [False]
-    skip  - whether to skip frames [1]
-    pttag - write the frame number in pretty (unix-friendly) format
+    arr       - input array where the frames are on the fast axis
+    odir      - the output directory where to save the frames
+    ftype     - the type (extension) of figure to save [png]
+    qc        - look at each frame as it is saved [False]
+    skip      - whether to skip frames [1]
+    pttag     - write the frame number in pretty (unix-friendly) format
+    wbox      - the first dimension of the figure size (figure width) [10]
+    hbox      - the second dimension of the figure size (figure height) [10]
+    xmin      - the minimum lateral point in your data [0.0]
+    xmax      - the maximum lateral point in your data (typically (nx-1)*dx) [nx]
+    zmin      - the minimum depth point in your data [0.0]
+    zmax      - the maximum depth point in your data (typically (nz-1)*dz) [nz]
+    vmin      - the minumum value desired to be plotted (min(data))
+    vmax      - the maximum value desired to be plotted (max(data))
+    xlabel    - the label of the x-axis [None]
+    ylabel    - the label of the y-axis [None]
+    labelsize - the fontsize of the labels [18]
+    ticksize  - the fontsize of the ticks [18]
+    ttlstring - title to be printed. Can be printed of the form ttlstring%(ottl + dttl*(framenumber))
+    ottl      - the first title value to be printed
+    dttl      - the sampling of the title value to be printed
+    aratio    - aspect ratio of the figure [1.0]
   """
   # Check if directory exists
   if(os.path.isdir(odir) == False):
@@ -28,7 +45,7 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   k = 0
   frames = np.arange(0,nfr,skip)
   for ifr in progressbar(frames, "frames"):
-    fig = plt.figure(figsize=(kwargs.get("figsize1",10),kwargs.get("figsize2",10)))
+    fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
     ax = fig.add_subplot(111)
     ax.imshow(arr[:,:,ifr],cmap=kwargs.get("cmap","gray"),
         extent=[kwargs.get("xmin",0),kwargs.get("xmax",arr.shape[1]),
@@ -38,6 +55,9 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
     ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
     ax.tick_params(labelsize=kwargs.get('ticksize',18))
+    if('%' in kwargs.get('ttlstring'),''):
+      ax.set_title(kwargs.get('ttlstring','')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*k),
+          fontsize=kwargs.get('labelsize',18))
     ax.set_aspect(kwargs.get('aratio',1.0))
     if(pttag):
       tag = create_inttag(k,nfr)
@@ -118,4 +138,93 @@ def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kw
     k += 1
     if(qc):
       plt.show()
+
+def viewframeskey(data,transp=True,fast=True,show=True,**kwargs):
+  """ 
+  Provides a frame by frame interactive viewing of a numpy array via the arrow keys.
+  Assumes the slow axis is the first axis.
+
+  Parameters:
+    data      - an input 3D array. Must be 3D otherwise will fail
+    transp    - whether to transpose the first and second axes before plotting
+    cmap      - colormap [gray]
+    vmin      - minimum value to display in the data [default is minimum amplitude of all data]
+    vmax      - maximum value to display in the data [default is maximum amplitude of all data]
+    pclip     - how much to clip the min and max of the amplitudes [0.9]
+    ttlstring - title to be printed. Can be printed of the form ttlstring%(ottl + dttl*(framenumber))
+    ottl      - origin for printing title values [0.0]
+    dttl      - sampling for printing title values [1.0]
+    scalebar  - flag of whether to plot a colorbar (False)
+    hbar      - height of the scale bar
+    wbar      - width of the scale bar
+    zbar      - z position of scale bar
+    xbar      - x position of scale bar
+    barlabel  - colorbar label
+    interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
+    show      - flag for calling plt.show() [True]
+  """
+  if(len(data.shape) < 3):
+    raise Exception("Data must be 3D")
+  curr_pos = 0
+  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+    vmin = np.min(data)*kwargs.get('pclip',0.9)
+    vmax = np.max(data)*kwargs.get('pclip',0.9)
+
+  def key_event(e):
+    nonlocal curr_pos,vmin,vmax
+
+    if e.key == "right":
+        curr_pos = curr_pos + 1
+    elif e.key == "left":
+        curr_pos = curr_pos - 1
+    else:
+        return
+    curr_pos = curr_pos % data.shape[0]
+
+    if(transp):
+      img = data[curr_pos,:,:].T
+    else:
+      img = data[curr_pos,:,:]
+    if(not fast):
+      ax.cla()
+      ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
+          extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
+          kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],interpolation=kwargs.get('interp','none'))
+    ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
+    ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+    ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+    if('%' in kwargs.get('ttlstring',' ')):
+      ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
+          fontsize=kwargs.get('labelsize',14))
+    else:
+      ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+    ax.tick_params(labelsize=kwargs.get('ticksize',14))
+    if(fast):
+      l.set_data(img)
+    fig.canvas.draw()
+
+  fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
+  fig.canvas.mpl_connect('key_press_event', key_event)
+  ax = fig.add_subplot(111)
+  # Show the first frame
+  if(transp):
+    img = data[0,:,:].T
+  else:
+    img = data[0,:,:]
+  l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
+      extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
+        kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],interpolation=kwargs.get('interp','none'))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  if('%' in kwargs.get('ttlstring',' ')):
+    ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0)),fontsize=kwargs.get('labelsize',14))
+  else:
+    ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  if(show):
+    plt.show()
+
+def viewframessld(data,transp=True,**kwargs):
+  pass
 
