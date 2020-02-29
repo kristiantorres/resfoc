@@ -26,8 +26,8 @@ rmig = preresmig(img,[dh,dx,dz],time=False)
 
 # Conversion to time
 #TODO: need to figure out how to get them to map to the same sample positions
-time = convert2time(rmig,dz,nt=nz,dt=0.004,vc=8000)
+time = convert2time(rmig,dz,dt=0.004)
 
 # Visualize the frames
-#viewframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9)
+viewframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=False)
 viewframeskey(time[:,zoff,:,:nz],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9)
