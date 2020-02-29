@@ -51,28 +51,30 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
 
   # Convert to time
   if(time):
-    rmigtime = convert2time(rmigiftswind,ds[2],nt=nz,dt=0.004,oro=oro,dro=dro,vc=10000)
+    rmigtime = convert2time(rmigiftswind,ds[2],dt=0.004,oro=oro,dro=dro)
     return rmigtime
   else:
     return rmigiftswind
 
-def convert2time(depth,dz,nt,dt,oro=1.0,dro=0.01,vc=2000,oz=0.0,ot=0.0):
+def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0):
   """
   Converts residually migrated images from depth to time
 
   Parameters
     depth - the input depth residual depth migrated images
     dz    - the depth sampling of the residual migration images
-    nt    - output number of time samples
     dt    - output time sampling
     oro   - center residual migration value [1.0]
     dro   - rho sampling [0.01]
-    vc    - constant velocity used for stretch [2000]
     oz    - input depth origin [0.0]
     ot    - output time origin [0.0]
   """
   # Get the dimensions of the input cube
   fnro = depth.shape[0]; nh = depth.shape[1]; nm = depth.shape[2]; nz = depth.shape[3]
+  nt = nz
+  # Compute velocity
+  T = (nt-1)*dt; Z = (nz-1)*dz
+  vc = 2*Z/T
   # Compute rho axis
   nro = (fnro + 1)/2; foro = oro - (nro-1)*dro;
   vel  = np.zeros(depth.shape,dtype='float32')
