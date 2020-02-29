@@ -51,7 +51,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
 
   # Convert to time
   if(time):
-    rmigtime = convert2time(rmigiftswind,ds[2],nt=2*nz,dt=0.004,oro=oro,dro=dro,vc=2000)
+    rmigtime = convert2time(rmigiftswind,ds[2],dt=0.004,oro=oro,dro=dro)
     return rmigtime
   else:
     return rmigiftswind

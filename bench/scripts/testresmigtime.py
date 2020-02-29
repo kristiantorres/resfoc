@@ -25,7 +25,6 @@ img[zoff,:,:] = np.array([butter_bandpass_filter(pt[zoff,ix,:].T,0.002,0.015,1/d
 rmig = preresmig(img,[dh,dx,dz],time=False)
 
 # Conversion to time
-#TODO: need to figure out how to get them to map to the same sample positions
 time = convert2time(rmig,dz,dt=0.004)
 
 # Visualize the frames
