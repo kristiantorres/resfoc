@@ -55,7 +55,7 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
     ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
     ax.tick_params(labelsize=kwargs.get('ticksize',18))
-    if('%' in kwargs.get('ttlstring'),''):
+    if('%' in kwargs.get('ttlstring','')):
       ax.set_title(kwargs.get('ttlstring','')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*k),
           fontsize=kwargs.get('labelsize',18))
     ax.set_aspect(kwargs.get('aratio',1.0))
