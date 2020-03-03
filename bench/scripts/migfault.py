@@ -99,11 +99,11 @@ sca = sca2d.scaas2d(ntd,nxp,nzp,dtd,dx,dz,dtu,bx,bz,alpha=alpha)
 
 nthreads=24
 #sca.fwdprop_multishot(allsrcs,allsrcx,allsrcz,nsrc,allrecx,allrecz,nrec,nsx,velp,allshot,nthreads)
-#sca.brnfwd(allsrcs,allsrcx,allsrcz,nsrc,allrecx,allrecz,nrec,nsx,vmgp,dvlp,allshot,nthreads)
+sca.brnfwd(allsrcs,allsrcx,allsrcz,nsrc,allrecx,allrecz,nrec,nsx,vmgp,dvlp,allshot,nthreads,verb=1)
 # Read in the data
-daxes,dat = sep.read_file(None,ifname='fltdat.H')
-dat = dat.reshape(daxes.n,order='F')
-allshot = np.transpose(dat,(2,0,1)).astype('float32')
+#daxes,dat = sep.read_file(None,ifname='fltdat.H')
+#dat = dat.reshape(daxes.n,order='F')
+#allshot = np.transpose(dat,(2,0,1)).astype('float32')
 
 imgp  = np.zeros([nzp,nxp],dtype='float32')
 imgl  = np.zeros([nzp,nxp],dtype='float32')

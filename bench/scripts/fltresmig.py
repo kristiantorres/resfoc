@@ -7,7 +7,7 @@ from utils.signal import butter_bandpass_filter
 
 # Read in the processed fault image
 sep = seppy.sep([])
-iaxes,img = sep.read_file(None,ifname='fltimgprc.H')
+iaxes,img = sep.read_file(None,ifname='fltimgwrng3prc.H')
 img = img.reshape(iaxes.n,order='F')
 
 # Get axes
@@ -23,12 +23,17 @@ eimg = np.zeros([rnh,nx,nz],dtype='float32')
 eimg[zoff,:,:] = img.T
 
 # Depth Residual migration
-rmig = preresmig(eimg,[dh,dx,dz],time=False)
+rmig = preresmig(eimg,[dh,dx,dz],time=False,nthreads=2*nro-1)
 
 # Conversion to time
 time = convert2time(rmig,dz,dt=0.004)
 
 # Visualize the frames
-viewframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=False)
-viewframeskey(time[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=True)
+#viewframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=False)
+#viewframeskey(time[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=True)
+
+# Write the files
+raxes = seppy.axes([nz,nx,2*nro-1],[oz,ox,oro-dro*(nro-1)],[dz,dx,dro])
+sep.write_file(None,raxes,rmig[:,zoff,:,:].T,ofname='drmigwrng.H')
+sep.write_file(None,raxes,time[:,zoff,:,:].T,ofname='trmigwrng.H')
 
