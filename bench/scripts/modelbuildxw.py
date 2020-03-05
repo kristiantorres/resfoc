@@ -50,6 +50,11 @@ zidx = np.abs(z) < 5.0
 
 cub[zidx] = 1
 
+#for iy in range(ny):
+#  for ix in range(nx):
+#    for iz in range(nz):
+#      if(z[iz
+
 print(np.min(np.abs(z)))
 
 xidx = x/dx
@@ -65,5 +70,7 @@ sep.write_file(None,axes,cub,"testplane.H")
 pv.write_nrrd('z60.nrrd',z)
 pv.write_nrrd('plane.nrrd',cub,ds=[dy,dx,dx])
 
-viewframeskey(cub,cmap='jet')
+viewframeskey(Y,cmap='jet',scalebar=True,hbox=7,wbox=14,barx=0.73,show=False)
+viewframeskey(X,cmap='jet',scalebar=True,hbox=7,wbox=14,barx=0.73,show=False)
+viewframeskey(Z,cmap='jet',scalebar=True,hbox=7,wbox=14,barx=0.73,show=True)
 

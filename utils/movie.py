@@ -68,7 +68,6 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
     if(qc):
       plt.show()
 
-
 def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   """ 
   Saves each frame on the fast axis to a png for viewing 
@@ -139,9 +138,9 @@ def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kw
     if(qc):
       plt.show()
 
-def viewframeskey(data,transp=True,fast=True,show=True,**kwargs):
+def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   """ 
-  Provides a frame by frame interactive viewing of a numpy array via the arrow keys.
+  Provides a frame by frame interactive viewing of a 3D numpy array via the arrow keys.
   Assumes the slow axis is the first axis.
 
   Parameters:
@@ -193,6 +192,13 @@ def viewframeskey(data,transp=True,fast=True,show=True,**kwargs):
     ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
     ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+    #if(kwargs.get('scalebar',False)):
+    #  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+    #    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+    #  cbar = fig.colorbar(l,cbar_ax,format='%.2f')
+    #  cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+    #  cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",18))
+    #  cbar.draw_all()
     if('%' in kwargs.get('ttlstring',' ')):
       ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
           fontsize=kwargs.get('labelsize',14))
@@ -214,6 +220,89 @@ def viewframeskey(data,transp=True,fast=True,show=True,**kwargs):
   l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
       extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
         kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],interpolation=kwargs.get('interp','none'))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  # Color bar
+  if(kwargs.get('scalebar',False)):
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+      kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+    cbar = fig.colorbar(l,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+    cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",18))
+    cbar.draw_all()
+  if('%' in kwargs.get('ttlstring',' ')):
+    ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0)),fontsize=kwargs.get('labelsize',14))
+  else:
+    ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  if(show):
+    plt.show()
+
+def viewpltframeskey(data,ox=0.0,dx=1.0,transp=True,show=True,**kwargs):
+  """ 
+  Provides a frame by frame interactive viewing of a 2D numpy array via the arrow keys.
+  Assumes the slow axis is the first axis.
+
+  Parameters:
+    data      - an input 2D array. Must be 2D otherwise will fail
+    vmin      - minimum value to display in the data [default is minimum amplitude of all data]
+    vmax      - maximum value to display in the data [default is maximum amplitude of all data]
+    pclip     - how much to clip the min and max of the amplitudes [0.9]
+    ttlstring - title to be printed. Can be printed of the form ttlstring%(ottl + dttl*(framenumber))
+    ottl      - origin for printing title values [0.0]
+    dttl      - sampling for printing title values [1.0]
+    show      - flag for calling plt.show() [True]
+  """
+  if(len(data.shape) < 2):
+    raise Exception("Data must be 2D")
+  curr_pos = 0
+  # Create the x axis
+  nx = data.shape[1]
+  xs = np.linspace(ox,ox+(nx-1)*dx,nx)
+  # Find the min and the max of the frames
+  if(kwargs.get('ymin',None) == None or kwargs.get('ymax',None) == None):
+    ymin = np.min(data); ymax = np.max(data)
+
+  def key_event(e):
+    nonlocal curr_pos,xs
+
+    if e.key == "right":
+        curr_pos = curr_pos + 1
+    elif e.key == "left":
+        curr_pos = curr_pos - 1
+    else:
+        return
+    curr_pos = curr_pos % data.shape[0]
+
+    if(transp):
+      crv = data[curr_pos,:].T
+    else:
+      crv = data[curr_pos,:]
+    ax.cla()
+    ax.plot(xs,crv,color=kwargs.get('color','tab:blue'),linewidth=kwargs.get('linewidth',1.5))
+    ax.set_ylim([kwargs.get('ymin',ymin),kwargs.get('ymax',ymax)])
+    ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
+    ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+    ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+    if('%' in kwargs.get('ttlstring',' ')):
+      ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
+          fontsize=kwargs.get('labelsize',14))
+    else:
+      ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+    ax.tick_params(labelsize=kwargs.get('ticksize',14))
+    fig.canvas.draw()
+
+  fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
+  fig.canvas.mpl_connect('key_press_event', key_event)
+  ax = fig.add_subplot(111)
+  # Show the first frame
+  if(transp):
+    crv = data[0,:].T
+  else:
+    crv = data[0,:,:]
+  l = ax.plot(xs,crv,color=kwargs.get('color','tab:blue'),linewidth=kwargs.get('linewidth',1.5))
+  ax.set_ylim([kwargs.get('ymin',ymin),kwargs.get('ymax',ymax)])
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
