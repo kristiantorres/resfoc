@@ -1,4 +1,3 @@
-NPPATH=${CONDA_PREFIX}/lib/python3.5/site-packages/numpy/core
 
 %.o: %.cpp
 	g++ -O3 -fPIC -ffast-math -fopenmp -shared -Wall -I. -c -fPIC -o $@ $<
