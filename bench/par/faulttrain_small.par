@@ -25,4 +25,4 @@ unet=y
 drpout=0.0
 # Other
 verb=y
-gpus=5
+gpus=4
