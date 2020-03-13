@@ -7,11 +7,12 @@ Functions for building deep neural networks using Keras
 import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose
-from tensorflow.keras.layers import BatchNormalization, Concatenate, Activation, Cropping2D
-from tensorflow.keras.layers import ZeroPadding2D, UpSampling2D, LeakyReLU
+from tensorflow.keras.layers import BatchNormalization, Concatenate, Activation, Cropping2D, concatenate
+from tensorflow.keras.layers import ZeroPadding2D, MaxPooling2D, UpSampling2D, LeakyReLU
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import RandomNormal
+from deeplearn.keraslosses import cross_entropy_balanced
 
 def conv2d(layer_input, filters, f_size, alpha=0.2, bn=True, dropout=0.0):
   """ A wrapper for Keras Conv2D function """
@@ -88,4 +89,41 @@ def auto_encoder(imgshape, nc_in, nc_out, nf, ksize, unet=True, dropout=0.0, reg
     out = Conv2D(nc_out, kernel_size=ksize, strides=1, padding='same', activation='relu', name='output')(u5)
 
   return Model(inp,out)
+
+def unetxwu(pretrained_weights = None,input_size = (128,128,1)):
+  inputs = Input(input_size)
+  conv1 = Conv2D(16, (3,3), activation='relu', padding='same')(inputs)
+  conv1 = Conv2D(16, (3,3), activation='relu', padding='same')(conv1)
+  pool1 = MaxPooling2D(pool_size=(2,2))(conv1)
+
+  conv2 = Conv2D(32, (3,3), activation='relu', padding='same')(pool1)
+  conv2 = Conv2D(32, (3,3), activation='relu', padding='same')(conv2)
+  pool2 = MaxPooling2D(pool_size=(2,2))(conv2)
+
+  conv3 = Conv2D(64, (3,3), activation='relu', padding='same')(pool2)
+  conv3 = Conv2D(64, (3,3), activation='relu', padding='same')(conv3)
+  pool3 = MaxPooling2D(pool_size=(2,2))(conv3)
+
+  conv4 = Conv2D(512, (3,3), activation='relu', padding='same')(pool3)
+  conv4 = Conv2D(512, (3,3), activation='relu', padding='same')(conv4)
+
+  up5 = concatenate([UpSampling2D(size=(2,2))(conv4), conv3], axis=-1)
+  conv5 = Conv2D(64, (3,3), activation='relu', padding='same')(up5)
+  conv5 = Conv2D(64, (3,3), activation='relu', padding='same')(conv5)
+
+  up6 = concatenate([UpSampling2D(size=(2,2))(conv5), conv2], axis=-1)
+  conv6 = Conv2D(32, (3,3), activation='relu', padding='same')(up6)
+  conv6 = Conv2D(32, (3,3), activation='relu', padding='same')(conv6)
+
+  up7 = concatenate([UpSampling2D(size=(2,2))(conv6), conv1], axis=-1)
+  conv7 = Conv2D(16, (3,3), activation='relu', padding='same')(up7)
+  conv7 = Conv2D(16, (3,3), activation='relu', padding='same')(conv7)
+
+  conv8 = Conv2D(1, (1,1), activation='sigmoid')(conv7)
+
+  model = Model(inputs=[inputs], outputs=[conv8])
+  print(model.summary())
+  model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+
+  return model
 

@@ -34,24 +34,26 @@ def resizepow2(img,kind='linear'):
   # Resample the image
   return resample(img,new_shape,kind)
 
-def resample(img,new_shape,kind='linear'):
+def resample(img,new_shape,kind='linear',ds=[]):
   """
   Resamples an image. Can work up to 4D numpy arrays.
   assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
-  length=img.shape[-1]
-  height=img.shape[-2]
+  length=img.shape[1]
+  height=img.shape[0]
   x=np.linspace(0,length,length)
   y=np.linspace(0,height,height)
   # New coordinates for interpolation
   xnew=np.linspace(0,length,new_shape[1])
   ynew=np.linspace(0,height,new_shape[0])
   # Compute new samplings
-  #lr = new_shape[0]/length
-  #hr = new_shape[1]/height
-  #d1out = d1/hr
-  #d2out = d2/lr
+  if(len(ds) != 0):
+      dout = []
+      lr = new_shape[1]/length
+      hr = new_shape[0]/height
+      dout.append(ds[1]/hr)
+      dout.append(ds[0]/lr)
   # Perform the interpolation
   if len(img.shape)==4:
     res = np.zeros([img.shape[0],img.shape[1],new_shape[0],new_shape[1]],dtype='float32')
@@ -68,8 +70,10 @@ def resample(img,new_shape,kind='linear'):
     f=interpolate.interp2d(x,y,img,kind=kind)
     res=f(xnew,ynew)
 
-  return res
-  #return res,[d1out,d2out]
+  if(len(ds) == 0):
+    return res
+  else:
+    return res,dout
 
 def next_power_of_2(x):
   """ Gets the nearest power of two to x """
