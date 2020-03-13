@@ -10,7 +10,7 @@ import inpout.seppy as seppy
 import numpy as np
 from utils.ptyprint import create_inttag
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from deeplearn.utils import plotseglabel, thresh, normalize
+from deeplearn.utils import plotseglabel, thresh, normalize, resample
 from tensorflow.keras.models import model_from_json
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -25,6 +25,9 @@ defaults = {
     "thresh": 0.5,
     "show": 'n',
     "gpus": [],
+    "aratio": 1.0,
+    "fs": 0,
+    "time": "n"
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -47,6 +50,8 @@ ioArgs.add_argument("-arch",help="input CNN architecture",type=str,required=True
 ioArgs.add_argument("-figpfx",help="Output directory of where to save figs",type=str)
 # Required arguments
 ptchArgs = parser.add_argument_group('Patching parameters')
+ptchArgs.add_argument('-nxo',help='Output x for resampling before patching [1024]',type=int)
+ptchArgs.add_argument('-nzo',help='Output z for resampling before patching [512]',type=int)
 ptchArgs.add_argument('-ptchx',help='X dimension of patch',type=int,required=True)
 ptchArgs.add_argument('-ptchz',help='Z dimension of patch',type=int,required=True)
 ptchArgs.add_argument('-strdx',help='X dimension of stride',type=int,required=True)
@@ -56,6 +61,9 @@ parser.add_argument("-thresh",help="Threshold to apply to predictions [0.5]",typ
 parser.add_argument("-verb",help="Verbosity flag (y or [n])",type=str)
 parser.add_argument("-show",help="Show plots before saving [n]",type=str)
 parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
+parser.add_argument("-aratio",help="Aspect ratio for plotting",type=float)
+parser.add_argument("-fs",help="First sample for windowing the plots",type=int)
+parser.add_argument("-time",help="Flag for a time or depth image [n]",type=str)
 # Enables required arguments in config file
 for action in parser._actions:
   if(action.dest in defaults):
@@ -69,6 +77,8 @@ sep = seppy.sep(sys.argv)
 verb  = sep.yn2zoo(args.verb)
 show = False
 if(sep.yn2zoo(args.show)): show = True
+time = False
+if(sep.yn2zoo(args.time)): time = True
 gpus  = sep.read_list(args.gpus,[])
 if(len(gpus) != 0):
   for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
@@ -78,14 +88,17 @@ iaxes,imgs = sep.read_file(None,ifname=args.imgs)
 imgs = imgs.reshape(iaxes.n,order='F')
 if(len(imgs.shape) < 3):
   imgs = np.expand_dims(imgs,axis=-1)
+else:
+  imgs = np.transpose(imgs,(2,0,1))
 nz = imgs.shape[0]; nx = imgs.shape[1]; nimg = imgs.shape[2]
 dz = iaxes.d[0]; dx = iaxes.d[1]
 
 # Perform the patch extraction
+nzo = args.nzo;   nxo = args.nxo
 nzp = args.ptchz; nxp = args.ptchx
 pe = PatchExtractor((nzp,nxp),stride=(args.strdx,args.strdz))
 
-# Read in the network
+## Read in the network
 with open(args.arch,'r') as f:
   model = model_from_json(f.read())
 
@@ -98,8 +111,13 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Loop over all images
 for iimg in range(nimg):
+  # Resample the images to the output size
+  if(nimg == 1):
+    rimg,ds = resample(imgs[:,:,0],[nzo,nxo],kind='linear',ds=[dz,dx])
+  else:
+    rimg,ds = resample(imgs[iimg,:,:],[nzo,nxo],kind='linear',ds=[dz,dx])
   # Perform the patch extraction
-  iptch = pe.extract(imgs[:,:,iimg])
+  iptch = pe.extract(rimg)
   numpz = iptch.shape[0]; numpx = iptch.shape[1]
   iptch = iptch.reshape([numpx*numpz,nzp,nxp,1])
   # Normalize each patch
@@ -113,8 +131,10 @@ for iimg in range(nimg):
   iprb  = pe.reconstruct(ipra)
   tprb  = thresh(iprb,args.thresh)
   # Plot the prediction and the image
-  plotseglabel(normalize(imgs[:,:,iimg]),tprb,color='blue',
-             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*dx/1000.0,
-             zmin=0.0,zmax=(nz-1)*dz/1000.0,vmin=-3.5,vmax=3.5,aratio=1.0,show=show,interp='sinc',
+  if(not time):
+    dz /= 1000
+  plotseglabel(normalize(rimg)[args.fs:,:],tprb[args.fs:,:],color='blue',
+             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
+             zmin=args.fs*dz,zmax=(nz-1)*dz,vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
              fname=args.figpfx)
 

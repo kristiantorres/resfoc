@@ -1,5 +1,6 @@
 """
 Trains a CNN for segmenting faults on a seismic image
+using the architecture by Xinming Wu
 
 The neural network is of a U-net architecture (user can
 decide for skip connections or not). Network is implemented
@@ -11,15 +12,14 @@ out the model architecture as well as the model weights
 and biases which can then be used subsequently for validation/testing.
 
 @author: Joseph Jennings
-@version: 2020.02.22
+@version: 2020.03.12
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
 import h5py
 from deeplearn.dataloader import load_alldata
-from deeplearn.kerasnets import auto_encoder
-from deeplearn.keraslosses import wgtbce
+from deeplearn.kerasnets import unetxwu
 from deeplearn.kerascallbacks import F3Pred
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -32,9 +32,7 @@ conf_parser.add_argument("-c", "--conf_file",
 args, remaining_argv = conf_parser.parse_known_args()
 defaults = {
     "verb": "y",
-    "lr": 0.001,
     "nepochs": 10,
-    "classwgt1": 0.5,
     "nflts": 32,
     "fltsize": 5,
     "unet": "y",
@@ -72,16 +70,8 @@ f3Args.add_argument("-f3prd",help="Path for writing predictions on F3 data",type
 f3Args.add_argument("-f3fig",help="Path for writing figures of predictions on F3 data",type=str)
 # Training
 trainArgs = parser.add_argument_group('Training parameters')
-trainArgs.add_argument('-lr',help='Learning rate [0.001]',type=float)
 trainArgs.add_argument('-bsize',help='Batch size [20]',type=int)
 trainArgs.add_argument('-nepochs',help='Number of passes over training data [10]',type=int)
-trainArgs.add_argument('-classwgt1',help='Class weight to balance cross entropy loss [0.5]',type=float)
-# Network
-netargs = parser.add_argument_group('CNN design parameters')
-netargs.add_argument('-nflts',help='Number of filters that will be created after first conv [32]',type=int)
-netargs.add_argument('-fltsize', help='Size of square convolutional filter [5]',type=int)
-netargs.add_argument('-unet',help='Create a network with skip connects [y]',type=str)
-netargs.add_argument('-drpout',help='Dropout percent from 0 - 1 [0.0]',type=float)
 # Other arguments
 parser.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
@@ -101,31 +91,15 @@ if(len(gpus) != 0):
   for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
 
 # Training arguments
-lr      = args.lr
 bsize   = args.bsize
 nepochs = args.nepochs
 
-# Network arguments
-nf    = args.nflts
-fsize = args.fltsize
-unet  = sep.yn2zoo(args.unet)
-drpot = args.drpout
-
 # Load all data
-allx,ally = load_alldata(args.trdat,None,20)
+allx,ally = load_alldata(args.trdat,None,32)
 xshape = allx.shape[1:]
 yshape = ally.shape[1:]
 
-# Create the keras model
-model = auto_encoder(yshape, xshape[2], 1, nf, fsize, unet, drpot, False)
-if(verb): model.summary()
-
-# Create the optimization object
-opt = Adam(lr=lr, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
-
-# Compile the model
-#model.compile( loss='binary_crossentropy', optimizer=opt )
-model.compile( loss=wgtbce(args.classwgt1), optimizer=opt , metrics=['accuracy'] )
+model = unetxwu()
 
 # Set GPUs
 tf.compat.v1.GPUOptions(allow_growth=True)
