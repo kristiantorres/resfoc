@@ -32,6 +32,7 @@ defaults = {
     "barz": 0.31,
     "hbar": 0.37,
     "xidx": 600,
+    "cropsize": 154,
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -69,6 +70,7 @@ plotArgs.add_argument("-time",help="Flag for a time or depth image [n]",type=str
 plotArgs.add_argument("-barx",help="X position of colorbar [0.91]",type=float)
 plotArgs.add_argument("-barz",help="Z position of colorbar [0.31]",type=float)
 plotArgs.add_argument("-hbar",help="Colorbar height [0.37]",type=float)
+plotArgs.add_argument("-cropsize",help="Amount to crop on the unsegmented image for removing colorbar",type=int)
 # Optional arguments
 parser.add_argument("-thresh",help="Threshold to apply to predictions [0.5]",type=float)
 parser.add_argument("-verb",help="Verbosity flag (y or [n])",type=str)
@@ -151,6 +153,6 @@ for iimg in range(nimg):
              xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
              zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
              pmin=0.3,alpha=0.7,fname=args.figpfx,ticksize=14,barlabelsize=14,barx=args.barx,
-             hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz)
+             hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
 
 
