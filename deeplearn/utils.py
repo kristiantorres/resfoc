@@ -11,6 +11,7 @@ import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from copy import copy
 
 def normalize(img,eps=sys.float_info.epsilon):
   """
@@ -52,8 +53,8 @@ def resample(img,new_shape,kind='linear',ds=[]):
       dout = []
       lr = new_shape[1]/length
       hr = new_shape[0]/height
-      dout.append(ds[1]/hr)
       dout.append(ds[0]/lr)
+      dout.append(ds[1]/hr)
   # Perform the interpolation
   if len(img.shape)==4:
     res = np.zeros([img.shape[0],img.shape[1],new_shape[0],new_shape[1]],dtype='float32')
@@ -114,7 +115,8 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
 def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   """ Plots a binary label on top of an image """
-  assert(img.shape == lbl.shape),'Input image and label must be same size'
+  if(img.shape != lbl.shape):
+    raise Exception('Input image and label must be same size')
   # Get mask
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
@@ -141,5 +143,44 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
     plt.show()
   if(fname):
       plt.savefig(fname+"-lbl.png",bbox_inches='tight',dpi=150,transparent=True)
+      plt.close()
+
+def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
+  """ Plots unthresholded predictions on top of an image """
+  if(img.shape != prd.shape):
+    raise Exception('Input image and predictions must be same size')
+  mask = np.ma.masked_where(prd <= pmin, prd)
+  #myjet = copy(plt.cmap('jet'))
+  # Select colormap
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
+  ax = fig.add_subplot(111)
+  # Plot image
+  ax.imshow(img,cmap=kwargs.get('cmap','gray'),
+      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  if(fname):
+      ax.set_aspect(kwargs.get('aratio',1.0))
+      plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
+  # Plot label
+  imp = ax.imshow(mask,cmap='jet',
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("pinterp","bilinear"),
+        vmin=pmin,vmax=1.0,alpha=alpha)
+  ax.set_aspect(kwargs.get('aratio',1.0))
+  # Color bar
+  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+  cbar = fig.colorbar(imp,cbar_ax,format='%.1f')
+  cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
+  cbar.draw_all()
+  if(show):
+    plt.show()
+  if(fname):
+      plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
       plt.close()
 
