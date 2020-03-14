@@ -10,7 +10,7 @@ import inpout.seppy as seppy
 import numpy as np
 from utils.ptyprint import create_inttag
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from deeplearn.utils import plotseglabel, thresh, normalize, resample
+from deeplearn.utils import plotseglabel, plotsegprobs, thresh, normalize, resample
 from tensorflow.keras.models import model_from_json
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -27,7 +27,11 @@ defaults = {
     "gpus": [],
     "aratio": 1.0,
     "fs": 0,
-    "time": "n"
+    "time": "n",
+    "barx": 0.91,
+    "barz": 0.31,
+    "hbar": 0.37,
+    "xidx": 600,
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -56,14 +60,20 @@ ptchArgs.add_argument('-ptchx',help='X dimension of patch',type=int,required=Tru
 ptchArgs.add_argument('-ptchz',help='Z dimension of patch',type=int,required=True)
 ptchArgs.add_argument('-strdx',help='X dimension of stride',type=int,required=True)
 ptchArgs.add_argument('-strdz',help='Z dimension of stride',type=int,required=True)
+# Plotting arguments
+plotArgs = parser.add_argument_group('Plotting parameters')
+plotArgs.add_argument("-aratio",help="Aspect ratio for plotting",type=float)
+plotArgs.add_argument("-fs",help="First sample for windowing the plots",type=int)
+plotArgs.add_argument("-xidx",help="Last X sample for windowing the plots [600]",type=int)
+plotArgs.add_argument("-time",help="Flag for a time or depth image [n]",type=str)
+plotArgs.add_argument("-barx",help="X position of colorbar [0.91]",type=float)
+plotArgs.add_argument("-barz",help="Z position of colorbar [0.31]",type=float)
+plotArgs.add_argument("-hbar",help="Colorbar height [0.37]",type=float)
 # Optional arguments
 parser.add_argument("-thresh",help="Threshold to apply to predictions [0.5]",type=float)
 parser.add_argument("-verb",help="Verbosity flag (y or [n])",type=str)
 parser.add_argument("-show",help="Show plots before saving [n]",type=str)
 parser.add_argument("-gpus",help="A comma delimited list of which GPUs to use [default all]",type=str)
-parser.add_argument("-aratio",help="Aspect ratio for plotting",type=float)
-parser.add_argument("-fs",help="First sample for windowing the plots",type=int)
-parser.add_argument("-time",help="Flag for a time or depth image [n]",type=str)
 # Enables required arguments in config file
 for action in parser._actions:
   if(action.dest in defaults):
@@ -129,13 +139,18 @@ for iimg in range(nimg):
   # Reconstruct and plot the predictions
   ipra  = iprd.reshape([numpz,numpx,nzp,nxp])
   iprb  = pe.reconstruct(ipra)
-  plt.imshow(iprb,cmap='jet'); plt.show()
   tprb  = thresh(iprb,args.thresh)
   # Plot the prediction and the image
   if(not time):
     ds[0] /= 1000
-  plotseglabel(normalize(rimg)[args.fs:,:],tprb[args.fs:,:],color='blue',
+  #plotseglabel(normalize(rimg)[args.fs:,:],tprb[args.fs:,:],color='blue',
+  #           xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
+  #           zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
+  #           fname=args.figpfx)
+  plotsegprobs(normalize(rimg)[args.fs:,:args.xidx],iprb[args.fs:,:args.xidx],
              xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
              zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-             fname=args.figpfx)
+             pmin=0.3,alpha=0.7,fname=args.figpfx,ticksize=14,barlabelsize=14,barx=args.barx,
+             hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz)
+
 

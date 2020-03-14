@@ -16,6 +16,6 @@ thresh=0.85
 verb=y
 show=y
 gpus=1
-aratio=6.5
-fs=200
+aratio=7.5
+fs=390
 
