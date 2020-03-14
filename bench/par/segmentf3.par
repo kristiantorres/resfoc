@@ -1,0 +1,19 @@
+[defaults]
+# IO
+imgs=./dat/f3cube.H
+preds=./dat/ep006.h5
+figpfx=./fig/f3preds/
+# Patching
+nxo=1024
+nzo=512
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+# Other
+verb=y
+show=y
+aratio=7.5
+fs=390
+time=y
+
