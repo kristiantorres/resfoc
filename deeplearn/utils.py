@@ -4,7 +4,7 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2002.02.22
+@version: 2020.03.13
 """
 import sys
 import numpy as np
