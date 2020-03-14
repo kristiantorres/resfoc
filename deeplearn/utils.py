@@ -11,7 +11,7 @@ import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
 from matplotlib import colors
-from copy import copy
+from utils.image import remove_colorbar
 
 def normalize(img,eps=sys.float_info.epsilon):
   """
@@ -168,9 +168,9 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
-      ax.set_aspect(kwargs.get('aratio',1.0))
-      plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
-      cbar.remove()
+    ax.set_aspect(kwargs.get('aratio',1.0))
+    plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
+    cbar.remove()
   # Plot label
   imp = ax.imshow(mask,cmap='jet',
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
@@ -187,6 +187,8 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   if(show):
     plt.show()
   if(fname):
-      plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
-      plt.close()
+    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
+    # Crop and pad the image so they are the same size
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
 
