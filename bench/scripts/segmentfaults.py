@@ -129,12 +129,13 @@ for iimg in range(nimg):
   # Reconstruct and plot the predictions
   ipra  = iprd.reshape([numpz,numpx,nzp,nxp])
   iprb  = pe.reconstruct(ipra)
+  plt.imshow(iprb,cmap='jet'); plt.show()
   tprb  = thresh(iprb,args.thresh)
   # Plot the prediction and the image
   if(not time):
-    dz /= 1000
+    ds[0] /= 1000
   plotseglabel(normalize(rimg)[args.fs:,:],tprb[args.fs:,:],color='blue',
              xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
-             zmin=args.fs*dz,zmax=(nz-1)*dz,vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
+             zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
              fname=args.figpfx)
 
