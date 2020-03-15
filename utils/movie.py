@@ -139,7 +139,7 @@ def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kw
       plt.show()
 
 def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
-  """ 
+  """
   Provides a frame by frame interactive viewing of a 3D numpy array via the arrow keys.
   Assumes the slow axis is the first axis.
 
@@ -240,7 +240,7 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     plt.show()
 
 def viewpltframeskey(data,ox=0.0,dx=1.0,transp=True,show=True,**kwargs):
-  """ 
+  """
   Provides a frame by frame interactive viewing of a 2D numpy array via the arrow keys.
   Assumes the slow axis is the first axis.
 
@@ -352,21 +352,21 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
   # Define nonlocal variables
   loc1 = kwargs.get('loc1',int(ns[0]/2*ds[0]+os[0]))
   i1 = int((loc1 - os[0])/ds[0])
-  loc2 = kwargs.get('loc2',int(ns[1]/2*ds[1]+os[1])) 
+  loc2 = kwargs.get('loc2',int(ns[1]/2*ds[1]+os[1]))
   i2 = int((loc2 - os[1])/ds[1])
-  loc3 = kwargs.get('loc3',int(ns[2]/2*ds[2]+os[2])) 
+  loc3 = kwargs.get('loc3',int(ns[2]/2*ds[2]+os[2]))
   i3 = int((loc3 - os[2])/ds[2])
   ax1 = None; ax2 = None; ax3 = None; ax4 = None
-  curr_pos = 0; 
+  curr_pos = 0
   # Govern the keyboard movement
   j1 = kwargs.get('j1',1); j2 = kwargs.get('j2',1); j3 = kwargs.get('j3',1)
 
   # Axis labels
-  label1 = kwargs.get('label1',' '); label2 = kwargs.get('label2',' '); label3 = kwargs.get('label3', ' ');
-  
+  label1 = kwargs.get('label1',' '); label2 = kwargs.get('label2',' '); label3 = kwargs.get('label3', ' ')
+
   def key_event(e):
     nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
-    
+
     if e.key=="u" or e.key=="d":
       if e.key=="u":
         i3-=j3
@@ -374,9 +374,9 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
         i3+=j3
       i3=i3%ns[2]
       loc3=i3*ds[2]+os[2]
-    
+
       ax[0,0].cla()
-    
+
       ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].set_ylabel(label2,fontsize=kwargs.get('labelsize',14))
@@ -388,7 +388,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
       del ax[1,0].lines[:]
       ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
       ax[1,0].plot(x1,loc3*np.ones((ns[0],)),c='k')
-    
+
       del ax[1,1].lines[:]
       ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
       ax[1,1].plot(x2,loc3*np.ones((ns[1],)),c='k')
@@ -398,7 +398,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
       ax2.set_xticks([loc2])
       ax2.set_xticklabels(['%.2f'%(loc2)])
       ax2.tick_params(labelsize=kwargs.get('ticksize',14))
-    
+
     elif(e.key=="e" or e.key=="w"):
       if(e.key=="w"):
         i1-=j1
@@ -436,7 +436,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
       ax4.set_xticks([loc1])
       ax4.set_xticklabels(['%.2f'%(loc1)])
       ax4.tick_params(labelsize=kwargs.get('ticksize',14))
-    
+
     elif e.key=="h" or e.key=="n":
       if e.key=="h":
         i2-=j2
@@ -475,7 +475,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
       ax4.set_xticks([loc1])
       ax4.set_xticklabels(['%.2f'%(loc1)])
       ax4.tick_params(labelsize=kwargs.get('ticksize',14))
-    
+
     elif e.key=="left" or e.key=="right" or e.key.isdigit():
       if e.key=="left":
         curr_pos-=1
@@ -528,7 +528,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
       ax4.tick_params(labelsize=kwargs.get('ticksize',14))
 
     fig.canvas.draw()
-    
+
   def onclick(e):
     nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
     tb = plt.get_current_fig_manager().toolbar
@@ -599,10 +599,10 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
   plt.subplots_adjust(wspace=0,hspace=0)
   fig.canvas.mpl_connect('key_press_event', key_event)
   fig.canvas.mpl_connect('button_press_event', onclick)
-  
+
   title = kwargs.get('title',' ')
   ax[0,1].text(0.5,0.5,title[curr_pos],horizontalalignment='center',verticalalignment='center',fontsize=50)
-  
+
   ## xz plane
   ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
@@ -611,7 +611,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
   ax[1,0].plot(x1,loc3*np.ones((ns[0],)),c='k')
   ax[1,0].set_xlabel(label1,fontsize=kwargs.get('labelsize',14))
   ax[1,0].set_ylabel(label3,fontsize=kwargs.get('labelsize',14))
-  
+
   # yz plane
   im = ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
@@ -630,7 +630,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
   ax2.set_xticks([loc2])
   ax2.set_xticklabels(['%.2f'%(loc2)])
   ax2.tick_params(labelsize=kwargs.get('ticksize',14))
-  
+
   # xy plane
   ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
