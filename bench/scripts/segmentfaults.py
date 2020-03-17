@@ -28,6 +28,7 @@ defaults = {
     "aratio": 1.0,
     "fs": 0,
     "time": "n",
+    "km": "y",
     "barx": 0.91,
     "barz": 0.31,
     "hbar": 0.37,
@@ -67,6 +68,7 @@ plotArgs.add_argument("-aratio",help="Aspect ratio for plotting",type=float)
 plotArgs.add_argument("-fs",help="First sample for windowing the plots",type=int)
 plotArgs.add_argument("-xidx",help="Last X sample for windowing the plots [600]",type=int)
 plotArgs.add_argument("-time",help="Flag for a time or depth image [n]",type=str)
+plotArgs.add_argument("-km",help="Flag for plotting in meters or kilometers [y]",type=str)
 plotArgs.add_argument("-barx",help="X position of colorbar [0.91]",type=float)
 plotArgs.add_argument("-barz",help="Z position of colorbar [0.31]",type=float)
 plotArgs.add_argument("-hbar",help="Colorbar height [0.37]",type=float)
@@ -91,6 +93,8 @@ show = False
 if(sep.yn2zoo(args.show)): show = True
 time = False
 if(sep.yn2zoo(args.time)): time = True
+km = False
+if(sep.yn2zoo(args.time)): km = True
 gpus  = sep.read_list(args.gpus,[])
 if(len(gpus) != 0):
   for igpu in gpus: os.environ['CUDA_VISIBLE_DEVICES'] = str(igpu)
@@ -102,7 +106,7 @@ if(len(imgs.shape) < 3):
   imgs = np.expand_dims(imgs,axis=-1)
 else:
   imgs = np.transpose(imgs,(2,0,1))
-nz = imgs.shape[0]; nx = imgs.shape[1]; nimg = imgs.shape[2]
+nz = imgs.shape[1]; nx = imgs.shape[2]; nimg = imgs.shape[0]
 dz = iaxes.d[0]; dx = iaxes.d[1]
 
 # Perform the patch extraction
@@ -143,16 +147,17 @@ for iimg in range(nimg):
   iprb  = pe.reconstruct(ipra)
   tprb  = thresh(iprb,args.thresh)
   # Plot the prediction and the image
-  if(not time):
-    ds[0] /= 1000
-  #plotseglabel(normalize(rimg)[args.fs:,:],tprb[args.fs:,:],color='blue',
-  #           xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
-  #           zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-  #           fname=args.figpfx)
-  plotsegprobs(normalize(rimg)[args.fs:,:args.xidx],iprb[args.fs:,:args.xidx],
-             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1]/1000.0,
+  if(not time and km):
+    ds[0] /= 1000; ds[1] /= 1000
+  elif(time and km):
+    ds[1] /= 1000
+  plotseglabel(normalize(rimg)[args.fs:,:args.xidx],tprb[args.fs:,:args.xidx],color='blue',
+             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1],
              zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-             pmin=0.3,alpha=0.7,fname=args.figpfx,ticksize=14,barlabelsize=14,barx=args.barx,
-             hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
-
+             fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,labelsize=14,wbox=10)
+  #plotsegprobs(normalize(rimg)[args.fs:,:args.xidx],iprb[args.fs:,:args.xidx],
+  #           xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1],
+  #           zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
+  #           pmin=0.3,alpha=0.7,fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,barlabelsize=14,barx=args.barx,
+  #           hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
 
