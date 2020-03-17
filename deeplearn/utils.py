@@ -121,16 +121,16 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
   cmap = colors.ListedColormap([color,'white'])
-  fig = plt.figure(figsize=(kwargs.get('fsize1',8),kwargs.get('fsize2',6)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
         kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
-  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
-  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
-  ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
   if(fname):
       ax.set_aspect(kwargs.get('aratio',1.0))
       plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
