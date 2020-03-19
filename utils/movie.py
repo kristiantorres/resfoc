@@ -165,7 +165,8 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
   curr_pos = 0
-  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin == None or vmax == None):
     vmin = np.min(data)*kwargs.get('pclip',0.9)
     vmax = np.max(data)*kwargs.get('pclip',0.9)
 
