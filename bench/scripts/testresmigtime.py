@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 from resfoc.resmig import preresmig, convert2time
 import matplotlib.pyplot as plt
-from utils.movie import viewframeskey
+from utils.movie import viewimgframeskey
 from utils.signal import butter_bandpass_filter
 
 ## Create point scatterer model
@@ -22,12 +22,12 @@ img = np.zeros(pt.shape,dtype='float32')
 img[zoff,:,:] = np.array([butter_bandpass_filter(pt[zoff,ix,:].T,0.002,0.015,1/dz) for ix in range(nx)])
 
 # Depth Residual migration
-rmig = preresmig(img,[dh,dx,dz],time=False)
+rmig = preresmig(img,[dh,dx,dz],time=False,nthreads=4)
 
 # Conversion to time
 #TODO: need to figure out how to get them to map to the same sample positions
-time = convert2time(rmig,dz,nt=nz,dt=0.004,vc=10000)
+time = convert2time(rmig,dz,dt=0.004)
 
 # Visualize the frames
-viewframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=False)
-viewframeskey(time[:,zoff,:,:nz],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9)
+viewimgframeskey(rmig[:,zoff,:,:],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9,show=False)
+viewimgframeskey(time[:,zoff,:,:nz],ttlstring='rho=%.2f',ottl=oro-dro*(nro-1),dttl=dro,wbox=14,hbox=7,pclip=0.9)

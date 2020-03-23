@@ -28,5 +28,5 @@ sep.write_file(None,axes,datw,ofname='elf.H')
 #    pclip=0.95,interp='sinc',width3=8,label1='X (km)',label2='X (km)',label3='Z (km)',
 #    transp=False,cbar=False,cmap='gray')
 
-axes = seppy.axes(datwt.shape,os,ds)
-sep.write_file(None,axes,datwt,ofname='elft.H')
+#axes = seppy.axes(datwt.shape,os,ds)
+#sep.write_file(None,axes,datwt,ofname='elft.H')

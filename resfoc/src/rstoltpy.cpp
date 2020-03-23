@@ -22,11 +22,12 @@ PYBIND11_MODULE(rstolt,m) {
       .def("resmig",[](rstolt &rst,
           py::array_t<float, py::array::c_style> dat,
           py::array_t<float, py::array::c_style> img,
-          int nthrd
+          int nthrd,
+          bool verb
           )
           {
-            rst.resmig(dat.mutable_data(), img.mutable_data(), nthrd);
+            rst.resmig(dat.mutable_data(), img.mutable_data(), nthrd, verb);
           },
-          py::arg("dat"), py::arg("img"), py::arg("nthrd")
+          py::arg("dat"), py::arg("img"), py::arg("nthrd"), py::arg("verb")
       );
 }

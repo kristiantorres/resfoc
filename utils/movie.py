@@ -189,7 +189,8 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
       ax.cla()
       ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
           extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
-          kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],interpolation=kwargs.get('interp','none'))
+          kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],
+          interpolation=kwargs.get('interp','none'),aspect='auto')
     ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
     ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
@@ -220,7 +221,8 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     img = data[0,:,:]
   l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
       extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
-        kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],interpolation=kwargs.get('interp','none'))
+        kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],
+      interpolation=kwargs.get('interp','none'),aspect='auto')
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
