@@ -33,8 +33,7 @@ void rstolt::resmig(float *dat, float *img, int nthrd, bool verb) {
     if(firstiter && verb) ridx[tidx] = iro;
     if(verb) printprogress_omp("nrho:", iro - ridx[tidx], csize, tidx);
     /* Temporary arrays */
-    float *str = new float[_nz](); float *trc = new float[_nz]();
-    float *mig = new float[_nz]();
+    float *str = new float[_nz]();
     /* Compute rho */
     float vov = _oro + iro*_dro;
     /* Loop over sub-surface offset */
@@ -64,7 +63,7 @@ void rstolt::resmig(float *dat, float *img, int nthrd, bool verb) {
     /* Parallel printing */
     firstiter = false;
     /* Free memory */
-    delete[] str; delete[] trc; delete[] mig;
+    delete[] str;
   }
   /* Parallel printing */
   if(verb) printf("\n");
