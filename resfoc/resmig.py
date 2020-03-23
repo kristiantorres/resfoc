@@ -3,6 +3,7 @@ import resfoc.rstolt as rstolt
 import resfoc.cosft as cft
 import resfoc.depth2time as d2t
 from deeplearn.utils import next_power_of_2
+from utils.ptyprint import printprogress
 
 def pad_cft(n):
   """ Computes the size necessary to pad the image to next power of 2"""
@@ -43,7 +44,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
   
   ## Residual Stolt migration
   rmig = np.zeros([fnro,nhpc,nmpc,nzpc],dtype='float32')
-  rst.resmig(imgpft,rmig,nthreads)
+  rst.resmig(imgpft,rmig,nthreads,verb)
   
   # Inverse cosine transform
   rmigift = cft.icosft(rmig,axis2=1,axis3=1,axis4=1).astype('float32')
@@ -56,7 +57,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
   else:
     return rmigiftswind
 
-def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0):
+def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
   """
   Converts residually migrated images from depth to time
 
@@ -81,9 +82,11 @@ def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0):
   time = np.zeros([fnro,nh,nm,nt],dtype='float32')
   # Apply a stretch for each rho
   for iro in range(fnro):
+    if(verb): printprogress("nrho:",iro,fnro)
     ro = foro + iro*dro
     vel[:] = vc/ro
     d2t.convert2time(nh,nm,nz,oz,dz,nt,ot,dt,vel,depth[iro,:,:,:],time[iro,:,:,:])
+  if(verb): printprogress("nrho:",fnro,fnro)
 
   return time
 

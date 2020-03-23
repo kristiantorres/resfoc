@@ -52,7 +52,7 @@ def printprogress(prefix,j,count,size=40,file=sys.stdout):
   @author: Joseph Jennings
   """
   x = int(size*j/count)
-  file.write("%s:[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), j, count))
+  file.write("%s[%s%s] %i/%i\r" % (prefix+" ", "#"*x, "."*(size-x), j, count))
   if(j == count):
     file.write("\n")
   file.flush()

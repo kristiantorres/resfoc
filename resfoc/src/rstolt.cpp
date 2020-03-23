@@ -1,10 +1,8 @@
-
 #include <omp.h>
-#include <stdio.h>
 #include <math.h>
 #include "stretch.h"
 #include "rstolt.h"
-#include <cstring>
+#include "progressbar.h"
 
 rstolt::rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, float dro, float oro) {
   /* Sizes */
@@ -15,15 +13,25 @@ rstolt::rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, fl
   _oro = oro - (nro-1)*dro;
 }
 
-void rstolt::resmig(float *dat, float *img, int nthrd) {
+void rstolt::resmig(float *dat, float *img, int nthrd, bool verb) {
 
   /* Initialize stretch */
   stretch intrp = stretch(_nz,0.0,_dz,_nz,0.01);
+
+  /* Set up printing if verbosity is desired */
+  int *ridx = new int[nthrd]();
+  int csize = (int)_nro/nthrd;
+  if(_nro%nthrd != 0) csize += 1;
+  bool firstiter = true;
 
   omp_set_num_threads(nthrd);
   /* Loop over rho */
 #pragma omp parallel for default(shared)
   for(int iro = 0; iro < _nro; ++iro) {
+    /* Set up the parallel printing */
+    int tidx = omp_get_thread_num();
+    if(firstiter && verb) ridx[tidx] = iro;
+    if(verb) printprogress_omp("nrho:", iro - ridx[tidx], csize, tidx);
     /* Temporary arrays */
     float *str = new float[_nz](); float *trc = new float[_nz]();
     float *mig = new float[_nz]();
@@ -35,7 +43,7 @@ void rstolt::resmig(float *dat, float *img, int nthrd) {
       /* Loop over midpoint (image point) */
       for(int im = 0; im < _nm; ++im) {
         float km = im*_dm;
-        /* Create the mapping z -> z' (loop from iz==2 to avoid kz=0) */
+        /* Create the mapping z -> z' (loop from iz=1 to avoid kz=0) */
         for(int iz = 1; iz < _nz; ++iz) {
           float kz = iz*_dz;
           /* Dispersion relation */
@@ -50,16 +58,15 @@ void rstolt::resmig(float *dat, float *img, int nthrd) {
           }
         }
         /* Do the migration for the mapping */
-        memcpy(trc,&dat[ih*_nz*_nm + im*_nz],sizeof(float)*_nz);
-        /* Initialize output trace to 0 */
-        memset(mig, 0, sizeof(float)*_nz);
-        intrp.apply(str, trc, mig);
-        /* Copy to the output image volume */
-        memcpy(&img[iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz],mig,sizeof(float)*_nz);
+        intrp.apply(str, dat + ih*_nz*_nm + im*_nz, img + iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz);
       }
     }
+    /* Parallel printing */
+    firstiter = false;
     /* Free memory */
     delete[] str; delete[] trc; delete[] mig;
   }
-
+  /* Parallel printing */
+  if(verb) printf("\n");
+  delete[] ridx;
 }
