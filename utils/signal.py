@@ -27,6 +27,24 @@ def ampspec1d(sig,dt):
 
   return spec,fs
 
+def ampspec2d(img,d1,d2):
+  """
+  Returns the 2D amplitude spectrum of the image and the
+  corresponding wavenumbers
+
+  Parameters:
+    img - the input image
+    d1  - the sampling along the fast axis
+    d2  - the sampling along the slow axis
+  """
+  n1 = img.shape[1]; dk1 = 1/(n1*d1); ok1 = -dk1*n1/2.0;
+  n2 = img.shape[0]; dk2 = 1/(n2*d2); ok2 = -dk2*n2/2.0;
+  k1 = np.linspace(ok1, ok1+(n1-1)*dk1, n1)
+  k2 = np.linspace(ok2, ok2+(n2-1)*dk2, n2)
+  imgfft = np.abs(np.fft.fftshift(np.fft.fft2(img)))
+
+  return imgfft,k1,k2
+
 def butter_bandpass(locut, hicut, fs, order=5):
   """
   Returns the numerator and demoninator of the transfer function
