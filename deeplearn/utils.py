@@ -53,8 +53,8 @@ def resample(img,new_shape,kind='linear',ds=[]):
       dout = []
       lr = new_shape[1]/length
       hr = new_shape[0]/height
-      dout.append(ds[0]/lr)
-      dout.append(ds[1]/hr)
+      dout.append(ds[1]/lr)
+      dout.append(ds[0]/hr)
   # Perform the interpolation
   if len(img.shape)==4:
     res = np.zeros([img.shape[0],img.shape[1],new_shape[0],new_shape[1]],dtype='float32')
