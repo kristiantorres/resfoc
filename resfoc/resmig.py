@@ -13,25 +13,33 @@ def pad_cft(n):
   else:
     return np + 1 - n
 
-def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
+def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,transp=False,verb=True,nthreads=4):
   """
   Computes the prestack residual migration
 
   Parameters
     img      - the input prestack image. Axis nh,nx,nz
-    ds       - the sampling of the image. [dh,dx,dz]
+    ds       - the sampling of the image. [dh,dx,dz] (or [dh,dz,dx] if transp=True)
     nro      - the number of rhos for the residual migration [6]
     oro      - the center rho value [1.0]
     dro      - the spacing between the rhos [0.01]
     time     - return the output migration in time [True]
+    transp   - take input [nh,nz,nx] and return output [nro,nh,nz,nx]
     verb     - verbosity flag [True]
     nthreads - number of CPU threads to use for computing the residual migration
   """
+  if(transp):
+    # [nh,nz,nx] -> [nh,nx,nz]
+    iimg = np.ascontiguousarray(np.transpose(img,(0,2,1)))
+    # [dh,dz,dx] -> [dh,dx,dz]
+    ids = [ds[0],ds[2],ds[1]]
+  else:
+    iimg = img; ids = ds
   # Get dimensions
-  nh = img.shape[0]; nm = img.shape[1]; nz = img.shape[2]
+  nh = iimg.shape[0]; nm = iimg.shape[1]; nz = iimg.shape[2]
   # Compute cosine transform
   nhp = pad_cft(nh); nmp = pad_cft(nm); nzp = pad_cft(nz)
-  imgp   = np.pad(img,((0,nhp),(0,nmp),(0,nzp)),'constant')
+  imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
   imgpft = cft.cosft(imgp,axis1=1,axis2=1,axis3=1).astype('float32')
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
@@ -53,9 +61,22 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,time=True,verb=True,nthreads=4):
   # Convert to time
   if(time):
     rmigtime = convert2time(rmigiftswind,ds[2],dt=0.004,oro=oro,dro=dro)
-    return rmigtime
+    if(transp):
+      # [nro,nh,nx,nt] -> [nro,nh,nt,nx]
+      return np.ascontiguousarray(np.transpose(rmigtime,(0,1,3,2)))
+    else:
+      # [nh,nx,nt]
+      return rmigtime
   else:
-    return rmigiftswind
+    if(transp):
+      # [nh,nx,nz] -> [nh,nz,nx]
+      return np.ascontiguousarray(np.transpose(rmigiftswind,(0,1,3,2)))
+    else:
+      # [nh,nx,nz]
+      return rmigiftswind
+
+def get_rho_axis(nro=6,oro=0.0,dro=0.01):
+  return 2*nro-1,oro - (nro-1)*dro,dro
 
 def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
   """
