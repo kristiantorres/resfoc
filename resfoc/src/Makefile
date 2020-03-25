@@ -1,7 +1,7 @@
 NPPATH=${CONDA_PREFIX}/lib/python3.5/site-packages/numpy/core
 
 %.o: %.cpp
-	g++ -O3 -fPIC -ffast-math -fopenmp -shared -Wall -I. -c -fPIC -o $@ $<
+	g++ -O3 -std=c++11 -fPIC -ffast-math -fopenmp -shared -Wall -I. -c -fPIC -o $@ $<
 
 depth2time: depth2time.o stretch.o
 	g++ -O3 -fPIC -ffast-math -fopenmp -std=c++1y -shared -Wall `${CONDA_PREFIX}/bin/python3 -m pybind11 --includes` \
