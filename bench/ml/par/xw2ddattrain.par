@@ -1,0 +1,22 @@
+[defaults]
+# Training inputs and outputs
+#trdat=/net/fantastic/scr2/joseph29/data/train/mine.h5
+trdat=/net/fantastic/scr2/joseph29/fltclass.h5
+vadat=
+wgtout=./dat/networks/xwarch-gpu10ep.h5
+arcout=./dat/networks/xwarch-gpu10.json
+chkpnt=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
+lssout=./dat/nnhistory/xwarch-gpu10ep_loss.H
+vlsout=./dat/nnhistory/xwarch-gpu10ep_vlss.H
+accout=./dat/nnhistory/xwarch-gpu10ep_accu.H
+vacout=./dat/nnhistory/xwarch-gpu10ep_vacu.H
+# For testing on a field dataset
+f3dat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+f3prd=/net/fantastic/scr2/joseph29/f3preds/xwarch10
+f3fig=./fig/f3preds/xwarch10
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=1

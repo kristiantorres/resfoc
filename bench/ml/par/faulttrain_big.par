@@ -1,0 +1,23 @@
+[defaults]
+# Training inputs and outputs
+trdat=/net/fantastic/scr2/joseph29/fltclass.h5
+vadat=
+wgtout=./dat/networks/fltclasswgt5-gpu100000ep.h5
+arcout=./dat/networks/fltclasswgt5-gpu100000ep.json
+lssout=./dat/nnhistory/fltclasswgt5-gpu100000ep_loss.H
+vlsout=./dat/nnhistory/fltclasswgt5-gpu100000ep_vlss.H
+accout=./dat/nnhistory/fltclasswgt5-gpu100000ep_accu.H
+vacout=./dat/nnhistory/fltclasswgt5-gpu100000ep_vacu.H
+# Training parameters
+lr=0.001
+bsize=20
+nepochs=100000
+classwgt1=0.5
+# CNN design parameters
+nflts=32
+fltsize=5
+unet=y
+drpout=0.0
+# Other
+verb=y
+gpus=2

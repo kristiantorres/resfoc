@@ -1,0 +1,29 @@
+[defaults]
+# IO
+imgs=./dat/elf.H
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu25.json
+figpfx=./fig/elfpreds/elf/elf
+# Patching
+nxo=512
+nzo=256
+ptchx=128
+ptchz=128
+strdx=32
+strdz=32
+# Other
+thresh=0.85
+verb=y
+gpus=4
+# Plotting
+show=n
+aratio=1.0
+fs=0
+time=n
+hbar=0.33
+barx=0.91
+barz=0.33
+xidx=-1
+cropsize=154
+km=n
+

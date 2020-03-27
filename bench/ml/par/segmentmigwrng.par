@@ -1,0 +1,27 @@
+[defaults]
+# IO
+imgs=./fltimgwrngagc.H
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu10.json
+figpfx=./fig/migwrng
+# Patching
+nxo=1024
+nzo=512
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+# Other
+thresh=0.8
+verb=y
+show=n
+gpus=1
+# Plotting
+aratio=1.0
+fs=0
+time=n
+hbar=0.65
+barz=0.17
+barx=0.91
+xidx=-1
+cropsize=154

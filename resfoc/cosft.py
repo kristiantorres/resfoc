@@ -1,4 +1,10 @@
+"""
+Cosine transform of up to 4D data
+@author: Joseph Jennings
+@version: 2020.03.26
+"""
 import numpy as np
+from utils.ptyprint import printprogress
 
 ## Main functions
 def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
@@ -15,7 +21,7 @@ def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
     print("Cosine transform > 4D not yet implemented")
     return
 
-def icosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
+def icosft(dat,axis1=None,axis2=None,axis3=None,axis4=None,verb=False):
   """ Computes the inverse cosine transform """
   if(len(dat.shape) == 1):
     return icosft1d(dat).astype('float32')
@@ -24,7 +30,7 @@ def icosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):
   elif(len(dat.shape) == 3):
     return icosft3d(dat,axis1,axis2,axis3).astype('float32')
   elif(len(dat.shape) == 4):
-    return icosft4d(dat,axis1,axis2,axis3,axis4).astype('float32')
+    return icosft4d(dat,axis1,axis2,axis3,axis4,verb=False).astype('float32')
   else:
     print("Inverse cosine transform > 4D not yet implemented")
     return
@@ -39,8 +45,8 @@ def cosft1d(sig):
   # Prepare input
   p = np.zeros(nt)
   p[0:n1] = sig[:]
-  p[n1:nw] = 0.0 
-  p[nw:nt] = p[nt-nw:0:-1] 
+  p[n1:nw] = 0.0
+  p[nw:nt] = p[nt-nw:0:-1]
   # Compute cosine transform
   return np.real(np.fft.rfft(p))[0:n1]
 
@@ -87,11 +93,11 @@ def cosft2d1(img):
   # Get sizes
   n1,n2 = img.shape
   nt = 2*next_fast_size(n1-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare the input
   pimg = np.zeros([nt,n2])
   pimg[0:n1,:] = img[:,:]
-  pimg[n1:nw,:] = 0.0 
+  pimg[n1:nw,:] = 0.0
   pimg[nw:nt,:] = pimg[nt-nw:0:-1]
   # Compute the cosine transform
   return np.real(np.fft.rfft(pimg,axis=0))[0:n1,:]
@@ -101,11 +107,11 @@ def icosft2d1(img):
   # Get sizes
   n1,n2 = img.shape
   nt = 2*next_fast_size(n1-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare the input
   pimg = np.zeros([nw,n2])
   pimg[0:n1,:] = img[:,:]
-  pimg[n1:nw,:] = 0.0 
+  pimg[n1:nw,:] = 0.0
   # Compute the inverse cosine transform
   return np.real(np.fft.irfft(pimg,axis=0))[0:n1,:]
 
@@ -114,11 +120,11 @@ def cosft2d2(img):
   # Get sizes
   n1,n2 = img.shape
   nt = 2*next_fast_size(n2-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare the input
   pimg = np.zeros([n1,nt])
   pimg[:,0:n2] = img[:,:]
-  pimg[:,n2:nw] = 0.0 
+  pimg[:,n2:nw] = 0.0
   pimg[:,nw:nt] = pimg[:,nt-nw:0:-1]
   # Compute the cosine transform
   return np.real(np.fft.rfft(pimg,axis=1))[:,0:n2]
@@ -128,7 +134,7 @@ def icosft2d2(img):
   # Get sizes
   n1,n2 = img.shape
   nt = 2*next_fast_size(n2-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare the input
   pimg = np.zeros([n1,nw])
   pimg[:,0:n2] = img[:,:]
@@ -194,11 +200,11 @@ def cosft3d1(cub):
   # Get sizes
   n1,n2,n3 = cub.shape
   nt = 2*next_fast_size(n1-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare input
   pcub = np.zeros([nt,n2,n3])
   pcub[0:n1,:,:] = cub[:,:,:]
-  pcub[n1:nw,:,:]  = 0.0 
+  pcub[n1:nw,:,:]  = 0.0
   pcub[nw:nt,:,:]  = pcub[nt-nw:0:-1]
   # Compute cosine transform
   return np.real(np.fft.rfft(pcub,axis=0))[0:n1,:,:]
@@ -208,7 +214,7 @@ def icosft3d1(cub):
   # Get sizes
   n1,n2,n3 = cub.shape
   nt = 2*next_fast_size(n1-1)
-  nw = int(nt/2) + 1 
+  nw = int(nt/2) + 1
   # Prepare input
   pcub = np.zeros([nw,n2,n3])
   pcub[0:n1,:,:]  = cub[:,:,:]
@@ -292,7 +298,7 @@ def cosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None):
     print("This type of 4D cosft has not been yet implemented")
     return
 
-def icosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None):
+def icosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None,verb=False):
   """ 4D inverse cosine transform """
   # Single axes inverse transforms
   if(axis1 and not axis2 and not axis3 and not axis4):
@@ -309,9 +315,14 @@ def icosft4d(hcub,axis1=None,axis2=None,axis3=None,axis4=None):
     ift12 = icosft4d2(ift1)
     return  icosft4d3(ift12)
   elif(axis2 and axis3 and axis4 and not axis1):
-    ift2  = icosft4d2(hcub)
-    ift23 = icosft4d3(ift2)
-    return  icosft4d4(ift23)
+    printprogress("axes:", 0, 3)
+    ift2   = icosft4d2(hcub)
+    printprogress("axes:", 1, 3)
+    ift23  = icosft4d3(ift2)
+    printprogress("axes:", 2, 3)
+    ift234 = icosft4d4(ift23)
+    printprogress("axes:", 3, 3)
+    return  ift234
   else:
     print("This type of 4D icosft has not yet been implemented")
     return
@@ -437,7 +448,7 @@ def samplings(dat,dsin):
 def next_fast_size(n):
   """ Gets the next fastest size of the cosine transform """
   while(1):
-    m = n 
+    m = n
     while( (m%2) == 0 ): m/=2
     while( (m%3) == 0 ): m/=3
     while( (m%5) == 0 ): m/=5
