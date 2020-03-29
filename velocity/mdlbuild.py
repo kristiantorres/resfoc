@@ -4,6 +4,7 @@ from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
 from scipy.ndimage import gaussian_filter
+from scaas.trismooth import smooth
 from utils.rand import randfloat
 
 class mdlbuild:
@@ -681,6 +682,22 @@ class mdlbuild:
       self.lbl = self.lbl[:,:,top:bot]
     self.vel = self.vel[:,:,top:bot]
     self.lyr = self.lyr[:,:,top:bot]
+
+  def smooth_model(self,rect1=2,rect2=2,rect3=2,sigma=None):
+    """
+    Applies either a triangular or gaussian smoother to the velocity model.
+    Default is a triangular smoother
+
+    Parameters
+      rect1 - Length of triangular filter along z-axis [2 gridpoints]
+      rect2 - Length of triangular filter along x-axis [2 gridpoints]
+      rect3 - Length of triangular filter along y-axis [2 gridpoints]
+      sigma - size of gaussian filter [None]
+    """
+    if(sigma is not None):
+      self.vel = gaussian_filter(self.vel,sigma=sigma).astype('float32')
+    else:
+      self.vel = smooth(self.vel,rect1=rect1,rect2=rect2,rect3=rect3)
 
   def get_refl(self):
     """ Computes the reflectivity for the current velocity model """
