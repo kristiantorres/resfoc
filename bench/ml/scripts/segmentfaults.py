@@ -104,8 +104,7 @@ iaxes,imgs = sep.read_file(None,ifname=args.imgs)
 imgs = imgs.reshape(iaxes.n,order='F')
 if(len(imgs.shape) < 3):
   imgs = np.expand_dims(imgs,axis=-1)
-else:
-  imgs = np.transpose(imgs,(2,0,1))
+imgs = np.transpose(imgs,(2,0,1))
 nz = imgs.shape[1]; nx = imgs.shape[2]; nimg = imgs.shape[0]
 dz = iaxes.d[0]; dx = iaxes.d[1]
 
@@ -129,7 +128,7 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 for iimg in range(nimg):
   # Resample the images to the output size
   if(nimg == 1):
-    rimg,ds = resample(imgs[:,:,0],[nzo,nxo],kind='linear',ds=[dz,dx])
+    rimg,ds = resample(imgs[0,:,:],[nzo,nxo],kind='linear',ds=[dz,dx])
   else:
     rimg,ds = resample(imgs[iimg,:,:],[nzo,nxo],kind='linear',ds=[dz,dx])
   # Perform the patch extraction
@@ -151,13 +150,13 @@ for iimg in range(nimg):
     ds[0] /= 1000; ds[1] /= 1000
   elif(time and km):
     ds[1] /= 1000
-  plotseglabel(normalize(rimg)[args.fs:,:args.xidx],tprb[args.fs:,:args.xidx],color='blue',
-             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1],
-             zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-             fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,labelsize=14,wbox=10)
-  #plotsegprobs(normalize(rimg)[args.fs:,:args.xidx],iprb[args.fs:,:args.xidx],
+  #plotseglabel(normalize(rimg)[args.fs:,:args.xidx],tprb[args.fs:,:args.xidx],color='blue',
   #           xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1],
   #           zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-  #           pmin=0.3,alpha=0.7,fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,barlabelsize=14,barx=args.barx,
-  #           hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
+  #           fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,labelsize=14,wbox=10)
+  plotsegprobs(normalize(rimg)[args.fs:,:args.xidx],iprb[args.fs:,:args.xidx],
+             xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nx-1)*ds[1],
+             zmin=args.fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
+             pmin=0.3,alpha=0.7,fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,barlabelsize=14,barx=args.barx,
+             hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
 
