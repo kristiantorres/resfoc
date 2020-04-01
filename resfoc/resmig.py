@@ -43,9 +43,9 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
     nhp = pad_cft(nh); nmp = pad_cft(nm); nzp = pad_cft(nz)
   else:
     if(transp):
-      nhp = nps[0]; nmp = nps[2]; nzp = nps[1]
+      nhp = nps[0] - img.shape[0]; nmp = nps[2] - img.shape[2]; nzp = nps[1] - img.shape[1]
     else:
-      nhp = nps[0]; nmp = nps[1]; nzp = nps[2]
+      nhp = nps[0] - img.shape[0]; nmp = nps[1] - img.shape[1]; nzp = nps[2] - img.shape[2]
   # Compute cosine transform
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
   if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
