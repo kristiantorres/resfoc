@@ -3,7 +3,7 @@
 imgs=./dat/f3cube.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu25.json
-figpfx=./fig/f3preds/xwarch25a/f3
+figpfx=./fig/f3preds/xwarch25a/preds/f3
 # Patching
 nxo=1024
 nzo=512
@@ -14,12 +14,13 @@ strdz=32
 # Other
 thresh=0.6
 verb=y
-show=n
+show=y
 gpus=4
 # Plotting
 aratio=23.5
 fs=390
 time=y
+km=y
 hbar=0.37
 barx=0.91
 barz=0.31
