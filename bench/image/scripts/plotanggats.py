@@ -1,13 +1,13 @@
 import inpout.seppy as seppy
 import numpy as np
-from resfoc.tpow import tpow
+from resfoc.gain import tpow
 import matplotlib.pyplot as plt
 from utils.movie import viewimgframeskey
 
 sep = seppy.sep([])
 
-aaxes,ang = sep.read_file(None,ifname="stormangwrngj310.H")
-raxes,rng = sep.read_file(None,ifname="stormangaj3.H")
+aaxes,ang = sep.read_file("stormangwrngj310.H")
+raxes,rng = sep.read_file("stormangaj3.H")
 
 nz = aaxes.n[0]; na = aaxes.n[1]; nx = aaxes.n[2]; nro = aaxes.n[3]
 dz = aaxes.d[0]; da = aaxes.d[1]; dx = aaxes.d[2]; dro = aaxes.d[3]
