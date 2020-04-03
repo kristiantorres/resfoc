@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
-  """ 
+  """
   Saves each frame on the fast axis to a png for viewing 
 
   Parameters:
@@ -188,8 +188,8 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     if(not fast):
       ax.cla()
       ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-          extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
-          kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],
+          extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
+          kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
           interpolation=kwargs.get('interp','none'),aspect='auto')
     ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
@@ -220,8 +220,8 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   else:
     img = data[0,:,:]
   l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-      extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',data.shape[1]),
-        kwargs.get('zmax',data.shape[2]),kwargs.get('zmin',0.0)],
+      extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
+        kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
       interpolation=kwargs.get('interp','none'),aspect='auto')
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
@@ -320,7 +320,7 @@ def viewpltframeskey(data,ox=0.0,dx=1.0,transp=True,show=True,**kwargs):
 def viewframessld(data,transp=True,**kwargs):
   pass
 
-def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
+def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   """
   Plots three frames of a 3D plot for visualization. Allows
   for user interaction with the arrow keys or e,w,n,s keys.
@@ -664,5 +664,6 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],**kwargs):
     cbar.draw_all()
 
   ax[0,1].axis('off')
-  plt.show()
+  if(show):
+    plt.show()
 
