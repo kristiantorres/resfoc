@@ -47,8 +47,6 @@ def cosft(data,**kwargs):
       n2 *= ns[i]
 
   #TODO: it is probably better to not make a copy and write in place
-  print(dim1,n1,n2)
-  print(ns,s)
   tmp = np.copy(data)
   fwdcosft(dim1,n1,n2,ns,signs,s,tmp)
 

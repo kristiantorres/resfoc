@@ -1,6 +1,7 @@
 import numpy as np
 import resfoc.rstolt as rstolt
-import resfoc.cosftsimp cft
+import resfoc.cosft as cft
+import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
 from deeplearn.utils import next_power_of_2
 from utils.ptyprint import printprogress
@@ -49,7 +50,8 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
   # Compute cosine transform
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
   if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
-  imgpft = cft.cosft(imgp,axis1=1,axis2=1,axis3=1).astype('float32')
+  #imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1)
+  imgpft = scft.cosft(imgp,axis1=1,axis2=1,axis3=1).astype('float32')
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
 
@@ -58,23 +60,14 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
   foro = oro - (nro-1)*dro; fnro = 2*nro-1
   if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1))
   rst = rstolt.rstolt(nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
-  print(dcs[2],dcs[1],dcs[0])
 
   ## Residual Stolt migration
   rmig = np.zeros([fnro,nhpc,nmpc,nzpc],dtype='float32')
   rst.resmig(imgpft,rmig,nthreads,verb)
 
-  import matplotlib.pyplot as plt
-  pclip = 0.2
-  vmin = pclip*np.min(imgpft[0,:,:]); vmax = pclip*np.max(imgpft[16,:,:])
-  plt.figure()
-  plt.imshow(imgpft[0,:,:].T,cmap='gray',vmin=vmin,vmax=vmax)
-  plt.figure()
-  plt.imshow(rmig[0,0,:,:].T,cmap='gray',vmin=vmin,vmax=vmax)
-  plt.show()
-
   # Inverse cosine transform
-  rmigift = cft.icosft(rmig,axis2=1,axis3=1,axis4=1,verb=True).astype('float32')
+  #rmigift = cft.icosft(rmig,axis1=1,axis2=1,axis3=1)
+  rmigift = scft.icosft(rmig,axis2=1,axis3=1,axis4=1,verb=True).astype('float32')
   rmigiftswind  = rmigift[:,0:nh,0:nm,0:nz]
 
   # Convert to time
