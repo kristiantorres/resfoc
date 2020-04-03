@@ -57,7 +57,9 @@ void rstolt::resmig(float *dat, float *img, int nthrd, bool verb) {
           }
         }
         /* Do the migration for the mapping */
-        intrp.apply(str, dat + ih*_nz*_nm + im*_nz, img + iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz);
+        long long datidx = ih*_nz*_nm + im*_nz;
+        long long imgidx = iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz;
+        intrp.apply(str, dat + datidx, img + imgidx);
       }
     }
     /* Parallel printing */
