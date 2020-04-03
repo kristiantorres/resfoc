@@ -3,10 +3,6 @@
 #include "stretch.h"
 #include "rstolt.h"
 #include "progressbar.h"
-#include <vector>
-#include "matplotlibcpp.h"
-
-namespace plt = matplotlibcpp;
 
 rstolt::rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, float dro, float oro) {
   /* Sizes */
