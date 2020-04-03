@@ -3,6 +3,10 @@
 #include "stretch.h"
 #include "rstolt.h"
 #include "progressbar.h"
+#include <vector>
+#include "matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
 
 rstolt::rstolt(int nz, int nm, int nh, int nro, float dz, float dm, float dh, float dro, float oro) {
   /* Sizes */
@@ -51,13 +55,30 @@ void rstolt::resmig(float *dat, float *img, int nthrd, bool verb) {
           float zzs = (vov*vov) * (kzh*kzm) - (kz*kz) * ( (km-kh)*(km-kh) );
           float zzg = (vov*vov) * (kzh*kzm) - (kz*kz) * ( (km+kh)*(km+kh) );
           if(zzs > 0 && zzg > 0) {
-            str[iz] = 0.5/kz * ( sqrt(zzs) + sqrt(zzg) );
+            //str[iz] = 0.5/kz * ( sqrt(zzs) + sqrt(zzg) );
+            str[iz] = kz;
+            if(ih == 16) {
+              fprintf(stderr,"im=%d iz=%d kh=%f km=%f str[iz]=%f kz=%f\n",im,iz,kh,km,str[iz],kz);
+            }
           } else { /* Evanescent */
+            if(ih == 16) {
+              fprintf(stderr,"here\n");
+            }
             str[iz] = -2.0*_dz;
           }
         }
         /* Do the migration for the mapping */
+        if(ih == 16) {
+          float *tmp1 = dat + ih*_nz*_nm + im*_nz;
+          std::vector<float> vec1(tmp1,tmp1+_nz);
+          plt::plot(vec1);
+        }
         intrp.apply(str, dat + ih*_nz*_nm + im*_nz, img + iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz);
+        if(ih == 16) {
+          float *tmp2 = img + iro*_nz*_nm*_nh + ih*_nz*_nm + im*_nz;
+          std::vector<float> vec2(tmp2,tmp2+_nz);
+          plt::plot(vec2); plt::show();
+        }
       }
     }
     /* Parallel printing */
