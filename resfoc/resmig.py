@@ -2,6 +2,7 @@ import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.cosft as cft
 import resfoc.depth2time as d2t
+from scaas.gradtaper import build_taper,build_taper_ds
 from deeplearn.utils import next_power_of_2
 from utils.ptyprint import printprogress
 
@@ -12,6 +13,31 @@ def pad_cft(n):
     return next_power_of_2(n+1) + 1 - n
   else:
     return np + 1 - n
+
+def taperimg(img,axis1=True,axis2=True,axis3=True):
+  """ Applies a taper along specified axes """
+  # Get dimensions
+  nh = img.shape[0]; nx = img.shape[1]; nz = img.shape[2]
+
+  ## Build tapers
+  #TODO: need a better way of doing this than top and bottom sample
+  # Vertical taper
+  tap2l,tap2i = build_taper_ds(nx,nz,100,250,300,500)
+  # Midpoint taper
+  tap2lh,tap2ih = build_taper(nz,nx,1000,1200)
+  tap2ihf = np.fliplr(tap2ih.T)
+  # Offset taper
+  tap2lo,tap2io = build_taper(nx,nh,25,55)
+  tap2iof = np.flipud(tap2io)
+
+  ## Apply tapers
+  imgtp = np.zeros(img.shape,dtype='float32')
+  for ih in range(nh):
+    imgtp[ih] = img[ih]*tap2ihf.T*tap2i.T
+  for iz in range(nz):
+    imgtp[:,:,iz] = imgtp[:,:,iz]*tap2iof
+
+  return imgtp
 
 def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb=True,nthreads=4):
   """
@@ -46,9 +72,12 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
       nhp = nps[0] - img.shape[0]; nmp = nps[2] - img.shape[2]; nzp = nps[1] - img.shape[1]
     else:
       nhp = nps[0] - img.shape[0]; nmp = nps[1] - img.shape[1]; nzp = nps[2] - img.shape[2]
-  # Compute cosine transform
+  # Pad input
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
   if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
+  # Apply taper
+  #imgtp  = taperimg(imgp)
+  # Compute cosine transform
   imgpft = cft.cosft(imgp,axis1=1,axis2=1,axis3=1).astype('float32')
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)

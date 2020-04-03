@@ -51,23 +51,11 @@ prp.plot_taper(refw,cmap='gray',vmin=-1,vmax=1)
 img = prp.wem(rvelsm,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=24)
 nh,oh,dh = prp.get_off_axis()
 
-gimg = tpow(img,dz,tpow=2)
+#gimg = tpow(img,dz,tpow=2)
 
-viewimgframeskey(gimg,transp=False)
+#viewimgframeskey(gimg,transp=False)
 
 # Write out image
 imgo = np.transpose(img,(1,2,0))
 sep.write_file('rugimgsmall.H',imgo,ors=[0.0,0.0,oh],ds=[dz,dx,dh])
-
-#inro = 5; idro = 0.005
-#storm = preresmig(img,[dh,dz,dx],nro=inro,dro=idro,time=False,transp=True,verb=True,nthreads=2)
-#onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
-#
-#stormang = prp.to_angle(storm,nthrds=24,oro=ooro,dro=odro,verb=True)
-#na,oa,da = prp.get_ang_axis()
-#
-## Write to file
-#stormangt = np.transpose(stormang,(3,2,1,0))
-#aaxes = seppy.axes([nz,na,nx,onro],[0.0,oa,0.0,ooro],[dz,da,dx,odro])
-#sep.write_file("stormang.H",stormangt,ofaxes=aaxes)
 
