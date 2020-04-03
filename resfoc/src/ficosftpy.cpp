@@ -20,13 +20,14 @@ PYBIND11_MODULE(ficosft,m) {
       py::array_t<int, py::array::c_style> n,
       py::array_t<int, py::array::c_style> sign,
       py::array_t<int, py::array::c_style> s,
-      py::array_t<float, py::array::c_style> data
+      py::array_t<float, py::array::c_style> data,
+      bool verb
       )
       {
-        fwdcosft(dim1,n1,n2,n.mutable_data(),sign.mutable_data(),s.mutable_data(),data.mutable_data());
+        fwdcosft(dim1,n1,n2,n.mutable_data(),sign.mutable_data(),s.mutable_data(),data.mutable_data(),verb);
       },
       py::arg("dim1"), py::arg("n1"), py::arg("n2"), py::arg("n"),
-      py::arg("sign"), py::arg("s"), py::arg("data")
+      py::arg("sign"), py::arg("s"), py::arg("data"), py::arg("verb")
       );
   m.def("invcosft",[](
       int dim1,
@@ -35,12 +36,13 @@ PYBIND11_MODULE(ficosft,m) {
       py::array_t<int, py::array::c_style> n,
       py::array_t<int, py::array::c_style> sign,
       py::array_t<int, py::array::c_style> s,
-      py::array_t<float, py::array::c_style> data
+      py::array_t<float, py::array::c_style> data,
+      bool verb
       )
       {
-        invcosft(dim1,n1,n2,n.mutable_data(),sign.mutable_data(),s.mutable_data(),data.mutable_data());
+        invcosft(dim1,n1,n2,n.mutable_data(),sign.mutable_data(),s.mutable_data(),data.mutable_data(),verb);
       },
       py::arg("dim1"), py::arg("n1"), py::arg("n2"), py::arg("n"),
-      py::arg("sign"), py::arg("s"), py::arg("data")
+      py::arg("sign"), py::arg("s"), py::arg("data"), py::arg("verb")
   );
 }

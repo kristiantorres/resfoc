@@ -6,7 +6,7 @@ Forward and inverse cosine transform of N-dimensional arrays
 import numpy as np
 from resfoc.ficosft import fwdcosft,invcosft
 
-def cosft(data,**kwargs):
+def cosft(data,verb=False,**kwargs):
   """
   Forward cosine transform
 
@@ -16,6 +16,7 @@ def cosft(data,**kwargs):
     axis1 - Flag indicating whether to compute transform along axis1 (0 or 1) [None]
     axis2 - Flag indicating whether to compute transform along axis2 (0 or 1) [None]
     axis3 - Flag indicating whether to compute transform along axis3 (0 or 1) [None]
+    verb  - Verbosity flag for verbose output [False]
 
   Returns the cosine transformed array
   """
@@ -31,7 +32,7 @@ def cosft(data,**kwargs):
   dim1 = -1
   for i in range(dim):
     ns[i] = data.shape[dim-i-1]
-    if(1==ns[i] or kwargs.get("axis%d"%(i),None) is None): 
+    if(1==ns[i] or kwargs.get("axis%d"%(dim-i-1),None) is None): 
       signs[i] = 0
     else:
       signs[i] = 1
@@ -48,11 +49,11 @@ def cosft(data,**kwargs):
 
   #TODO: it is probably better to not make a copy and write in place
   tmp = np.copy(data)
-  fwdcosft(dim1,n1,n2,ns,signs,s,tmp)
+  fwdcosft(dim1,n1,n2,ns,signs,s,tmp,verb)
 
   return tmp
 
-def icosft(data,**kwargs):
+def icosft(data,verb=False,**kwargs):
   """
   Inverse cosine transform
 
@@ -62,6 +63,7 @@ def icosft(data,**kwargs):
     axis1 - Flag indicating whether to compute transform along axis1 (0 or 1) [0]
     axis2 - Flag indicating whether to compute transform along axis2 (0 or 1) [0]
     axis3 - Flag indicating whether to compute transform along axis3 (0 or 1) [0]
+    verb  - Verbosity flag for verbose output [False]
 
   Returns the inverse cosine transformed array
   """
@@ -77,7 +79,7 @@ def icosft(data,**kwargs):
   dim1 = -1
   for i in range(dim):
     ns[i] = data.shape[dim-i-1]
-    if(1==ns[i] or kwargs.get("axis%d"%(i),None) is None): 
+    if(1==ns[i] or kwargs.get("axis%d"%(dim-i-1),None) is None): 
       signs[i] = 0 
     else:
       signs[i] = 1
@@ -93,7 +95,7 @@ def icosft(data,**kwargs):
       n2 *= ns[i]
 
   tmp = np.copy(data)
-  invcosft(dim1,n1,n2,ns,signs,s,tmp)
+  invcosft(dim1,n1,n2,ns,signs,s,tmp,verb)
 
   return tmp 
 

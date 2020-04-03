@@ -7,12 +7,12 @@ sep = seppy.sep()
 paxes,pln = sep.read_file('plane.H',form='native')
 pln = pln.reshape(paxes.n,order='F').astype('float32')
 
-plnft1  = cft.cosft(pln.T,axis0=1)
-plnft2  = cft.cosft(pln.T,axis1=1)
+plnft1  = cft.cosft(pln.T,axis1=1)
+plnft2  = cft.cosft(pln.T,axis0=1)
 plnft12 = cft.cosft(pln.T,axis0=1,axis1=1)
 
-iplnft1  = cft.icosft(plnft1,axis0=1)
-iplnft2  = cft.icosft(plnft2,axis1=1)
+iplnft1  = cft.icosft(plnft1,axis1=1)
+iplnft2  = cft.icosft(plnft2,axis0=1)
 iplnft12 = cft.icosft(plnft12,axis0=1,axis1=1)
 
 ## Plot results

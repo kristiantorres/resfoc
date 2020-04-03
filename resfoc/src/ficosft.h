@@ -8,8 +8,8 @@
 
 #include "cosft.h"
 
-void fwdcosft(int dim1, int n1, int n2, int *n, int *sign, int *s, float *data);
-void invcosft(int dim1, int n1, int n2, int *n, int *sign, int *s, float *data);
+void fwdcosft(int dim1, int n1, int n2, int *n, int *sign, int *s, float *data, bool verb);
+void invcosft(int dim1, int n1, int n2, int *n, int *sign, int *s, float *data, bool verb);
 int first_index(int i, int j, int dim, const int *n, const int *s);
 
 #endif /* FICOSFT_H_ */
