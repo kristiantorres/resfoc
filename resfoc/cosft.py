@@ -95,6 +95,8 @@ def icosft(data,verb=False,**kwargs):
       n2 *= ns[i]
 
   tmp = np.copy(data)
+  #print(dim1,n1,n2)
+  #print(ns,signs,s)
   invcosft(dim1,n1,n2,ns,signs,s,tmp,verb)
 
   return tmp 
