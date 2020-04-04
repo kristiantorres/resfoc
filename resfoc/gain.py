@@ -8,8 +8,8 @@ import numpy as np
 from scaas.trismooth import smooth
 
 def tpow(dat,dt,tpow,ot=0.0,norm=True,transp=False):
-  """ 
-  Applies a t^pow gain 
+  """
+  Applies a t^pow gain
 
   Parameters
     dat  - input array of order [nro,nh,nt,nx] where nro and nh are optional
@@ -24,7 +24,7 @@ def tpow(dat,dt,tpow,ot=0.0,norm=True,transp=False):
   #TODO: 4D not yet implemented
   if(len(dat.shape) == 4):
     # [nro,nh,nx,nt] -> [nro,nh,nt,nx]
-    if(transp): 
+    if(transp):
       dat = np.transpose(dat,(0,1,3,2))
       tp = tpow4d(dat,dt,tpow,ot,norm)
       return np.ascontiguousarray(np.transpose(tp,(0,1,3,2)))
@@ -32,7 +32,7 @@ def tpow(dat,dt,tpow,ot=0.0,norm=True,transp=False):
       return tpow4d(dat,dt,tpow,ot,norm)
   elif(len(dat.shape) == 3):
     # [nh,nx,nt] -> [nh,nt,nx]
-    if(transp): 
+    if(transp):
       dat = np.transpose(dat,(0,2,1))
       tp = tpow3d(dat,dt,tpow,ot,norm)
       return np.ascontiguousarray(np.transpose(tp,(0,2,1)))
@@ -50,10 +50,10 @@ def tpow2d(dat,dt,tpow,ot=0.0,norm=True):
   nx = dat.shape[1]; nt = dat.shape[0]
   # Build the t function
   if(ot != 0.0):
-    t = np.linspace(ot,ot + (nt-1)*dt, nt) 
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
   else:
     ot = dt
-    t = np.linspace(ot,ot + (nt-1)*dt, nt) 
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
   tp = np.power(t,tpow)
   # Normalize by default
   if(norm): tp = tp/np.max(tp)
@@ -62,25 +62,24 @@ def tpow2d(dat,dt,tpow,ot=0.0,norm=True):
   # Scale the data
   return(dat*tpx).astype('float32')
 
-def tpow3d(dat,nt,ot,dt,nx,tpow,nh,nro,norm=True):
+def tpow3d(dat,dt,tpow,ot=0.0,norm=True):
   """ Applies a t^pow gain to the input array dat """
   # Get the shape of the data
   nx = dat.shape[2]; nt = dat.shape[1]; nh = dat.shape[0]
   # Build the t function
   if(ot != 0.0):
-    t = np.linspace(ot,ot + (nt-1)*dt, nt) 
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
   else:
     ot = dt
-    t = np.linspace(ot,ot + (nt-1)*dt, nt) 
+    t = np.linspace(ot,ot + (nt-1)*dt, nt)
   tp = np.power(t,tpow)
   # Normalize by default
   if(norm): tp = tp/np.max(tp)
   # Replicate it across the other axes
   tpx   = np.tile(np.array([tp]).T,(1,nx))
-  tpxr  = np.tile(tpx.T,(nro,1,1))
-  tpxrt = np.transpose(tpxr,(2,1,0))
+  tpxr  = np.tile(tpx,(nh,1,1))
   # Scale the data
-  return (dat*tpxrt).astype('float32')
+  return (dat*tpxr).astype('float32')
 
 def agc(dat,rect1=125):
   """
