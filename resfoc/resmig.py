@@ -1,5 +1,6 @@
 import numpy as np
 import resfoc.rstolt as rstolt
+import resfoc.rstoltbig as rstoltbig
 import resfoc.cosft as cft
 import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
@@ -15,7 +16,7 @@ def pad_cft(n):
   else:
     return np + 1 - n
 
-def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb=True,nthreads=4):
+def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debug=False,verb=True,nthreads=4):
   """
   Computes the prestack residual migration
 
@@ -29,6 +30,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
                ([nhp,nxp,nzp] or [nhp,nzp,nxp] if transp=True)
     time     - return the output migration in time [True]
     transp   - take input [nh,nz,nx] and return output [nro,nh,nz,nx]
+    debug    - a debug mode that is less efficient for large images [False]
     verb     - verbosity flag [True]
     nthreads - number of CPU threads to use for computing the residual migration
   """
@@ -55,19 +57,24 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,verb
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
 
-  # Migration object
+  # Residual migration
   nzpc = imgpft.shape[2]; nmpc = imgpft.shape[1]; nhpc = imgpft.shape[0]
   foro = oro - (nro-1)*dro; fnro = 2*nro-1
   if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1))
-  rst = rstolt.rstolt(nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
-
-  ## Residual Stolt migration
-  rmig = np.zeros([fnro,nhpc,nmpc,nzpc],dtype='float32')
-  rst.resmig(imgpft,rmig,nthreads,verb)
-
-  # Inverse cosine transform
-  rmigift = cft.icosft(rmig,axis1=1,axis2=1,axis3=1,verb=True)
-  rmigiftswind  = rmigift[:,0:nh,0:nm,0:nz]
+  rmigiftswind = np.zeros([fnro,nh,nm,nz],dtype='float32')
+  if(not debug):
+    # Mode for large images
+    rst = rstoltbig.rstoltbig(nz,nm,nh,nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
+    rmig = np.zeros([fnro,nh,nm,nz],dtype='float32')
+    rst.resmig(imgpft,rmigiftswind,nthreads,verb)
+  else:
+    # Mode for small images/debugging
+    rst = rstolt.rstolt(nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
+    rmig = np.zeros([fnro,nhpc,nmpc,nzpc],dtype='float32')
+    rst.resmig(imgpft,rmig,nthreads,verb)
+    # Inverse cosine transform
+    rmigift = cft.icosft(rmig,axis1=1,axis2=1,axis3=1,verb=True)
+    rmigiftswind[:]  = rmigift[:,0:nh,0:nm,0:nz]
 
   # Convert to time
   if(time):
