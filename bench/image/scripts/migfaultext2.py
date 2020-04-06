@@ -39,7 +39,6 @@ rvelsm = gaussian_filter(rvel,sigma=20)
 
 dsx = 20; bx = 25; bz = 25
 prp = geom.defaultgeom(nx,dx,nz,dz,nsx=52,dsx=dsx,bx=bx,bz=bz)
-#prp = geom.defaultgeom(nx,dx,nz,dz,nsx=2,dsx=dsx,bx=bx,bz=bz)
 
 prp.plot_acq(rvelsm,cmap='jet',show=False)
 prp.plot_acq(rref,cmap='gray',show=False)
@@ -55,7 +54,6 @@ prp.build_taper(100,200)
 prp.plot_taper(rref,cmap='gray')
 
 img = prp.wem(rvelsm,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=24)
-#img = prp.wem(rvelsm,oneshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=2)
 nh,oh,dh = prp.get_off_axis()
 
 viewimgframeskey(img,pclip=0.2,transp=False)

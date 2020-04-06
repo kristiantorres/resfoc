@@ -29,6 +29,7 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
     zmax      - the maximum depth point in your data (typically (nz-1)*dz) [nz]
     vmin      - the minumum value desired to be plotted (min(data))
     vmax      - the maximum value desired to be plotted (max(data))
+    pclip     - a scale to be applied to shrink or expand the dynamic range
     xlabel    - the label of the x-axis [None]
     ylabel    - the label of the y-axis [None]
     labelsize - the fontsize of the labels [18]
@@ -44,14 +45,15 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   nfr = arr.shape[2]
   k = 0
   frames = np.arange(0,nfr,skip)
+  vmin = np.min(arr); vmax = np.max(arr)
   for ifr in progressbar(frames, "frames"):
     fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
     ax = fig.add_subplot(111)
     ax.imshow(arr[:,:,ifr],cmap=kwargs.get("cmap","gray"),
         extent=[kwargs.get("xmin",0),kwargs.get("xmax",arr.shape[1]),
           kwargs.get("zmax",arr.shape[0]),kwargs.get("zmin",0)],
-        vmin=kwargs.get("vmin",np.min(arr[:,:,ifr])),
-        vmax=kwargs.get("vmax",np.max(arr[:,:,ifr])))
+        vmin=kwargs.get("vmin",vmin)*kwargs.get('pclip',1.0),
+        vmax=kwargs.get("vmax",vmax)*kwargs.get('pclip',1.0))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
     ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
     ax.tick_params(labelsize=kwargs.get('ticksize',18))
@@ -69,7 +71,7 @@ def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
       plt.show()
 
 def makemoviesbs_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
-  """ 
+  """
   Saves each frame on the fast axis to a png for viewing 
 
   Parameters:

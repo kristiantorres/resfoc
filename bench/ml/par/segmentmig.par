@@ -1,9 +1,9 @@
 [defaults]
 # IO
-imgs=./fltimgprc2.H
+imgs=../image/resangtruezoff.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu10.json
-figpfx=./fig/migtrue
+figpfx=./fig/migtruetap
 # Patching
 nxo=1024
 nzo=512
@@ -15,14 +15,17 @@ strdz=64
 thresh=0.8
 verb=y
 show=n
-gpus=1
+gpus=0
 # Plotting
+pmin=0.4
 aratio=1.0
 fs=0
 time=n
-hbar=0.65
-barz=0.17
+km=y
+hbar=0.67
+barz=0.16
 barx=0.91
-xidx=-1
+bxidx=20
+exidx=1000
 cropsize=154
 

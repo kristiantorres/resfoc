@@ -1,0 +1,11 @@
+[defaults]
+# IO
+timg=resangtruezoff.H
+wimg=resangwrngzoff.H
+ptb=./dat/resmigwrngptb.H
+ivelout=./fig/velerr.png
+imgout=./fig/tvelerrimg
+wimgout=./fig/wvelerrimg
+# Plotting
+thresh=15
+show=n
