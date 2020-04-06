@@ -127,7 +127,7 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
@@ -157,7 +157,7 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   im = ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
   ax.tick_params(labelsize=kwargs.get('ticksize',18))
