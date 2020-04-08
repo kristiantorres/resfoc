@@ -1,9 +1,10 @@
 [defaults]
 # IO
-imgs=../image/resangwrngzoff2.H
+#imgs=../image/resangwrngconvstk.H
+imgs=../image/resmigwrngzoff.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu10.json
-figpfx=./fig/migwrngtap
+figpfx=./fig/resmigzoff/
 # Patching
 nxo=1024
 nzo=512
@@ -14,7 +15,7 @@ strdz=64
 # Other
 thresh=0.8
 verb=y
-show=y
+show=n
 gpus=0
 # Plotting
 pmin=0.4
@@ -28,3 +29,4 @@ barx=0.91
 bxidx=20
 exidx=1000
 cropsize=154
+
