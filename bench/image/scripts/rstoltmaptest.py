@@ -20,7 +20,7 @@ dcs = samplings([nh,nx,nz],[dh,dx,dz])
 
 dkh = np.pi*dcs[0]; dkx = np.pi*dcs[1]; dkz = np.pi*dcs[2]
 
-print(dkh,dkx,dkz)
+#print(dkh,dkx,dkz)
 
 ih = 16
 kh = ih*dkh
@@ -43,12 +43,14 @@ for ix in range(nx):
     #print("im=%d iz=%d kh=%f km=%f str[iz]=%f kz=%f"%(ix,iz,kh,km,stretch[iz],kz))
   stretches[ix,:] = stretch[:]
 
-
 plt.figure()
 plt.imshow(stretches.T,vmin=np.min(kzs),vmax=np.max(kzs))
+plt.title(r"$k_z$")
 plt.figure()
 plt.imshow(kzs.T,vmin=np.min(kzs),vmax=np.max(kzs))
+plt.title(r"$k_{z_0}$")
 plt.figure()
 plt.imshow((stretches-kzs).T,vmin=np.min(kzs),vmax=np.max(kzs))
+plt.title("Difference")
 plt.show()
 

@@ -5,7 +5,7 @@ from utils.movie import viewcube3d
 sep = seppy.sep([])
 
 #Inline 112
-daxes,dat = sep.read_file(None,ifname='./dat/invfloat.H',form='native')
+daxes,dat = sep.read_file('./dat/invfloat.H',form='native')
 
 dat = dat.reshape(daxes.n,order='F')
 
@@ -17,8 +17,8 @@ viewcube3d(datw,ds=ds,os=os,
     pclip=0.95,interp='sinc',width1=8,label1='X (km)',label2='X (km)',label3='Z (km)',
     transp=False,cbar=False,cmap='gray')
 
-axes = seppy.axes(datw.shape,os,ds)
-sep.write_file(None,axes,datw,ofname='elf.H')
+#axes = seppy.axes(datw.shape,os,ds)
+#sep.write_file(None,axes,datw,ofname='elf.H')
 
 #datwt = np.transpose(datw,(0,2,1))
 #ds = [0.01,0.02,0.02]
