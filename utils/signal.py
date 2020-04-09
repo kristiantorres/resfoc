@@ -10,6 +10,7 @@ are from author Sam
 import numpy as np
 from skimage import exposure
 from scipy import misc
+from scipy.signal import butter, lfilter, filtfilt
 
 def ampspec1d(sig,dt):
   """ 
@@ -25,6 +26,61 @@ def ampspec1d(sig,dt):
   fs = np.linspace(of,of+(nf-1)*df,nf)
 
   return spec,fs
+
+def ampspec2d(img,d1,d2):
+  """
+  Returns the 2D amplitude spectrum of the image and the
+  corresponding wavenumbers
+
+  Parameters:
+    img - the input image
+    d1  - the sampling along the fast axis
+    d2  - the sampling along the slow axis
+  """
+  n1 = img.shape[1]; dk1 = 1/(n1*d1); ok1 = -dk1*n1/2.0;
+  n2 = img.shape[0]; dk2 = 1/(n2*d2); ok2 = -dk2*n2/2.0;
+  k1 = np.linspace(ok1, ok1+(n1-1)*dk1, n1)
+  k2 = np.linspace(ok2, ok2+(n2-1)*dk2, n2)
+  imgfft = np.abs(np.fft.fftshift(np.fft.fft2(img)))
+
+  return imgfft,k1,k2
+
+def butter_bandpass(locut, hicut, fs, order=5):
+  """
+  Returns the numerator and demoninator of the transfer function
+  of a Butterworth_bandpass filter.
+
+  Parameters
+    locut - the low frequency beyond which to not pass
+    hicut - the hight frequency beyond which to not pass
+    fs    - the sampling frequency
+    order - the order (number of terms in the LCCDE) to use for the filter
+
+  @source: SO: how-to-implement-band-pass-butterworth-filter-with-scipy-signal-butter
+  @author: Warren Weckesser
+  """
+  nyq = 0.5 * fs
+  lo = locut / nyq
+  hi = hicut / nyq
+  b, a = butter(order, [lo, hi], btype='band')
+  return b, a
+
+def butter_bandpass_filter(data, locut, hicut, fs, order=5):
+  """
+  Convolves the input signal with a butterworth bandpass filter
+
+  Parameters
+    locut - the low frequency beyond which to not pass
+    hicut - the hight frequency beyond which to not pass
+    fs    - the sampling frequency
+    order - the order (number of terms in the LCCDE) to use for the filter
+
+  @source: SO: how-to-implement-band-pass-butterworth-filter-with-scipy-signal-butter
+  @author: Warren Weckesser
+  """
+  b, a = butter_bandpass(locut, hicut, fs, order=order)
+  y = filtfilt(b, a, data)
+  return y
 
 def butter2d_lp(shape, f, n, pxd=1):
   """Designs an n-th order lowpass 2D Butterworth filter with cutoff

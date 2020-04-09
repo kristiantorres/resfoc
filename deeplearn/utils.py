@@ -4,13 +4,14 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2002.02.22
+@version: 2020.03.13
 """
 import sys
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
 from matplotlib import colors
+from utils.image import remove_colorbar
 
 def normalize(img,eps=sys.float_info.epsilon):
   """
@@ -34,24 +35,26 @@ def resizepow2(img,kind='linear'):
   # Resample the image
   return resample(img,new_shape,kind)
 
-def resample(img,new_shape,kind='linear'):
+def resample(img,new_shape,kind='linear',ds=[]):
   """
   Resamples an image. Can work up to 4D numpy arrays.
   assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
-  length=img.shape[-1]
-  height=img.shape[-2]
+  length=img.shape[1]
+  height=img.shape[0]
   x=np.linspace(0,length,length)
   y=np.linspace(0,height,height)
   # New coordinates for interpolation
   xnew=np.linspace(0,length,new_shape[1])
   ynew=np.linspace(0,height,new_shape[0])
   # Compute new samplings
-  #lr = new_shape[0]/length
-  #hr = new_shape[1]/height
-  #d1out = d1/hr
-  #d2out = d2/lr
+  if(len(ds) != 0):
+      dout = []
+      lr = new_shape[1]/length
+      hr = new_shape[0]/height
+      dout.append(ds[1]/lr)
+      dout.append(ds[0]/hr)
   # Perform the interpolation
   if len(img.shape)==4:
     res = np.zeros([img.shape[0],img.shape[1],new_shape[0],new_shape[1]],dtype='float32')
@@ -68,8 +71,10 @@ def resample(img,new_shape,kind='linear'):
     f=interpolate.interp2d(x,y,img,kind=kind)
     res=f(xnew,ynew)
 
-  return res
-  #return res,[d1out,d2out]
+  if(len(ds) == 0):
+    return res
+  else:
+    return res,dout
 
 def next_power_of_2(x):
   """ Gets the nearest power of two to x """
@@ -108,23 +113,27 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,lbl,show=False,color='red',**kwargs):
+def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   """ Plots a binary label on top of an image """
-  assert(img.shape == lbl.shape),'Input image and label must be same size'
+  if(img.shape != lbl.shape):
+    raise Exception('Input image and label must be same size')
   # Get mask
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
   cmap = colors.ListedColormap([color,'white'])
-  fig = plt.figure(figsize=(kwargs.get('fsize1',8),kwargs.get('fsize2',6)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","none"))
-  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
-  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
-  ax.tick_params(labelsize=kwargs.get('ticksize',18))
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  if(fname):
+      ax.set_aspect(kwargs.get('aratio',1.0))
+      plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
   # Plot label
   ax.imshow(mask,cmap=cmap,
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
@@ -132,4 +141,55 @@ def plotseglabel(img,lbl,show=False,color='red',**kwargs):
   ax.set_aspect(kwargs.get('aratio',1.0))
   if(show):
     plt.show()
+  if(fname):
+      plt.savefig(fname+"-lbl.png",bbox_inches='tight',dpi=150,transparent=True)
+      plt.close()
+
+def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
+  """ Plots unthresholded predictions on top of an image """
+  if(img.shape != prd.shape):
+    raise Exception('Input image and predictions must be same size')
+  mask = np.ma.masked_where(prd <= pmin, prd)
+  # Select colormap
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
+  ax = fig.add_subplot(111)
+  # Plot image
+  im = ax.imshow(img,cmap=kwargs.get('cmap','gray'),
+      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
+  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
+  ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',18))
+  ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  # Set colorbar
+  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+  cbar = fig.colorbar(im,cbar_ax,format='%.1f',boundaries=np.arange(pmin,1.1,0.1))
+  cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
+  if(fname):
+    ax.set_aspect(kwargs.get('aratio',1.0))
+    plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
+    cbar.remove()
+  # Plot label
+  imp = ax.imshow(mask,cmap='jet',
+      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
+        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("pinterp","bilinear"),
+        vmin=pmin,vmax=1.0,alpha=alpha)
+  ax.set_aspect(kwargs.get('aratio',1.0))
+  # Set colorbar
+  cbar_axp = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+  cbarp = fig.colorbar(imp,cbar_axp,format='%.1f')
+  cbarp.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  cbarp.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
+  cbarp.draw_all()
+  if(show):
+    plt.show()
+  if(fname):
+    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
+    # Crop and pad the image so they are the same size
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
 
