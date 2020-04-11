@@ -63,7 +63,7 @@ class pbsjob(object):
     pbsout = """#! /bin/tcsh
 
 #PBS -N %s
-#PBS -l nodes=1:ppn=%d
+#PBS -l mem=60gb,nodes=1:ppn=%d
 #PBS -q %s
 #PBS -o %s
 #PBS -e %s

@@ -1,0 +1,23 @@
+[defaults]
+# IO
+moddir=/data/sep/joseph29/projects/resfoc/bench/dat/velflts
+outdir=/data/sep/joseph29/projects/resfoc/bench/dat/resmigflts
+imgpf=resfltimg
+ptbpf=resfltptb
+datapath=/data/sep/joseph29/scratch/resmigflts
+begvel=40
+# Other
+verb=y
+# Cluster arguments
+tjobs=1000
+ajobs=50
+nprocs=6
+nsubmit=5
+logpath=./log/resmigflts
+parpath=./par/resmigflts
+jobprefix=resmigflt-
+nleft=0
+klean=y
+delay=5.0
+blacklist=
+
