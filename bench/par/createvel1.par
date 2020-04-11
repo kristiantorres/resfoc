@@ -1,0 +1,25 @@
+[defaults]
+# IO
+outdir=./dat/vels
+datapath=/scratch/joseph29
+beg=8000
+end=9999
+prefix=
+nmodels=5
+# Velocity model
+nx=600
+ox=0.0
+dx=25.0
+ny=600
+oy=0.0
+dy=25.0
+nz=600
+oz=0.0
+dz=10.0
+# Processing
+nzo=256
+nxo=400
+rect=0.5
+# Other
+verb=y
+

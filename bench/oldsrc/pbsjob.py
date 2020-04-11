@@ -12,7 +12,7 @@ import subprocess
 #       (-a option) to be reached.
 #        S -  (Unicos only) job is suspend.
 
-class slurmjob(object):
+class pbsjob(object):
   """ A class for keeping track of jobs """
 
   def __init__(self,logpath=".",user='joseph29',verb=False):
@@ -61,7 +61,7 @@ class slurmjob(object):
     self.outfile = self.logpath + '/' + name + self.jobid + '_out.log'
     self.errfile = self.logpath + '/' + name + self.jobid + '_err.log'
     # Create the PBS script
-    slurmout = """#! /bin/bash
+    pbsout = """#! /bin/tcsh
 #SBATCH --job-name %s
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=%d
@@ -78,7 +78,7 @@ echo $SLURMD_NODENAME > %s-node.txt
     # Write the script to file
     script = name + self.jobid + ".sh"
     with open(script,'w') as f:
-      f.write(slurmout)
+      f.write(pbsout)
 
     # Submit the script
     sub = "sbatch %s > %s"%(script,self.jobid)
