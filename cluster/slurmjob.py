@@ -61,7 +61,7 @@ class slurmjob(object):
     self.outfile = self.logpath + '/' + name + self.jobid + '_out.log'
     self.errfile = self.logpath + '/' + name + self.jobid + '_err.log'
     # Create the PBS script
-    slurmout = """#! /bin/tcsh
+    slurmout = """#! /bin/bash
 #SBATCH --job-name %s
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=%d
