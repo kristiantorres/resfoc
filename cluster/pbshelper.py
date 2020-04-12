@@ -48,16 +48,32 @@ def submit_job(script,sleep=1,submit=True,verb=True):
 
   return
 
-def get_numjobs(user,queue):
+def get_numjobs(queue,user='joseph29',qfile=None):
   """ Gets the number of running and completed jobs of a user in a specific queue """
-  # Get the output of qstat -u user
-  ujobs = "qstat -u %s > qstat.out"%(user)
-  sp = subprocess.check_call(ujobs,shell=True)
-  # Read in the file
+  # Initialize the dictionary
   numjobs = {}
-  numjobs['R'] = 0; numjobs['C'] = 0; numjobs['Q'] = 0;
-  with open('qstat.out', 'r') as f:
-    for line in f.readlines():
+  numjobs['R'] = 0; numjobs['C'] = 0; numjobs['Q'] = 0
+  # Change the queue to have spaces before and after
+  queue = ' ' + queue + ' '
+  # Get the output of qstat -u user
+  if(qfile == None):
+    ujobs = "qstat -u %s > qstat.out"%(user)
+    sp = subprocess.check_call(ujobs,shell=True)
+    # Read in the file
+    with open('qstat.out', 'r') as f:
+      for line in f.readlines():
+        if(user in line and queue in line and ' R ' in line):
+          numjobs['R'] += 1
+        elif(user in line and queue in line and ' Q ' in line):
+          numjobs['Q'] += 1
+        elif(user in line and queue in line and ' H ' in line):
+          numjobs['Q'] += 1
+        elif(user in line and queue in line and ' C ' in line):
+          numjobs['C'] += 1
+        elif(user in line and queue in line and ' E ' in line):
+          numjobs['C'] += 1
+  else:
+    for line in qfile:
       if(user in line and queue in line and ' R ' in line):
         numjobs['R'] += 1
       elif(user in line and queue in line and ' Q ' in line):
@@ -95,7 +111,7 @@ def killjobs(user='joseph29',queue=None,state='Q'):
 
 def qstat(user='joseph29'):
   """ Gets the output of qstat from python """
-  ujobs = 'qstat -u %s > qstat.out'%(user)
+  ujobs = 'qstat -u %s -n -1> qstat.out'%(user)
   sp = subprocess.check_call(ujobs,shell=True)
   with open('qstat.out', 'r') as f:
     return f.readlines()

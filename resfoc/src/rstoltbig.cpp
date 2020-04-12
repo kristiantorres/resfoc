@@ -39,8 +39,15 @@ void rstoltbig::resmig(float *dat, float *img, int nthrd, bool verb) {
   for(int iro = 0; iro < _nro; ++iro) {
     /* Set up the parallel printing */
     int tidx = omp_get_thread_num();
+		//TODO: set two types of verbosity. depending on the number of threads used
     if(firstiter && verb) ridx[tidx] = iro;
-    if(verb) printprogress_omp("nrho:", iro - ridx[tidx], csize, tidx);
+		if(verb) {
+			if(nthrd >= _nro) {
+				printprogress_omp("resmig:", 0, 2, tidx);
+			} else {
+				printprogress_omp("nrho:", iro - ridx[tidx], csize, tidx);
+			}
+		}
     /* Temporary arrays */
     float *iimg = new float[_nzp*_nmp*_nhp]();
     float *str  = new float[_nzp]();
@@ -72,6 +79,7 @@ void rstoltbig::resmig(float *dat, float *img, int nthrd, bool verb) {
       }
     }
     /* Inverse cosine transform */
+    if(verb && nthrd >= _nro) printprogress_omp("cosftr:", 1, 2, tidx);
     invcosft(_dim1, _n1, _n2, _ns, _signs, _s, iimg, false);
     /* Copy to output */
     for(int ih = 0; ih < _nh; ++ih) {
@@ -84,6 +92,7 @@ void rstoltbig::resmig(float *dat, float *img, int nthrd, bool verb) {
     /* Free memory */
     delete[] str; delete[] iimg;
   }
+  if(verb && nthrd >= _nro) printprogress_omp("finish!", 2, 2, 0);
   /* Parallel printing */
   if(verb) printf("\n");
   delete[] ridx;

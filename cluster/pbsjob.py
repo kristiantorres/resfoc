@@ -24,6 +24,8 @@ class pbsjob(object):
     self.status['sep'] = None; self.status['default'] = None
     self.times= {}                   # Job time for each queue
     self.times['sep'] = None; self.times['default'] = None
+    self.nodes = {}                  # Nodes names for each job
+    self.nodes['sep'] = None; self.nodes['default'] = None
     self.user = user                 # User id
     self.logpath = logpath           # Path for writing log files
     self.verb = verb                 # verbosity flag
@@ -31,7 +33,7 @@ class pbsjob(object):
     self.outfile = None              # Stdout log file
     self.errfile = None              # Stderr log file
 
-  def submit(self,name,cmd,nprocs=8,queue='sep',sleep=1):
+  def submit(self,name,cmd,nprocs=16,queue='sep',sleep=1):
     """ Submits the job with command to the cluster """
     # First check if the job is running
     if('R' in self.status.values()):
@@ -93,7 +95,7 @@ cd $PBS_O_WORKDIR
   def getstatus(self):
     """ Gets the status of the job """
     # Call qstat
-    ujobs = "qstat -u %s | grep %s > qstat.out"%(self.user,self.jobid)
+    ujobs = "qstat -u %s -n -1 | grep %s > qstat.out"%(self.user,self.jobid)
     #if(self.verb): print(ujobs)
     sp = subprocess.check_call(ujobs,shell=True)
     # Parse the output by the job id and the user
@@ -109,9 +111,10 @@ cd $PBS_O_WORKDIR
             attrs[9] = 'Q'
           # Set the status for the queue
           self.status[attrs[2]] = attrs[9]
-          # Get the time elapsed
+          # Get the time elapsed and the node id
           if(attrs[9] == 'R'):
-            self.times[attrs[2]] = self.toseconds(attrs[-1])
+            self.times[attrs[2]] = self.toseconds(attrs[10])
+            self.nodes[attrs[2]] = attrs[-1][:6]
 
     return self.status
 
@@ -130,12 +133,10 @@ cd $PBS_O_WORKDIR
         self.status[attrs[2]] = attrs[9]
         # Get the time elapsed
         if(attrs[9] == 'R'):
-          self.times[attrs[2]] = self.toseconds(attrs[-1])
+          self.times[attrs[2]] = self.toseconds(attrs[10])
+          self.nodes[attrs[2]] = attrs[-1][:6]
 
     return self.status
-
-  #def approvesubmit(self):
-  #  """ Checks the current status for the job """
 
   def success(self,flag):
     """ Checks if a completed job was successful """
@@ -150,6 +151,15 @@ cd $PBS_O_WORKDIR
             return True
 
       return False
+
+  def delete(self,queue=None):
+    """ Deletes the job from the specified queue """
+    if(queue != None):
+      sp = subprocess.check_call("qdel %s"%(self.subids[queue]),shell=True)
+    else:
+      # Remove from both queues
+      sp = subprocess.check_call("qdel %s"%(self.subids['sep']),shell=True)
+      sp = subprocess.check_call("qdel %s"%(self.subids['default']),shell=True)
 
   #TODO: wrap qdels with a try catch
   def cleanup(self):

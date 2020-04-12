@@ -6,6 +6,7 @@ See utils.movie for interactive plotting
 """
 import numpy as np
 from utils.signal import ampspec1d
+from resfoc.gain import agc
 import matplotlib.pyplot as plt
 
 def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
@@ -149,19 +150,21 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,show=True,**kwargs):
+def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png',show=True,**kwargs):
   """
   Makes a plot of a single angle gather as it changes with rho
 
   Parameters
-    aimg   - the residually migrated angle domain image [nro,nx,na,nz]
-    xloc   - the image point at which to extract the angle gather [samples]
-    dx     - the lateral sampling of the image
-    dz     - the vertical sampling of the image
-    oro    - the origin of the rho axis
-    dro    - the sampling of the rho axis
-    transp - flag indicating whether to transpose the data [False]
-    show   - flag indicating whether to call plt.show() [True]
+    aimg    - the residually migrated angle domain image [nro,nx,na,nz]
+    xloc    - the image point at which to extract the angle gather [samples]
+    dx      - the lateral sampling of the image
+    dz      - the vertical sampling of the image
+    oro     - the origin of the rho axis
+    dro     - the sampling of the rho axis
+    transp  - flag indicating whether to transpose the data [False]
+    figname - name of output figure [None]
+    ftype   - the type of output figure [png]
+    show    - flag indicating whether to call plt.show() [True]
   """
   if(transp):
     # [nro,na,nz,nx] -> [nro,nx,na,nz]
@@ -174,35 +177,50 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,show=True,**kwargs):
   ## Plot a line at the specified image point
   # Compute the original migrated image
   ro1dx = int((1-oro)/dro)
-  mig = np.sum(aimgt[ro1dx],axis=1)
-  fig1 = plt.figure(figsize=(10,10))
+  if(kwargs.get('agc',False)):
+    mig = agc(np.sum(aimgt[ro1dx],axis=1))
+  else:
+    mig = np.sum(aimgt[ro1dx],axis=1)
+  fig1 = plt.figure(figsize=(kwargs.get('wboxi',14),kwargs.get('hboxi',7)))
   ax1 = fig1.gca()
   # Build the line
-  lz = np.linspace(0.0,(nz)*dz,nz)
-  lx = np.zeros(nz) + xloc*dx
+  izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
+  lz = np.linspace(izmin*dz,izmax*dz,izmax-izmin)
+  lx = np.zeros(izmax-izmin) + xloc*dx
   vmin1 = np.min(mig); vmax1 = np.max(mig)
-  ax1.imshow(mig.T,cmap='gray',interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0.0),
-    nx*dx,nz*dz,kwargs.get('zmin',0.0)],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
+  ax1.imshow(mig[kwargs.get('xmin'):kwargs.get('xmax'),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
+      interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
+    kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
   ax1.plot(lx,lz,color='k',linewidth=2)
   ax1.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax1.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax1.tick_params(labelsize=kwargs.get('labelsize',14))
+  if(figname is not None and show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname+'-img.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
 
   ## Plot the rho figure
   # Grab a single angle gather
-  oneang = aimgt[:,xloc,:,:]
+  if(kwargs.get('agc',False)):
+    oneang = agc(aimgt[:,xloc,:,:])
+  else:
+    oneang = aimgt[:,xloc,:,:]
   # Flatten along angle and rho axis
   oneang = np.reshape(oneang,[nro*na,nz])
   # Min and max amplitudes
   vmin2 = np.min(oneang); vmax2 = np.max(oneang)
-  fig2 = plt.figure(figsize=(14,7))
+  fig2 = plt.figure(figsize=(kwargs.get('wboxg',14),kwargs.get('hboxg',7)))
   ax2 = fig2.gca()
-  ax2.imshow(oneang.T,cmap='gray',extent=[oro,oro+nro*dro,nz*dz,kwargs.get('zmin',0.0)],
+  ax2.imshow(oneang[:,kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
+      extent=[oro,oro+nro*dro,kwargs.get('zmax',nz)*dz,kwargs.get('zmin',0.0)*dz],
       vmin=vmin2*kwargs.get('pclip',1.0),vmax=vmax2*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'),
       aspect=kwargs.get('roaspect',0.01))
   ax2.set_xlabel(r'$\rho$',fontsize=kwargs.get('labelsize',14))
   ax2.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax2.tick_params(labelsize=kwargs.get('labelsize',14))
-  if(show):
-    plt.show()
+  if(show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname+'.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
 
