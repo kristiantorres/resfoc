@@ -109,8 +109,9 @@ imgs = imgs.reshape(iaxes.n,order='F')
 if(len(imgs.shape) < 3):
   imgs = np.expand_dims(imgs,axis=-1)
 imgs = np.transpose(imgs,(2,0,1))
-nz = imgs.shape[1]; nx = imgs.shape[2]; nimg = imgs.shape[0]
-dz = iaxes.d[0]; dx = iaxes.d[1]
+[nimg,nz,nx] = imgs.shape
+[dz,dx,dro] = iaxes.d
+[oz,ox,oro] = iaxes.o
 
 # Perform the patch extraction
 nzo = args.nzo;   nxo = args.nxo
@@ -159,10 +160,10 @@ for iimg in range(nimg):
   fs = args.fs
   bxidx = args.bxidx; exidx = args.exidx
   # Make plot
-  oro = 0.9775; dro = 0.0025
-  plotsegprobs(gimg[fs:,bxidx:exidx],iprb[fs:,bxidx:exidx],oro+iimg*dro,
+  rho = oro + iimg*dro
+  plotsegprobs(gimg[fs:,bxidx:exidx],iprb[fs:,bxidx:exidx],title=r'$\rho$=%f'%(rho),
              xlabel='X (km)',ylabel='Z (km)',xmin=bxidx*ds[1],xmax=(exidx-1)*ds[1],
              zmin=fs*ds[0],zmax=(nz-1)*ds[0],vmin=-2.5,vmax=2.5,aratio=args.aratio,show=show,interp='sinc',
-             pmin=args.pmin,alpha=0.7,fname=str(iimg),ticksize=14,barlabelsize=14,barx=args.barx,
+             pmin=args.pmin,alpha=0.7,fname=args.figpfx+create_inttag(iimg,nimg),ticksize=14,barlabelsize=14,barx=args.barx,
              hbar=args.hbar,wbox=10,labelsize=14,barz=args.barz,cropsize=args.cropsize)
 

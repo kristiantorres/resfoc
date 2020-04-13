@@ -10,7 +10,7 @@ import numpy as np
 from deeplearn.utils import resample
 from scipy.ndimage import gaussian_filter
 import scaas.defaultgeom as geom
-from scaas.velocity import create_randomptb_loc
+from scaas.velocity import create_randomptb_loc, create_randomptbs_loc
 from scaas.wavelet import ricker
 from resfoc.gain import agc,tpow
 from resfoc.resmig import preresmig,get_rho_axis
@@ -66,11 +66,11 @@ verb = sep.yn2zoo(args.verb); nthrd = args.nthreads
 # Read in the model
 vaxes,vel = sep.read_file(args.velin)
 vel = vel.reshape(vaxes.n,order='F')
-velw = np.ascontiguousarray((vel[:,:,0].T).astype('float32'))
+velw = np.ascontiguousarray((vel[:,:,args.velidx].T).astype('float32'))
 # Read in the reflectivity
 raxes,ref = sep.read_file(args.refin)
 ref = ref.reshape(raxes.n,order='F')
-refw = np.ascontiguousarray((ref[:,:,0].T).astype('float32'))
+refw = np.ascontiguousarray((ref[:,:,args.velidx].T).astype('float32'))
 
 # Resample the model
 nx = 1024; nz = 512
@@ -84,21 +84,24 @@ rvelsm = gaussian_filter(rvel,sigma=20)
 # Scale by a random perturbation
 nro1=3; oro1=1.03; dro1=0.01
 romin1 = oro1 - (nro1-1)*dro1; romax1 = romin1 + dro1*(2*nro1-1)
-#TODO: choose randomly the position of the anomaly (within bounds)
-# Make sure not too close together
-rhosm1 = create_randomptb_loc(nz,nx,romin1,romax1,naz=150,nax=150,cz=200,cx=700,
-    nptsz=2,nptsx=2,octaves=3,period=80,Ngrad=80,persist=0.2,ncpu=1)
-
+#rhosm1 = create_randomptb_loc(nz,nx,romin1,romax1,naz=150,nax=150,cz=200,cx=700,
+#    nptsz=2,nptsx=2,octaves=3,period=80,Ngrad=80,persist=0.2,ncpu=1)
+#
 nro2=3; oro2=0.97; dro2=0.01
 romin2 = oro2 - (nro2-1)*dro1; romax2 = romin2 + dro2*(2*nro2-1)
-rhosm2 = create_randomptb_loc(nz,nx,romin2,romax2,naz=150,nax=150,cz=120,cx=300,
-    nptsz=2,nptsx=2,octaves=3,period=80,Ngrad=80,persist=0.2,ncpu=1)
-# Plot for QC
-plt.figure(1); plt.imshow(rvelsm,cmap='jet')
-plt.figure(2); plt.imshow(rvelsm*rhosm1*rhosm2,cmap='jet')
-plt.figure(3); plt.imshow(rhosm1*rhosm2,cmap='jet')
+#rhosm2 = create_randomptb_loc(nz,nx,romin2,romax2,naz=150,nax=150,cz=120,cx=300,
+#    nptsz=2,nptsx=2,octaves=3,period=80,Ngrad=80,persist=0.2,ncpu=1)
+## Plot for QC
+#rvelwr = rvelsm*rhosm1*rhosm2
+
+#print(romin1,romin2); print(romax1,romax2)
+rho12 = create_randomptbs_loc(nz,nx,nptbs=3,romin=romin2,romax=romax1,
+                              minnaz=50,maxnaz=300,minnax=50,maxnax=300,mincz=150,maxcz=300,mincx=150,maxcx=850,
+                              mindist=100,nptsz=2,nptsx=2,octaves=2,period=80,Ngrad=80,persist=0.2,ncpu=1,sigma=20)
+plt.figure(4); plt.imshow(rho12,cmap='jet')
 plt.show()
-rvelwr = rvelsm*rhosm1*rhosm2
+
+rvelwr = rvelsm*rho12
 
 dsx = 20; bx = 25; bz = 25
 prp = geom.defaultgeom(nx,dx,nz,dz,nsx=52,dsx=dsx,bx=bx,bz=bz)
@@ -124,10 +127,10 @@ img = prp.wem(rvelwr,allshot,wav,dtd,nh=16,lap=True,verb=verb,nthrds=nthrd)
 nh,oh,dh = prp.get_off_axis()
 
 # Residual migration
-inro = 10; idro = 0.0025
+inro = 17; idro = 0.00125
 onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 if(nthrd > onro): nthrd = onro
-storm = preresmig(img,[dh,dz,dx],nps=[2049,513,1025],nro=inro,dro=idro,time=False,transp=True,verb=verb,nthreads=nthrd)
+storm = preresmig(img,[dh,dz,dx],nps=[2049,513,1025],nro=inro,dro=idro,time=False,transp=True,verb=verb,nthreads=6)
 
 # Write image to file
 stormt = np.transpose(storm,(2,3,1,0))
