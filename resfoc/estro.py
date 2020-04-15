@@ -11,7 +11,7 @@ from resfoc.ssim import ssim
 
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
-  Estimates rho by comparing residual migration images with a 
+  Estimates rho by comparing residual migration images with a
   well-focused "target image"
 
   Parameters
@@ -104,6 +104,7 @@ def onehot2rho(oehs,dro,oro,nz=512,nx=1024,nzp=128,nxp=128,strdz=64,strdx=64,pat
   # Loop over each patch
   for ixp in range(numpx):
     for izp in range(numpz):
+      print(oehs[ixp,izp])
       idx = np.argmax(oehs[ixp,izp])
       rhop[ixp,izp,:,:] = oro + idx*dro
 
@@ -130,4 +131,25 @@ def ssim_ro(rimgs,fimg):
     ssims[iro] = ssim(rimgs[iro],fimg)
 
   return np.argmax(ssims)
+
+def refoc_tgt(resimgs,oehs):
+  """
+  Refocuses an image based on the one-hot encoded vectors
+  from the SSIM measure/NN prediction
+
+  Parameters
+    resimgs - input patched residual migration images [numpx,numpz,nro,nxp,nzp]
+    oehs    - one-hot encoded vectors
+
+  Returns a patched coarsely focused image
+  """
+  [numpx,numpz,nro,nxp,nzp] = resimgs.shape
+
+  out = np.zeros([numpx,numpz,nxp,nzp])
+
+  for ipx in range(numpx):
+    for ipz in range(numpz):
+      out[ipx,ipz] = resimgs[ipx,ipz,oehs[ipx,ipz]]
+
+  return out
 

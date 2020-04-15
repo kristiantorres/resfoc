@@ -8,11 +8,12 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose
 from tensorflow.keras.layers import BatchNormalization, Concatenate, Activation, Cropping2D, concatenate
-from tensorflow.keras.layers import ZeroPadding2D, MaxPooling2D, UpSampling2D, LeakyReLU
+from tensorflow.keras.layers import ZeroPadding2D, MaxPooling2D, UpSampling2D, LeakyReLU, Flatten, Dense, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import RandomNormal
 from deeplearn.keraslosses import cross_entropy_balanced
+from tensorflow.keras.losses import categorical_crossentropy
 
 def conv2d(layer_input, filters, f_size, alpha=0.2, bn=True, dropout=0.0):
   """ A wrapper for Keras Conv2D function """
@@ -124,6 +125,39 @@ def unetxwu(pretrained_weights = None,input_size = (128,128,1)):
   model = Model(inputs=[inputs], outputs=[conv8])
   print(model.summary())
   model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+
+  return model
+
+def findres(input_size = (128,128,19)):
+  inputs = Input(input_size)
+  conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(inputs)
+  conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(conv1)
+  pool1 = MaxPooling2D(pool_size=(2,2))(conv1)
+
+  conv2 = Conv2D(64, (3,3), activation='relu', padding='same')(pool1)
+  conv2 = Conv2D(64, (3,3), activation='relu', padding='same')(conv2)
+  pool2 = MaxPooling2D(pool_size=(2,2))(conv2)
+
+  conv3 = Conv2D(128, (3,3), activation='relu', padding='same')(pool2)
+  conv3 = Conv2D(128, (3,3), activation='relu', padding='same')(conv3)
+  pool3 = MaxPooling2D(pool_size=(2,2))(conv3)
+
+  conv4 = Conv2D(512, (3,3), activation='relu', padding='same')(pool3)
+  conv4 = Conv2D(512, (3,3), activation='relu', padding='same')(conv4)
+
+  flat   = Flatten()(conv4)
+  dense1 = Dense(2048, kernel_initializer='normal', activation='relu')(flat)
+  #dense1 = Dense(4096, kernel_initializer='normal', activation='softmax')(flat)
+  drop1  = Dropout(0.2)(dense1)
+
+  #dense2 = Dense(input_size[2], kernel_initializer='normal', activation='softmax')(flat)
+  #dense2 = Dense(input_size[2], activation=tf.nn.softmax)(flat)
+  dense2 = Dense(input_size[2], activation='softmax')(drop1)
+  drop2  = Dropout(0.2)(dense2)
+
+  model = Model(inputs=[inputs], outputs=[drop2])
+  print(model.summary())
+  model.compile(optimizer = Adam(lr = 1e-4), loss = categorical_crossentropy , metrics = ['accuracy'])
 
   return model
 
