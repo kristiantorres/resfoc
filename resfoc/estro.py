@@ -75,6 +75,64 @@ def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,
   else:
     return rhoi
 
+def estro_tgtt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
+  """
+  Estimates rho by comparing residual migration images with a
+  well-focused "target image"
+
+  Parameters
+    rimgs   - input residual migration images [nro,nz,nx]
+    fimg    - input target image [nx,nz]
+    dro     - sampling along trial rho axis
+    oro     - origin of rho axis
+    nzp     - size of patches in z direction [128]
+    nxp     - size of patches in x direction [128]
+    strdx   - patch stride in x direction [128]
+    strdz   - patch stride in z direction [128]
+    patches - return the estimated rho in patch form  [numpx,numpz,nzp,nxp]
+    onehot  - return the estimated rho in one-hot encoded form ((numpz,numpx,nro) with a one at the estimated rho)
+
+  Returns the estimated rho in a map, patches and/or onehot form
+  """
+  # Get dimensions
+  [nro,nz,nx] = rimgs.shape
+
+  if(nz != fimg.shape[0] or nx != fimg.shape[1]):
+    raise Exception("Residual migration and focused image must have same spatial dimensions")
+
+  # Extract patches on target image
+  pe   = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  ptch = pe.extract(fimg)
+  numpz = ptch.shape[0]; numpx = ptch.shape[1]
+
+  # Extract patches on residual migration image
+  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
+  rptch = np.squeeze(per.extract(rimgs))
+
+  # Allocate the output rho
+  rhop = np.zeros(ptch.shape)
+  oehs = np.zeros([numpz,numpx,nro])
+
+  # Loop over each patch and compute the ssim for each rho
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      idx = ssim_ro(rptch[izp,ixp],ptch[izp,ixp])
+      # Compute rho and save idx
+      rhop[izp,ixp,:,:] = oro + idx*dro
+      oehs[izp,ixp,idx] = 1.0
+
+  # Reconstruct the rho field
+  rhoi = pe.reconstruct(rhop)
+
+  if(patches and onehot):
+    return rhoi,rhop,oehs
+  elif(patches):
+    return rhoi,rhop
+  elif(onehot):
+    return rhoi,oehs
+  else:
+    return rhoi
+
 def onehot2rho(oehs,dro,oro,nz=512,nx=1024,nzp=128,nxp=128,strdz=64,strdx=64,patches=False):
   """
   Builds a spatial rho map from onehot encoded vectors
@@ -132,24 +190,36 @@ def ssim_ro(rimgs,fimg):
 
   return np.argmax(ssims)
 
-def refoc_tgt(resimgs,oehs):
+def refoc_tgt(resimgs,oehs,nxp=128,nzp=128,strdx=64,strdz=64,transp=False):
   """
   Refocuses an image based on the one-hot encoded vectors
   from the SSIM measure/NN prediction
 
   Parameters
-    resimgs - input patched residual migration images [numpx,numpz,nro,nxp,nzp]
+    resimgs - input residual migration images [nro,nxp,nzp]
     oehs    - one-hot encoded vectors
 
-  Returns a patched coarsely focused image
+  Returns a coarsely focused image
   """
+  #nro = resimgs.shape[0]
+  ## Extract patches on residual migration image
+  #per = PatchExtractor((nro,nxp,nzp),stride=(nro,strdx,strdz))
+  #rptch = np.squeeze(per.extract(resimgs))
+
   [numpx,numpz,nro,nxp,nzp] = resimgs.shape
 
   out = np.zeros([numpx,numpz,nxp,nzp])
 
   for ipx in range(numpx):
     for ipz in range(numpz):
-      out[ipx,ipz] = resimgs[ipx,ipz,oehs[ipx,ipz]]
+      idx = np.argmax(oehs[ipx,ipz])
+      out[ipx,ipz] = resimgs[ipx,ipz,idx]
+
+  # Return the reconstructed image
+  #pe   = PatchExtractor((nxp,nzp),stride=(strdx,strdz))
+  #ptch = pe.extract(np.zeros([resimgs.shape[1],resimgs.shape[2]]))
+  #return pe.reconstruct(out)
 
   return out
+
 
