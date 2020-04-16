@@ -1,0 +1,32 @@
+[defaults]
+# IO
+imgs=../focdat/zoresfltimg-00760.H
+#imgs=../focdat/zoresfltimg-01377.H
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu10.json
+figpfx=./fig/resimgs/00760/
+# Patching
+nxo=1024
+nzo=512
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+# Other
+thresh=0.8
+verb=y
+show=n
+gpus=0
+# Plotting
+pmin=0.4
+aratio=1.0
+fs=70
+time=n
+km=y
+hbar=0.67
+barz=0.16
+barx=0.91
+bxidx=100
+exidx=800
+cropsize=154
+

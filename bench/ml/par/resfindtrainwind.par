@@ -1,0 +1,21 @@
+[defaults]
+# Training inputs and outputs
+trdat=/net/fantastic/scr2/joseph29/ssimresdatwind.h5
+vadat=
+wgtout=/scr1/joseph29/networks/resfind-gpu10ep.h5
+arcout=/scr1/joseph29/networks/resfind-gpu10.json
+chkpnt=/scr1/joseph29/resfind-gpu10ep-chkpnt.h5
+lssout=./dat/nnhistory/resfind-gpu10ep_loss.H
+vlsout=./dat/nnhistory/resfind-gpu10ep_vlss.H
+accout=./dat/nnhistory/resfind-gpu10ep_accu.H
+vacout=./dat/nnhistory/resfind-gpu10ep_vacu.H
+# Test image
+imgin=fltimg-00010.H
+resin=resfltimg-00010.H
+ptbin=resfltptb-00010.H
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=0

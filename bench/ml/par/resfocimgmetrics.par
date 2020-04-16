@@ -1,0 +1,25 @@
+[defaults]
+# IO
+focimgs=/net/fantastic/scr2/joseph29/focimgs.h5
+resimgs=/net/fantastic/scr2/joseph29/resimgs.h5
+fltlbls=/net/fantastic/scr2/joseph29/fltlbls.h5
+resptbs=/net/fantastic/scr2/joseph29/resptbs.h5
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu10.json
+# Patching
+nxo=1024
+nzo=512
+nro=19
+oro=0.9775
+dro=0.0025
+ptchx=128
+ptchz=128
+strdx=64
+strdz=64
+# Other
+thresh=0.8
+verb=y
+gpus=0
+qc=y
+
+
