@@ -420,9 +420,9 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   # Make the coordinates for the cross hairs
   ds = np.append(np.flip(ds),1.0)
   os = np.append(np.flip(os),0.0)
-  x1=np.linspace(os[0], os[0] + ds[0]*(ns[0]-1), ns[0])
-  x2=np.linspace(os[1], os[1] + ds[1]*(ns[1]-1), ns[1])
-  x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]-1), ns[2])
+  x1=np.linspace(os[0], os[0] + ds[0]*(ns[0]), ns[0])
+  x2=np.linspace(os[1], os[1] + ds[1]*(ns[1]), ns[1])
+  x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
 
   # Compute plotting min and max
   if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
