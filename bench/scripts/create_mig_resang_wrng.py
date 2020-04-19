@@ -124,7 +124,7 @@ pname = args.outdir + '/' + args.ptbpf + '-%s.H'%(num)
 stormt = np.transpose(storm,(2,3,1,0))
 sep.write_file(iname,stormt,os=[0,0,oh,ooro],ds=[dz,dx,dh,odro],dpath=args.dpath+'/')
 # Write velocity perturbation to file
-sep.write_file(pname,rvelsm-rvelwr,ds=[dz,dx],dpath=args.dpath+'/')
+sep.write_file(pname,rvelwr-rvelsm,ds=[dz,dx],dpath=args.dpath+'/')
 
 # Flag for cluster manager to determine success
 print("Success!")
