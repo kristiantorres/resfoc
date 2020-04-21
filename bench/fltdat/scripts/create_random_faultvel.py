@@ -3,14 +3,14 @@ Creates heavily faulted and folded pseudo random velocity models.
 Based on the software by Bob Clapp
 
 @author: Joseph Jennings
-@version: 2020.02.09
+@version: 2020.04.20
 """
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
 import velocity.mdlbuild as mdlbuild
 from scaas.wavelet import ricker
-from utils.ptyprint import progressbar
+from utils.ptyprint import progressbar, create_inttag
 import utils.rand as rndut
 import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
@@ -79,17 +79,17 @@ parser.add_argument("-verb",help="Verbosity flag ([y] or n)")
 args = parser.parse_args(remaining_argv)
 
 # Set up SEP
-sep = seppy.sep(sys.argv)
+sep = seppy.sep()
 
 ## Get commandline arguments
 # Inputs and outputs
 beg     = args.beg
 end     = args.end
 outdir  = args.outdir
-outmod  = outdir + "/" + "velfltmod" + sep.create_inttag(beg,end) + ".H"
-outlbl  = outdir + "/" + "velfltlbl" + sep.create_inttag(beg,end) + ".H"
-outref  = outdir + "/" + "velfltref" + sep.create_inttag(beg,end) + ".H"
-outimg  = outdir + "/" + "velfltimg" + sep.create_inttag(beg,end) + ".H"
+outmod  = outdir + "/" + "velfltmod" + create_inttag(beg,end) + ".H"
+outlbl  = outdir + "/" + "velfltlbl" + create_inttag(beg,end) + ".H"
+outref  = outdir + "/" + "velfltref" + create_inttag(beg,end) + ".H"
+outimg  = outdir + "/" + "velfltimg" + create_inttag(beg,end) + ".H"
 prefix  = args.prefix
 nmodels = args.nmodels
 
@@ -214,10 +214,11 @@ for imodel in range(nmodels):
 
 # Write the velocity model and the label
 maxes = seppy.axes([nz,nx,nmodels],[0.0,0.0,0.0],[dz,dx,1.0])
-sep.write_file(None,maxes,vels,ofname=outmod,dpath=args.datapath)
-sep.write_file(None,maxes,lbls,ofname=outlbl,dpath=args.datapath)
-sep.write_file(None,maxes,refs,ofname=outref,dpath=args.datapath)
-sep.write_file(None,maxes,imgs,ofname=outimg,dpath=args.datapath)
+ds = [dz,dx,1.0]
+sep.write_file(outmod,vels,ds=ds,dpath=args.datapath)
+sep.write_file(outlbl,lbls,ds=ds,dpath=args.datapath)
+sep.write_file(outref,refs,ds=ds,dpath=args.datapath)
+sep.write_file(outimg,imgs,ds=ds,dpath=args.datapath)
 
 # Flag for cluster manager to determine success
 print("Success!")

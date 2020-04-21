@@ -1,11 +1,11 @@
 [defaults]
 # IO
-outdir=./dat/vels
-datapath=/scr2/joseph29/
-beg=2
+outdir=./dat/velflts
+datapath=/scr2/joseph29/velflts/
+beg=1
 end=9999
 prefix=
-nmodels=2
+nmodels=1
 # Velocity model
 nx=1000
 ox=0.0
@@ -21,6 +21,5 @@ nzo=1000
 nxo=1000
 slcy=100
 rect=0.5
-nscale=5
 # Other
 verb=y
