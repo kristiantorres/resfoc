@@ -58,7 +58,7 @@ void evntcre8::deposit(float vel,
   float luse = layerT * (1 + (.5 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))) * layer_rand);
 
   for (int i1 = 0; i1 < nzot; i1++) {
-    int ii = (i1 - iold) * + _d1 / luse;
+    int ii = (i1 - iold) * _d1 / luse;
     if (ii != iold) {
       vu = (1. + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) - .5) * dev_layer);
     }
@@ -211,6 +211,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
             float thetaNew = thetaOld + shiftTheta;
             if (dir < 0. || radius > fullRadius)
               thetaNew = thetaOld - shiftTheta;
+
 
             // Convert to polar coordinates
             float dPR  = radius * cosf(thetaNew * pi / 180.);

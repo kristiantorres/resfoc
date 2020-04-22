@@ -49,6 +49,7 @@ ptb -= np.mean(ptb);
 crdxp = x0 + 1000*ptb
 ixp = (crdxp/dx + 0.5).astype('int')
 
+#TODO: should apply the shifts with linear interpolation here
 nimg = np.zeros(img.shape)
 for iz in range(nz):
   nimg[ixp[iz],iz] = img[posx,iz]
@@ -64,6 +65,8 @@ for ix in range(nx):
       disp[ix,iz] = lam * nimg[ixp[iz],iz] * (1-np.abs(x)/gam)**2
     elif(x <= (crdxp[iz]-x0) and x >= -gam):
       disp[ix,iz] = (lam-1) * nimg[ixp[iz],iz] * (1-np.abs(x)/gam)**2
+
+# Compute the z displacement
 
 ## Rotate into the other coordinate system
 #dispr = np.zeros(disp.shape)
@@ -94,7 +97,7 @@ for ixr in range(nx):
     ix = int(x/dx+0.5); iz = int(z/dz+0.5);
     if(ix >= 0 and ix < nx and iz >=0 and iz < nz):
       dispr[ixr,izr] = disp[ix,iz]
-
+      #TODO: rotate the surface as well
 
 plt.figure(1)
 plt.imshow(img.T,cmap='jet')
