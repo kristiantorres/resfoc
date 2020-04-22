@@ -148,6 +148,12 @@ class mdlbuild:
     idx = self.lbl > 1
     self.lbl[idx] = 1
 
+  def fault2d():
+    """
+    Builds a fault with an accurate interpoltation scheme but only in 2D
+    """
+    pass
+
   def get_label(self):
     """
     Gets the fault labels and ensures the label is the same size
