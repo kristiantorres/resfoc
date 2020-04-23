@@ -178,6 +178,9 @@ class mdlbuild:
       thresh      - Threshold applied for obtaining the fault labels [50]
       slcy        - y index from where to extract the slice for faulting [ny/2]
     """
+    # Check that azim is either 0 or 180
+    if(azim != 0.0 and azim != 180.0):
+      raise Exception("Azimuth must be 0 or 180 degrees for fault2d")
     # Extract a slice from the model if it is 3D
     if(len(self.vel.shape) == 3):
       if(slcy is None):
@@ -582,7 +585,7 @@ class mdlbuild:
       dz  += np.random.rand()*(2*500)  - 500.0
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
 
-  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True):
+  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
     """
     Puts in a small fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -594,14 +597,19 @@ class mdlbuild:
       begy   - beginning position in x for fault [0.5]
       tscale - divides the shift in z by this amount
       rand   - small random variations in the throw of faults [True]
+      twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
     """
     daz = 8000; dz = 5000
     if(rand):
       daz    += np.random.rand()*(2000) - 1000
       dz     += np.random.rand()*(2000) - 1000
       tscale += np.random.rand()*2
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-        theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+    if(twod):
+      self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale)
+    else:
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
   def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True):
     """
