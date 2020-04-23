@@ -53,8 +53,11 @@ theta0 = theta0 + 2 * np.pi;
 theta0 = theta0 * 180. / np.pi;
 print(theta0-360)
 
+azim = 0.0
+azim *= np.pi/180.0
+azicor = np.cos(azim)
 zcenter = zbeg - dfz
-xcenter = xbeg - daz
+xcenter = xbeg - daz*azicor
 
 fullradius = np.sqrt(dfz*dfz + daz*daz)
 
@@ -66,11 +69,12 @@ distdie *= 5000
 thetashift = 1.0
 thetadie=12.0
 
-traj = np.zeros([nx,nz])
+circ = np.zeros([nx,nz])
 
 # Compute shifts
 for ix in range(nx):
   px = dx * ix - xcenter
+  px *= azicor
 
   for iz in range(nz):
     pz = dz * iz - zcenter
@@ -89,8 +93,8 @@ for ix in range(nx):
     # Compute the distance from center for the current point
     radius = np.sqrt(px*px + pz*pz)
 
-    if(np.abs(radius - fullradius) < 50):
-      traj[ix,iz] = 1.0
+    if(np.abs(radius - fullradius) < 20):
+      circ[ix,iz] = 1.0 
 
     # Check if we are in the region for faulting
     # Criteria for radius and angle
@@ -98,11 +102,12 @@ for ix in range(nx):
     ratioTheta = np.abs(thetaCompare - theta0)/thetadie
  
     # Make sure not too far away from xbeg
-    diffx = xbeg - (px + xcenter)
-    diffz = zbeg - (pz + zcenter)
+    diffx = xbeg - (px*azicor + xcenter)
+    diffz = zbeg - (pz        + zcenter)
     distbeg = np.sqrt(diffx*diffx + diffz*diffz)
 
     if(ratioAz < 1 and ratioTheta < 1 and distbeg < 8000):
+    #if(ratioAz < 1 and ratioTheta < 1):
       # Once we are in range, compute the displacement
       scaleAz    = 1 - ratioAz
       scaleTheta = 1 - ratioTheta
@@ -117,11 +122,24 @@ for ix in range(nx):
         thetaNew = thetaOld - shifttheta
 
       # Convert back to cartesian coordinates 
-      newX = radius * np.cos(thetaNew * np.pi/180) + xcenter
-      newZ = radius * np.sin(thetaNew * np.pi/180) + zcenter
+      newX = radius * np.cos(thetaNew * np.pi/180)*azicor + xcenter
+      newZ = radius * np.sin(thetaNew * np.pi/180)        + zcenter
 
       shiftz[ix,iz] = (newZ - dz*iz)
       shiftx[ix,iz] = (newX - dx*ix)
+      circ[ix,iz] *= shiftz[ix,iz]
+
+#print(xcenter,zcenter)
+#print(fullradius)
+## Draw circle
+#circ = np.zeros([nx,nz])
+#for ix in range(nx):
+#  x = ix*dx - xcenter
+#  for iz in range(nz):
+#    z = iz*dz - zcenter
+#    pr = np.sqrt(x*x + z*z)
+#    if(np.abs(pr - fullradius) < 20):
+#      circ[ix,iz] = 1.0 
 
 plt.figure(1)
 plt.imshow(shiftx.T,cmap='jet',extent=[0,nx*dx,nz*dz,0])
@@ -131,8 +149,12 @@ plt.figure(2)
 plt.imshow(shiftz.T,cmap='jet',extent=[0,nx*dx,nz*dz,0])
 plt.scatter(xcenter,zcenter)
 plt.scatter(xbeg,zbeg)
-#plt.figure(3)
-#plt.imshow(traj,cmap='jet',extent=[0,nx*dx,nz*dz,0])
+plt.figure(3)
+plt.imshow(circ.T,cmap='jet',extent=[0,nx*dx,nz*dz,0])
+#plt.scatter(xcenter,zcenter)
+#plt.scatter(xbeg,zbeg)
+#plt.figure(4)
+#plt.imshow((circ*shiftz).T,cmap='jet',extent=[0,nx*dx,nz*dz,0])
 plt.show()
 
 velflt = np.zeros([nx,nz])

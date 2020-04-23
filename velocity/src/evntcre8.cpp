@@ -311,7 +311,7 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
 
   /* Cylindrical coordinate 0,0,0 is at */
   float zcenter = zbeg - dz;
-  float xcenter = xbeg - daz * cosf(azim);
+  float xcenter = xbeg - daz * sign;
 
   /* Distance from fault to center */
   float fullRadius = sqrtf(dz * dz + daz * daz);
@@ -324,7 +324,6 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
   for (int i2 = 0; i2 < _n2; i2++) {
     // X component of distance from center
     float p2 = _d2 * i2 - xcenter;
-
     // Rotate 180 if desired
     p2 *= sign;
 
@@ -364,8 +363,8 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
       float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
 
       // Compute distance from xbeg, ybeg and zbeg
-      float diffx = xbeg - (p2 + xcenter);
-      float diffz = zbeg - (p1 + zcenter);
+      float diffx = xbeg - (p2*sign + xcenter);
+      float diffz = zbeg - (p1      + zcenter);
       float distbeg = sqrtf(diffx*diffx + diffz*diffz);
 
       if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
@@ -383,8 +382,8 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
           thetaNew = thetaOld - shiftTheta;
 
         // Convert to polar coordinates
-        float newX = radius * cosf(thetaNew * pi / 180.) + xcenter;
-        float newZ = radius * sinf(thetaNew * pi / 180.) + zcenter;
+        float newX = radius * cosf(thetaNew * pi / 180.) * sign + xcenter;
+        float newZ = radius * sinf(thetaNew * pi / 180.)        + zcenter;
 
         // Compute shifts to be applied
         shiftz[i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
@@ -411,26 +410,6 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
       }
     }
   }
-
-  /* Apply shift to label */
-  tbb::parallel_for(
-      tbb::blocked_range<size_t>(0, _n2),
-      [&](const tbb::blocked_range<size_t>& r) {
-    for (size_t i2 = r.begin(); i2 != r.end(); ++i2) {
-      for (int i1 = 0; i1 < nz; i1++) {
-        int l1 = std::max(0, (int)(i1 - shiftz[i2*nz + i1] / _d1 + .5));
-        int l2 = std::max(0, (int)(i2 - shiftx[i2*nz + i1] / _d2 + .5));
-        if (l1 >=  nz) l1 =  nz - 1;
-        if (l2 >= _n2) l2 = _n2 - 1;
-        if (l1 >= 0) {
-          olblot[i2*nz + i1] = lblin[l2*nz + l1];
-        }
-        else {
-          olblot[i2*nz + i1] =  0;
-        }
-      }
-    }
-  });
 
   /* Free memory */
   delete[] shiftz; delete[] shiftx;
@@ -813,7 +792,19 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
       }
     }
   }
+}
 
+void evntcre8::calcref2d(int nz, float *vel, float *ref) {
+  for(int i2 = 0; i2 < _n2; ++i2) {
+    for(int i1 = 0; i1 < nz; ++i1) {
+        /* Backwards derivatives at the end */
+        if(i1 == nz-1) {
+          ref[i2*nz + i1] = vel[i2*nz + i1  ] - vel[i2*nz + i1-1];
+        } else {
+          ref[i2*nz + i1] = vel[i2*nz + i1+1] - vel[i2*nz + i1  ];
+        }
+    }
+  }
 }
 
 void evntcre8::laplacian(int nz, float *lblin, float *lblot) {

@@ -68,6 +68,9 @@ for ix in range(nx):
 #plt.imshow(smooth(velflt.astype('float32'),rect1=3,rect2=3).T,cmap='jet')
 #plt.show()
 
+plt.figure(1)
+plt.imshow(coords[0].T,cmap='jet')
+plt.show()
 fltnew = map_coordinates(lyrs,coords)
 
 plt.imshow(fltnew.T,cmap='jet')

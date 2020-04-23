@@ -1,8 +1,8 @@
 [defaults]
 # IO
-outdir=./dat/vels
+outdir=./dat/velflts
 datapath=/scratch/
-beg=2
+beg=1
 end=9999
 prefix=
 nmodels=1
@@ -21,6 +21,5 @@ nzo=1000
 nxo=1000
 slcy=100
 rect=0.5
-nscale=5
 # Other
 verb=y
