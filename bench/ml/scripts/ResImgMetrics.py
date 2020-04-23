@@ -151,9 +151,13 @@ for iex in progressbar(range(nex), "iex:"):
   idfc = ires[10,:,:].T
   # Estimate rho
   irho,oehs = estro_tgtt(irest,ifoc,args.dro,args.oro,nzp=nzp,nxp=nxp,onehot=True)
-  #fig,ax = plt.subplots(1,2,figsize=(14,7))
-  #ax[0].imshow(irho.T,cmap='seismic',vmin=0.97,vmax=1.03)
-  #ax[1].imshow(iptb,cmap='jet',vmin=-100,vmax=100)
+  fig,ax = plt.subplots(1,2,figsize=(14,7))
+  im1 = ax[0].imshow(irho,cmap='seismic',vmin=0.97,vmax=1.03)
+  ax[0].set_title('Estimated Rho')
+  fig.colorbar(im1, ax=ax[0])
+  im2 = ax[1].imshow(-1*iptb,cmap='seismic',vmin=-100,vmax=100)
+  ax[0].set_title('Velocity perturbation')
+  fig.colorbar(im2, ax=ax[1])
   #plt.show()
   irp = np.squeeze(per.extract(irest))
   iep = refoc_tgt(irp,oehs,transp=False)

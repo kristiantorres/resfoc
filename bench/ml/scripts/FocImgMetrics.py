@@ -171,7 +171,7 @@ for iex in progressbar(range(nex), "iex:"):
                hbar=0.67,wbox=10,labelsize=14,barz=0.16)
     plotsegprobs(icnv,icpre,
                xlabel='X (km)',ylabel='Z (km)',xmin=0.0,xmax=(nxo)*dx,
-               zmin=0,zmax=(nzo)*dz,vmin=-2.5,vmax=2.5,show=False,interp='sinc',
+               zmin=0,zmax=(nzo)*dz,vmin=-2.5,vmax=2.5,show=True,interp='sinc',
                pmin=0.3,alpha=0.7,ticksize=14,barlabelsize=14,barx=0.91,
                hbar=0.51,wbox=8,labelsize=14,barz=0.24,fname='./fig/cnvpred760')
 
