@@ -140,7 +140,7 @@ for imodel in range(nmodels):
 
   dlyr = 0.05
   for ilyr in progressbar(range(nlayer), "ndeposit:", 40):
-    mb.deposit(velval=props[ilyr],thick=thicks[ilyr],band2=0.01,band3=0.05,dev_pos=0.0,layer=150,layer_rand=0.00,dev_layer=dlyr)
+    mb.deposit(velval=props[ilyr],thick=thicks[ilyr],band2=0.01,band3=0.05,dev_pos=0.0,layer=50,layer_rand=0.00,dev_layer=dlyr)
 
   # Water deposit
   mb.deposit(1480,thick=80,layer=150,dev_layer=0.0)
@@ -151,12 +151,9 @@ for imodel in range(nmodels):
   azims = [0.0,180.0]
 
   ox = 0.4; dx = 0.1
-  #for ifl in progressbar(range(3), "nfaults:"):
-    #x = ox + ifl*dx
-    #mb.smallfault(azim=0.0,begz=0.35,begx=x,begy=0.5,tscale=10.0)
-  mb.fault2d(azim=0.0,begz=0.35,begx=0.4,throwsc=10.0,theta_shift=4.0,theta_die=11.0,dist_die=0.3,daz=8000,dz=5000)
-  mb.fault2d(azim=0.0,begz=0.35,begx=0.5,throwsc=10.0,theta_shift=4.0,theta_die=11.0,dist_die=0.3,daz=8000,dz=5000)
-  mb.fault2d(azim=0.0,begz=0.35,begx=0.6,throwsc=10.0,theta_shift=4.0,theta_die=11.0,dist_die=0.3,daz=8000,dz=5000)
+  for ifl in progressbar(range(3), "nfaults:"):
+    x = ox + ifl*dx
+    mb.smallfault(azim=0.0,begz=0.35,begx=x,tscale=10.0,twod=True)
 
   # Get model
   if(nxo == nx and nzo == nz):
