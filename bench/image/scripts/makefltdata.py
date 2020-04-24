@@ -26,16 +26,16 @@ nz = vaxes.n[0]; dz = vaxes.d[0]
 nx = vaxes.n[1]; dx = vaxes.d[1]
 
 # Create migration velocity
-rvelsm = smooth(velw,rect1=20,rect2=20)
+rvelsm = smooth(velw,rect1=30,rect2=30)
 
-dsx = 10; bx = 50; bz = 50
+dsx = 20; bx = 50; bz = 50
 prp = geom.defaultgeom(nx,dx,nz,dz,nsx=51,dsx=dsx,bx=bx,bz=bz)
 
 prp.plot_acq(rvelsm,cmap='jet',show=False)
 prp.plot_acq(refw,cmap='gray',show=False)
 
 # Create data axes
-ntu = 6000; dtu = 0.001;
+ntu = 6500; dtu = 0.001;
 freq = 20; amp = 100.0; dly = 0.2;
 wav = ricker(ntu,dtu,freq,amp,dly)
 plot_wavelet(wav,dtu)
