@@ -277,7 +277,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
 }
 
 void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
-    float thetashift, float perpdie, float distdie, float thetadie, float scalethrw,
+    float thetashift, float distdie, float thetadie, float scalethrw,
     float *olblot, float *nlblot, float *oshiftx, float *oshiftz) {
 
   float dst1 = nz*_d1;
@@ -290,7 +290,6 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
 
   // Die off distance from the tear perpendicular to the tear and radius direction
   distdie *= dst3;
-  perpdie *= dst3;
 
   // Definition of pi
   float pi = atan(1.) * 4;

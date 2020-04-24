@@ -196,7 +196,7 @@ class mdlbuild:
     lbltn = np.zeros(self.vel.shape,dtype='float32')
     self.ec8.shifts2d(nz,self.lbl,
                       azim,begx,begz,dz,daz,
-                      theta_shift,perp_die,dist_die,theta_die,throwsc,
+                      theta_shift,dist_die,theta_die,throwsc,
                       lblto,lbltn,shiftx,shiftz)
     # Build coordinate array
     coords[0] = shiftx; coords[1] = shiftz

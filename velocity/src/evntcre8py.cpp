@@ -101,7 +101,6 @@ PYBIND11_MODULE(evntcre8,m) {
              float dz,
              float daz,
              float thetashift,
-             float perpdie,
              float distdie,
              float thetadie,
              float scalethrw,
@@ -112,11 +111,11 @@ PYBIND11_MODULE(evntcre8,m) {
              )
              {
                ec8.shifts2d(nz, lblin.mutable_data(),
-                   azim, begx, begz, dz, daz, thetashift, perpdie, distdie, thetadie, scalethrw,
+                   azim, begx, begz, dz, daz, thetashift, distdie, thetadie, scalethrw,
                    olblot.mutable_data(), nlblot.mutable_data(), shiftx.mutable_data(), shiftz.mutable_data());
              },
              py::arg("nz"), py::arg("lblin"), py::arg("azim"), py::arg("begx"), py::arg("begz"),
-             py::arg("dz"), py::arg("daz"), py::arg("thetashift"), py::arg("perpdie"), py::arg("distdie"),
+             py::arg("dz"), py::arg("daz"), py::arg("thetashift"), py::arg("distdie"),
              py::arg("thetadie"), py::arg("scalethrw"), py::arg("olblot"), py::arg("nlblot"), py::arg("shiftx"),
              py::arg("shiftz")
          )

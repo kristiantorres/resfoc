@@ -22,7 +22,7 @@ class evntcre8 {
         float thetashift, float perpdie, float distdie, float thetadie, float dir, float scalethrw,
         int *lyrot, float *velot, float *olblot, float *nlblot);
     void shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
-        float thetashift, float perpdie, float distdie, float thetadie, float scalethrw,
+        float thetashift, float distdie, float thetadie, float scalethrw,
         float *olblot, float *nlblot, float *shiftx, float *shiftz);
     void squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
         float azim, float maxshift, float lambda, float rinline, float rxline,
