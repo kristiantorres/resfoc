@@ -1,4 +1,3 @@
-
 #include <math.h>
 #include <algorithm>
 #include <tbb/blocked_range.h>
@@ -6,9 +5,6 @@
 #include <tbb/tbb.h>
 #include <fftw3.h>
 #include "evntcre8.h"
-#include "/opt/matplotlib-cpp/matplotlibcpp.h"
-
-namespace plt = matplotlibcpp;
 
 evntcre8::evntcre8(int nx, int ny, float dx, float dy, float dz) {
   _n2 = nx; _n3 = ny;
