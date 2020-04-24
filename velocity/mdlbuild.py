@@ -3,7 +3,7 @@ import velocity.evntcre8 as evntcre8
 from utils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, map_coordinates
 from scaas.trismooth import smooth
 from utils.rand import randfloat
 
@@ -148,18 +148,111 @@ class mdlbuild:
     idx = self.lbl > 1
     self.lbl[idx] = 1
 
+  def fault2d(self,begx=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
+      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,throwsc=1.0,thresh=0.15,slcy=None):
+    """
+    Creates a 2D fault event in the geologic model.
+
+    Apart from the fact that this method is only 2D, it performs a more accurate
+    interpolation for the fault rotation and also provides an exact procedure
+    for finding the label
+
+    Parameters:
+      azim        - Azimuth of fault [180]
+      begx        - Relative location of the beginning of the fault in x [0.5]
+      begy        - Relative location of the beginning of the fault in y [0.5]
+      begz        - Relative location of the beginning of the fault in z [0.5]
+      dz          - Distance away from the center of a circle in z [7000]
+      daz         - Distance away in azimuth [8000]
+      perp_die    - Controls the die off perpendicular to the fault
+                    (e.g., if fault is visible in x, die off is in y).
+                    Large number results in slower dieoff [0.5]
+      dist_die    - Controls the die off in the same plane of the fault 
+                    (e.g., if fault is visible in x, die off is also in x)
+                    Large number results in slower dieoff [0.3]
+      theta_die   - Controls the die off along the fault (essentially the throw). The larger 
+                    the number the larger the fault will be. Acts similar to daz. [12]
+      theta_shift - Shift in theta for fault [4.0]
+      dirf        - Direction of fault movement [0.1]
+      throwsc     - The total shift in z is divided by this amount (leads to smaller throw) [1.0]
+      thresh      - Threshold applied for obtaining the fault labels [50]
+      slcy        - y index from where to extract the slice for faulting [ny/2]
+    """
+    # Check that azim is either 0 or 180
+    if(azim != 0.0 and azim != 180.0):
+      raise Exception("Azimuth must be 0 or 180 degrees for fault2d")
+    # Extract a slice from the model if it is 3D
+    if(len(self.vel.shape) == 3):
+      if(slcy is None):
+        slcy = int(self.__ny/2)
+      self.vel = self.vel[slcy,:,:]
+      self.lbl = self.lbl[slcy,:,:]
+      self.lyr = self.lyr[slcy,:,:]
+    nz = self.vel.shape[1]
+    # Output velocity model
+    velot = np.zeros(self.vel.shape,dtype='float32')
+    # Output shifts
+    shiftx = np.zeros(self.vel.shape,dtype='float32')
+    shiftz = np.zeros(self.vel.shape,dtype='float32')
+    coords = np.zeros([2,*self.vel.shape],dtype='float32')
+    # Output labels
+    lblto = np.zeros(self.vel.shape,dtype='float32')
+    lbltn = np.zeros(self.vel.shape,dtype='float32')
+    self.ec8.shifts2d(nz,self.lbl,
+                      azim,begx,begz,dz,daz,
+                      theta_shift,perp_die,dist_die,theta_die,throwsc,
+                      lblto,lbltn,shiftx,shiftz)
+    # Build coordinate array
+    coords[0] = shiftx; coords[1] = shiftz
+    # Fault velocity model with an accurate interpolation
+    velot = map_coordinates(self.vel,coords)
+    # Fault label and lyr with nearest neighbor
+    lblto = map_coordinates(self.lbl,coords,order=0)
+    lyrot = map_coordinates(self.lyr,coords,order=0)
+    # Update old label with shifted version
+    self.lbl = lblto
+    # Update layer and velocity models
+    self.vel = velot
+    self.lyr = lyrot
+    # Apply a threshold
+    lbltn = lbltn/np.max(lbltn)
+    idx = lbltn > thresh
+    lbltn[ idx] = 1; lbltn[~idx] = 0
+    # Update label
+    self.lbl += lbltn
+    # Apply final threshold to label
+    idx = self.lbl > 1
+    self.lbl[idx] = 1
+
   def get_label(self):
     """
     Gets the fault labels and ensures the label is the same size
     as the current velocity model size
     """
+    # Get model and label size
     nzv = self.vel.shape[2]
     nzl = self.lbl.shape[2]
+    # If they are not same size, pad
     if(nzv == nzl):
       return self.lbl
     else:
       ndiff = nzv - nzl
       return np.pad(self.lbl,((0,0),(0,0),(ndiff,0)),'constant')
+
+  def get_label2d(self):
+    """
+    Gets the fault labels and ensures the label is the same size
+    as the current velocity model size
+    """
+    # Get model and label size
+    nzv = self.vel.shape[1]
+    nzl = self.lbl.shape[1]
+    # If they are not same size, pad
+    if(nzv == nzl):
+      return self.lbl
+    else:
+      ndiff = nzv - nzl
+      return np.pad(self.lbl,((0,0),(ndiff,0)),'constant')
 
   def tinyfault_block(self,nfault=5,azim=0.0,begz=0.2,begx=0.3,begy=0.3,dx=0.1,dy=0.0,rand=True):
     """
@@ -492,7 +585,7 @@ class mdlbuild:
       dz  += np.random.rand()*(2*500)  - 500.0
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
 
-  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True):
+  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
     """
     Puts in a small fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -504,14 +597,19 @@ class mdlbuild:
       begy   - beginning position in x for fault [0.5]
       tscale - divides the shift in z by this amount
       rand   - small random variations in the throw of faults [True]
+      twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
     """
     daz = 8000; dz = 5000
     if(rand):
       daz    += np.random.rand()*(2000) - 1000
       dz     += np.random.rand()*(2000) - 1000
       tscale += np.random.rand()*2
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-        theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+    if(twod):
+      self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale)
+    else:
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
   def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True):
     """
@@ -705,6 +803,14 @@ class mdlbuild:
     ref = np.zeros(self.vel.shape,dtype='float32')
     velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
     self.ec8.calcref(nz,velsm,ref)
+    return ref
+
+  def get_refl2d(self):
+    """ Computes the reflectivity for the current 2D velocity model """
+    nz = self.vel.shape[1]
+    ref = np.zeros(self.vel.shape,dtype='float32')
+    velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
+    self.ec8.calcref2d(nz,velsm,ref)
     return ref
 
   def find_faultpos(self,nfaults,mindist,begx=0.05,endx=0.95,begz=0.05,endz=0.95):
