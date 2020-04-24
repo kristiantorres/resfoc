@@ -19,7 +19,7 @@ strdz=64
 # Other
 thresh=0.8
 verb=y
-gpus=0
+gpus=2
 qc=y
 
 

@@ -14,11 +14,11 @@ from utils.movie import viewimgframeskey
 sep = seppy.sep()
 
 # Read in the model
-vaxes,vel = sep.read_file('../fltdat/velsmall.H')
+vaxes,vel = sep.read_file('../fltdat/velbig.H')
 vel = vel.reshape(vaxes.n,order='F')
 velw = np.ascontiguousarray(vel.astype('float32'))
 # Read in the reflectivity
-raxes,ref = sep.read_file('../fltdat/refsmall.H')
+raxes,ref = sep.read_file('../fltdat/refbig.H')
 ref = ref.reshape(raxes.n,order='F')
 refw = np.ascontiguousarray(ref.astype('float32'))
 
@@ -47,8 +47,8 @@ viewimgframeskey(allshot,transp=False,pclip=0.2)
 
 ## Write out all shots
 datout = np.transpose(allshot,(1,2,0))
-sep.write_file('fltsmall.H',datout,ds=[dtd,dx,dsx])
+sep.write_file('fltbig.H',datout,ds=[dtd,dx,dsx])
 
-sep.to_header("fltsmall.H","srcz=%d recz=%d"%(0,0))
-sep.to_header("fltsmall.H","bx=%d bz=%d alpha=%f"%(bx,bz,0.99))
+sep.to_header("fltbig.H","srcz=%d recz=%d"%(0,0))
+sep.to_header("fltbig.H","bx=%d bz=%d alpha=%f"%(bx,bz,0.99))
 
