@@ -149,7 +149,7 @@ class mdlbuild:
     self.lbl[idx] = 1
 
   def fault2d(self,begx=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,perp_die=0.5,dirf=0.1,throwsc=1.0,thresh=0.15,slcy=None):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.15,slcy=None):
     """
     Creates a 2D fault event in the geologic model.
 
@@ -164,16 +164,12 @@ class mdlbuild:
       begz        - Relative location of the beginning of the fault in z [0.5]
       dz          - Distance away from the center of a circle in z [7000]
       daz         - Distance away in azimuth [8000]
-      perp_die    - Controls the die off perpendicular to the fault
-                    (e.g., if fault is visible in x, die off is in y).
-                    Large number results in slower dieoff [0.5]
       dist_die    - Controls the die off in the same plane of the fault 
                     (e.g., if fault is visible in x, die off is also in x)
                     Large number results in slower dieoff [0.3]
       theta_die   - Controls the die off along the fault (essentially the throw). The larger 
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
-      dirf        - Direction of fault movement [0.1]
       throwsc     - The total shift in z is divided by this amount (leads to smaller throw) [1.0]
       thresh      - Threshold applied for obtaining the fault labels [50]
       slcy        - y index from where to extract the slice for faulting [ny/2]
@@ -200,7 +196,7 @@ class mdlbuild:
     lbltn = np.zeros(self.vel.shape,dtype='float32')
     self.ec8.shifts2d(nz,self.lbl,
                       azim,begx,begz,dz,daz,
-                      theta_shift,perp_die,dist_die,theta_die,throwsc,
+                      theta_shift,dist_die,theta_die,throwsc,
                       lblto,lbltn,shiftx,shiftz)
     # Build coordinate array
     coords[0] = shiftx; coords[1] = shiftz
@@ -606,7 +602,7 @@ class mdlbuild:
       tscale += np.random.rand()*2
     if(twod):
       self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale)
+          theta_die=11.0,theta_shift=4.0,dist_die=0.3,throwsc=tscale)
     else:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
           theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
