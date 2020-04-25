@@ -1,7 +1,7 @@
 [defaults]
 # IO
 outdir=./dat/velflts
-datapath=/scr2/joseph29/velflts/
+datapath=/scr1/joseph29/velflts/
 beg=1
 end=9999
 prefix=
