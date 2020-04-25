@@ -188,7 +188,7 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   lz = np.linspace(izmin*dz,izmax*dz,izmax-izmin)
   lx = np.zeros(izmax-izmin) + xloc*dx
   vmin1 = np.min(mig); vmax1 = np.max(mig)
-  ax1.imshow(mig[kwargs.get('xmin'):kwargs.get('xmax'),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
+  ax1.imshow(mig[kwargs.get('xmin',0):kwargs.get('xmax',nx),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
       interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
     kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
   ax1.plot(lx,lz,color='k',linewidth=2)
@@ -224,6 +224,72 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
     plt.savefig(figname+'.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
 
+def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname=None,**kwargs):
+  """
+  Plots a velocity perturbation on top of an image
+
+  Parameters
+    focimg - the input image
+    velptb - the velocity perturbation
+    dz     - depth sampling interval
+    dx     - horizontal sampling interval
+    thresh - threshold in velocity to apply
+    agc    - apply AGC to the image before plotting [True]
+    alpha  - transparence value [0.3]
+    xmin   - the minimum x sample to plot for windowing [0]
+    xmax   - the maximum x sample to plot for windowing [nx]
+    zmin   - the minimum z sample to plot for windowing [0]
+    zmax   - the maximum z sample to plot for windowing [nz]
+    pclip  - pclip to apply for gain                    [1.0]
+  """
+  if(img.shape != velptb.shape):
+    raise Exception("Image and velocity must have same shape")
+  # Get spatial plotting range
+  [nz,nx] = img.shape;
+  ixmin = kwargs.get('xmin',0); ixmax = kwargs.get('xmax',nx)
+  xmin = ixmin*dx; xmax = ixmax*dx
+  izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
+  zmin = izmin*dz; zmax = izmax*dz
+  # Get amplitude range
+  ivmin = np.min(img);    ivmax = np.max(img)
+  pvmin = kwargs.get('velmin',np.min(velptb)); pvmax = kwargs.get('velmax',np.max(velptb))
+  pclip = kwargs.get('pclip',1.0)
+  # Plot the perturbation to get the true colorbar
+  fig1 = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+  ax1 = fig1.gca()
+  im1 = ax1.imshow(velptb[izmin:izmax,ixmin:ixmax],cmap='seismic',
+      extent=[ixmin*dx/1000,(ixmax-1)*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],interpolation='bilinear',
+      vmin=pvmin,vmax=pvmax)
+  plt.close()
+  # Plot perturbation on the image
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+  ax = fig.gca()
+  if(agc):
+    gimg = agc(img.astype('float32').T).T
+  else:
+    gimg = img
+  ax.imshow(gimg[izmin:izmax,ixmin:ixmax],vmin=ivmin*pclip,vmax=ivmax*pclip,
+             extent=[ixmin*dx/1000,(ixmax)*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],cmap='gray',interpolation='sinc')
+  mask1 = np.ma.masked_where((velptb) < thresh, velptb)
+  mask2 = np.ma.masked_where((velptb) > -thresh, velptb)
+  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[ixmin*dx/1000,ixmax*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
+  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[ixmin*dx/1000,ixmax*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Colorbar
+  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+  cbar = fig.colorbar(im1,cbar_ax,format='%.0f')
+  cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  cbar.set_label('Velocity (m/s)',fontsize=kwargs.get('labelsize',15))
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
+  if(show):
+    plt.show()
+  plt.close()
+
 def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   """
   Makes a 3D plot of a data cube
@@ -251,8 +317,8 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
 
   # Compute plotting min and max
   if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
-    vmin = np.min(data)*kwargs.get('pclip',0.9)
-    vmax = np.max(data)*kwargs.get('pclip',0.9)
+    vmin = np.min(data)*kwargs.get('pclip',1.0)
+    vmax = np.max(data)*kwargs.get('pclip',1.0)
 
   loc1 = kwargs.get('loc1',int(ns[0]/2*ds[0]+os[0]))
   i1 = int((loc1 - os[0])/ds[0])
@@ -261,7 +327,7 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   loc3 = kwargs.get('loc3',int(ns[2]/2*ds[2]+os[2]))
   i3 = int((loc3 - os[2])/ds[2])
   ax1 = None; ax2 = None; ax3 = None; ax4 = None
-  curr_pos = 0 
+  curr_pos = 0
 
   # Axis labels
   label1 = kwargs.get('label1',' '); label2 = kwargs.get('label2',' '); label3 = kwargs.get('label3', ' ')
@@ -322,7 +388,7 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax4.set_xticks([loc1])
   ax4.set_xticklabels(['%.2f'%(loc1)])
   ax4.tick_params(labelsize=kwargs.get('ticksize',14))
-  
+
   ax[0,1].axis('off')
   if(show):
     plt.show()
