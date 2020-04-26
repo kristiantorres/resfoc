@@ -131,7 +131,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
     aimgt = np.transpose(aimg,(2,0,1))
   else:
     aimgt = aimg
-  nz = aimgt.shape[2]; na = aimgt.shape[1]; nx = aimg.shape[2]
+  nz = aimgt.shape[2]; na = aimgt.shape[1]; nx = aimgt.shape[0]
   # Subsample the spatial axis
   aimgts = aimgt[::jx,:,:]
   nxs = aimgts.shape[0]

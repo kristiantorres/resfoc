@@ -420,14 +420,14 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   # Make the coordinates for the cross hairs
   ds = np.append(np.flip(ds),1.0)
   os = np.append(np.flip(os),0.0)
-  x1=np.linspace(os[0], os[0] + ds[0]*(ns[0]), ns[0])
-  x2=np.linspace(os[1], os[1] + ds[1]*(ns[1]), ns[1])
-  x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
+  x1=np.linspace(os[0], os[0] + ds[0]*(ns[0]-1), ns[0])
+  x2=np.linspace(os[1], os[1] + ds[1]*(ns[1]-1), ns[1])
+  x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]-1), ns[2])
 
   # Compute plotting min and max
   if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
-    vmin = np.min(data)*kwargs.get('pclip',0.9)
-    vmax = np.max(data)*kwargs.get('pclip',0.9)
+    vmin = np.min(data)*kwargs.get('pclip',1.0)
+    vmax = np.max(data)*kwargs.get('pclip',1.0)
 
   # Define nonlocal variables
   loc1 = kwargs.get('loc1',int(ns[0]/2*ds[0]+os[0]))
@@ -743,4 +743,35 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax[0,1].axis('off')
   if(show):
     plt.show()
+
+def resangframes(resang,dz,dx,dro,oro,jx=10,transp=False,show=True,**kwargs):
+  """
+  Show a spatial angle gather plot for each rho. Assumes
+  input has shape of [nro,nx,na,nz]
+
+  Parameters
+    resang - the input residually-migrated angle gathers
+    dz     - depth sampling
+    dx     - spatial sampling
+    dro    - rho sampling
+    jx     - subsampling along the x axis (image points to skip) [10]
+    transp - flag indicating that the input image has shape [nro,na,nz,nx] [False]
+  """
+  if(transp):
+    # [nro,na,nz,nx] -> [nro,nx,na,nz]
+    resangt = np.transpose(resang,(0,3,1,2))
+  else:
+    resangt = resang
+  nz = resangt.shape[3]; na = resangt.shape[2]; nx = resangt.shape[1]; nro = resangt.shape[0]
+  # Subsample the spatial axis
+  resangts = resangt[:,::jx,:,:]
+  nxs = resangts.shape[1]
+  # Reshape to flatten the angle and CDP axes
+  resangts = resangts.reshape([nro,na*nxs,nz])
+  # Plot frames
+  viewimgframeskey(resangts,ottl=oro,dttl=dro,ttlstring=r'$\rho$=%.3f',
+      pclip=kwargs.get('pclip',1.0),labelsize=kwargs.get('labelsize',14),
+      ticksize=kwargs.get('ticksize',14),interp=kwargs.get('interp','none'),
+      xmax=kwargs.get('xmax',nx*dx),zmax=kwargs.get('zmax',nz*dz),show=show,
+      xlabel='X (km)',zlabel='Z (km)')
 
