@@ -1,6 +1,6 @@
 import inpout.seppy as seppy
 import numpy as np
-from resfoc.resmig import preresmig, convert2time, get_rho_axis
+from resfoc.resmig import preresmig,convert2time,get_rho_axis
 import matplotlib.pyplot as plt
 from utils.movie import viewimgframeskey
 
@@ -20,7 +20,7 @@ onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 rmig = preresmig(imgt,[dh,dx,dz],nps=[2049,1025,513],nro=inro,dro=idro,time=False,nthreads=24,verb=True)
 
 # Conversion to time
-time = convert2time(rmig,dz,dt=0.004,dro=odro,verb=True)
+#time = convert2time(rmig,dz,dt=0.004,dro=odro,verb=True)
 
 # Visualize the frames
 #viewimgframeskey(rmig[:,16,:,:],ttlstring='rho=%.2f',ottl=ooro,dttl=odro,wbox=14,hbox=7,pclip=0.9,show=False)

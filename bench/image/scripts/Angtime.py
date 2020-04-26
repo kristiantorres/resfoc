@@ -72,11 +72,11 @@ if(tconv):
     na,oa,da = get_ang_axis()
     # Write to file
     stormangt = np.transpose(stormang,(2,1,3,0))
-    sep.write_file(fout,stormangt,os=[oz,oa,ox,oro],ds=[dt,da,dx,dro])
+    sep.write_file(fout,stormangt,os=[oz,oa,ox,oro],ds=[dz,da,dx,dro])
   else:
     # Write to file
     imgtt = np.ascontiguousarray(np.transpose(imgt,(3,2,1,0))).astype('float32')
-    sep.write_file(fout,imgtt,os=[oz,ox,oh,oro],ds=[dt,dx,dh,dro])
+    sep.write_file(fout,imgtt,os=[oz,ox,oh,oro],ds=[dz,dx,dh,dro])
 else:
   if(aconv):
     # Convert to angle
