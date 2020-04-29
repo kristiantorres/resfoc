@@ -99,14 +99,15 @@ gwmg = agc(wmg.astype('float32').T).T
 paxes,ptb = sep.read_file(args.ptb)
 ptb = ptb.reshape(paxes.n,order='F')
 
-bxidx = 20; exidx = 1000;
+bxidx = 0; exidx = 1000;
 fsize = 15; wbox=10; hbox=6
 hbar=0.67; wbar=0.02; barz=0.16; barx=0.91
 cropsize = 152
 # Make the figure of the perturbation (unmasked)
 fig1 = plt.figure(figsize=(wbox,hbox))
 ax1 = fig1.gca()
-im = ax1.imshow(ptb[:,bxidx:exidx],cmap='jet',extent=[bxidx*dx/1000,(exidx-1)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='bilinear')
+im = ax1.imshow(ptb[:,bxidx:exidx],cmap='seismic',extent=[bxidx*dx/1000,(exidx-1)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='bilinear',
+    vmin=-100,vmax=100)
 ax1.set_xlabel('X (km)',fontsize=fsize)
 ax1.set_ylabel('Z (km)',fontsize=fsize)
 ax1.tick_params(labelsize=fsize)
@@ -119,17 +120,17 @@ ax2.imshow(gimg[:,bxidx:exidx],vmin=-2.5,vmax=2.5,extent=[bxidx*dx/1000,(exidx-1
 mask1 = np.ma.masked_where((ptb) < thresh, ptb)
 mask2 = np.ma.masked_where((ptb) > -thresh, ptb)
 ax2.imshow(mask1[:,bxidx:exidx],extent=[bxidx*dx/1000,(exidx-1)*dx/1000.0,nz*dz/1000.0,0.0],alpha=0.3,
-    cmap='jet',vmin=-100,vmax=100,interpolation='bilinear')
+    cmap='seismic',vmin=-100,vmax=100,interpolation='bilinear')
 ax2.imshow(mask2[:,bxidx:exidx],extent=[bxidx*dx/1000,(exidx-1)*dx/1000.0,nz*dz/1000.0,0.0],alpha=0.3,
-    cmap='jet',vmin=-100,vmax=100,interpolation='bilinear')
+    cmap='seismic',vmin=-100,vmax=100,interpolation='bilinear')
 ax2.set_xlabel('X (km)',fontsize=fsize)
 ax2.set_ylabel('Z (km)',fontsize=fsize)
 ax2.tick_params(labelsize=fsize)
 # Colorbar
 cbar_ax = fig2.add_axes([barx,barz,wbar,hbar])
-cbar = fig2.colorbar(im,cbar_ax,format='%.0f',boundaries=np.arange(-100,101,1))
+cbar = fig2.colorbar(im,cbar_ax,format='%.0f')
 cbar.ax.tick_params(labelsize=fsize)
-cbar.set_label('Velocity (km/s)',fontsize=fsize)
+cbar.set_label('Velocity (m/s)',fontsize=fsize)
 plt.savefig(args.ivelout,bbox_inches='tight',transparent=True,dpi=150)
 if(show):
   plt.show()
