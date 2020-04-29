@@ -3,15 +3,88 @@ Functions for estimating the RMS velocity ratio (rho)
 from residual migration images
 
 @author: Joseph Jennings
-@version: 2020.04.12
+@version: 2020.04.29
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from resfoc.ssim import ssim
+from resfoc.rhoshifts import rhoshifts
+from scipy.ndimage import map_coordinates
+
+def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
+  """
+  Computes semblance from residually migrated angle gathers
+  and picks the rho from the maximum semblance
+
+  Parameters
+    resang    - input residually migrated angle gathers [nro,nx,na,nz]
+    oro       - the origin of the rho axis
+    dro       - the sampling of the rho axis
+    agc       - apply AGC before computing semblance [True]
+    rect1semb - number of points to smooth semblance on depth axis [10]
+    rect2semb - number of points to smooth semblance on rho axis [3]
+    smooth    - flag for smoothing the picked rho(z) function
+    rect1pick - number of points to smooth the rho picks on depth axis [40]
+    rect2pick - number of points to smooth the rho picks along the spatial axis [40]
+    gate      - picking parameter (more to come) [3]
+    an        - picking parameter (more to come) [1]
+    niter     - number of iterations for shaping regularization smoothing [100]
+
+  Returns an estimate of rho(x,z) with shape [nx,nz]
+  """
+  pass
+
+def refocusimg(rimgs,rho,dro,ro1=None):
+  """
+  Refocuses the image based on an input rho map
+
+  Parameters
+    rimgs - input residually migrated images [nro,nx,nz]. 
+            Input can be angle stack or zero offset.
+    rho   - input smooth rho map
+    dro   - the sampling along the rho axis
+    ro1   - the index of the rho=1 image. [(nro-1)/2]
+
+  Returns a refocused image [nx,nz]
+  """
+  # Get dimensions of the input images
+  [nro,nx,nz] = rimgs.shape
+  if(rho.shape[0] != nx or rho.shape[1] != nz):
+    raise Exception("Input rho map must have same spatial dimensions as residually migrated images")
+
+  # Get rho=1 index
+  if(ro1 is None):
+    ro1 = int((nro-1)/2)
+
+  # Create coordinate array
+  coords = np.zeros([3,nro,nx,nz],dtype='float32')
+
+  # Compute the coordinates for shifting
+  rhoshifts(nro,nx,nz,dro,rho,coords)
+
+  # Apply shifts
+  rfc = map_coordinates(rimgs,coords)
+
+  # Extract at rho = 1
+  return rfc[ro1]
+
+def refocusang(resang,rho,dro):
+  """
+  Refocuses all angles based on an input rho map
+
+  Parameters
+    resang - input residually migrated angle gathers [nro,nx,na,nz]
+    rho    - input smooth rho map
+    dro    - the sampling along the rho axis
+    ro1    - the index of the rho=1 image [(nro-1)/2]
+
+    Returns a refocused image and flattened gathers [nx,na,nz]
+  """
+  pass
 
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
-  Estimates rho by comparing residual migration images with a
+  Estimates rho by comparing residual migration images with a 
   well-focused "target image"
 
   Parameters
@@ -75,64 +148,6 @@ def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,
   else:
     return rhoi
 
-def estro_tgtt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
-  """
-  Estimates rho by comparing residual migration images with a
-  well-focused "target image"
-
-  Parameters
-    rimgs   - input residual migration images [nro,nz,nx]
-    fimg    - input target image [nx,nz]
-    dro     - sampling along trial rho axis
-    oro     - origin of rho axis
-    nzp     - size of patches in z direction [128]
-    nxp     - size of patches in x direction [128]
-    strdx   - patch stride in x direction [128]
-    strdz   - patch stride in z direction [128]
-    patches - return the estimated rho in patch form  [numpx,numpz,nzp,nxp]
-    onehot  - return the estimated rho in one-hot encoded form ((numpz,numpx,nro) with a one at the estimated rho)
-
-  Returns the estimated rho in a map, patches and/or onehot form
-  """
-  # Get dimensions
-  [nro,nz,nx] = rimgs.shape
-
-  if(nz != fimg.shape[0] or nx != fimg.shape[1]):
-    raise Exception("Residual migration and focused image must have same spatial dimensions")
-
-  # Extract patches on target image
-  pe   = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
-  ptch = pe.extract(fimg)
-  numpz = ptch.shape[0]; numpx = ptch.shape[1]
-
-  # Extract patches on residual migration image
-  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
-  rptch = np.squeeze(per.extract(rimgs))
-
-  # Allocate the output rho
-  rhop = np.zeros(ptch.shape)
-  oehs = np.zeros([numpz,numpx,nro])
-
-  # Loop over each patch and compute the ssim for each rho
-  for izp in range(numpz):
-    for ixp in range(numpx):
-      idx = ssim_ro(rptch[izp,ixp],ptch[izp,ixp])
-      # Compute rho and save idx
-      rhop[izp,ixp,:,:] = oro + idx*dro
-      oehs[izp,ixp,idx] = 1.0
-
-  # Reconstruct the rho field
-  rhoi = pe.reconstruct(rhop)
-
-  if(patches and onehot):
-    return rhoi,rhop,oehs
-  elif(patches):
-    return rhoi,rhop
-  elif(onehot):
-    return rhoi,oehs
-  else:
-    return rhoi
-
 def onehot2rho(oehs,dro,oro,nz=512,nx=1024,nzp=128,nxp=128,strdz=64,strdx=64,patches=False):
   """
   Builds a spatial rho map from onehot encoded vectors
@@ -162,7 +177,6 @@ def onehot2rho(oehs,dro,oro,nz=512,nx=1024,nzp=128,nxp=128,strdz=64,strdx=64,pat
   # Loop over each patch
   for ixp in range(numpx):
     for izp in range(numpz):
-      print(oehs[ixp,izp])
       idx = np.argmax(oehs[ixp,izp])
       rhop[ixp,izp,:,:] = oro + idx*dro
 
@@ -189,37 +203,4 @@ def ssim_ro(rimgs,fimg):
     ssims[iro] = ssim(rimgs[iro],fimg)
 
   return np.argmax(ssims)
-
-def refoc_tgt(resimgs,oehs,nxp=128,nzp=128,strdx=64,strdz=64,transp=False):
-  """
-  Refocuses an image based on the one-hot encoded vectors
-  from the SSIM measure/NN prediction
-
-  Parameters
-    resimgs - input residual migration images [nro,nxp,nzp]
-    oehs    - one-hot encoded vectors
-
-  Returns a coarsely focused image
-  """
-  #nro = resimgs.shape[0]
-  ## Extract patches on residual migration image
-  #per = PatchExtractor((nro,nxp,nzp),stride=(nro,strdx,strdz))
-  #rptch = np.squeeze(per.extract(resimgs))
-
-  [numpx,numpz,nro,nxp,nzp] = resimgs.shape
-
-  out = np.zeros([numpx,numpz,nxp,nzp])
-
-  for ipx in range(numpx):
-    for ipz in range(numpz):
-      idx = np.argmax(oehs[ipx,ipz])
-      out[ipx,ipz] = resimgs[ipx,ipz,idx]
-
-  # Return the reconstructed image
-  #pe   = PatchExtractor((nxp,nzp),stride=(strdx,strdz))
-  #ptch = pe.extract(np.zeros([resimgs.shape[1],resimgs.shape[2]]))
-  #return pe.reconstruct(out)
-
-  return out
-
 
