@@ -393,3 +393,72 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   if(show):
     plt.show()
 
+def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,figname=None,ftype='png',**kwargs):
+  """
+  Plots the semblance picks on top of the computed semblance panel
+  and the residually migrated angle gathers
+
+  Parameters:
+    ang   - Residually migrated angle gathers [nro,na,nz]
+    smb   - Computed rho semblance [nro,nz]
+    pck   - The computed Rho picks [nz]
+    dz    - The depth sampling
+    dro   - The residual migration sampling
+    oro   - The residual migration origin
+    agc   - Apply agc to the gathers [False]
+    mode  - Mode of how to plot ([sbs]/tb) side by side or top/bottom
+    show  - Show the plots [True]
+    fname - Output figure name [None]
+  """
+  # Reshape the angle gathers
+  nro = ang.shape[0]; na = ang.shape[1]; nz = ang.shape[2]
+  angr = ang.reshape([na*nro,nz])
+  # Gain the data
+  if(agc):
+    angrg = agc(angr)
+  else:
+    angr  = angr
+  vmin = np.min(angr); vmax = np.max(angr)
+  pclip = kwargs.get('pclip',1.0)
+  # Compute z for rho picks
+  z = np.linspace(oz,oz+(nz-1)*dz,nz)
+  # Plot the rho picks
+  wbox = kwargs.get('wbox',14); hbox = kwargs.get('hbox',7)
+  fntsize = kwargs.get('fontsize',15); tcksize = kwargs.get('ticksize',15)
+  if(mode == 'sbs'):
+    fig,ax = plt.subplots(1,2,figsize=(wbox,hbox))
+    # Angle gather
+    ax[0].imshow(angr.T,cmap='gray',aspect=0.009,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='sinc',
+               vmin=vmin*pclip,vmax=vmax*pclip)
+    ax[0].plot(pck,z,linewidth=3,color='tab:cyan')
+    ax[0].set_xlabel(r'$\rho$',fontsize=fntsize)
+    ax[0].set_ylabel('Z (km)',fontsize=fntsize)
+    ax[0].tick_params(labelsize=tcksize)
+    # Semblance
+    ax[1].imshow(smb.T,cmap='jet',aspect=0.02,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='bilinear')
+    ax[1].plot(pck,z,linewidth=3,color='k')
+    ax[1].set_xlabel(r'$\rho$',fontsize=fntsize)
+    ax[1].set_ylabel(' ',fontsize=fntsize)
+    ax[1].tick_params(labelsize=tcksize)
+    plt.subplots_adjust(wspace=-0.4)
+  elif(mode == 'tb'):
+    fig,ax = plt.subplots(2,1,figsize=(wbox,hbox))
+    # Angle gather
+    ax[0].imshow(angr.T,cmap='gray',aspect=0.009,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='sinc',
+               vmin=vmin*pclip,vmax=vmax*pclip)
+    ax[0].plot(pck,z,linewidth=3,color='tab:cyan')
+    ax[0].set_xlabel(r'$\rho$',fontsize=fntsize)
+    ax[0].set_ylabel('Z (km)',fontsize=fntsize)
+    ax[0].tick_params(labelsize=tcksize)
+    # Semblance
+    ax[1].imshow(smb.T,cmap='jet',aspect=0.009,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='bilinear')
+    ax[1].plot(pck,z,linewidth=3,color='k')
+    ax[1].set_xlabel(r'$\rho$',fontsize=fntsize)
+    ax[1].set_ylabel(' ',fontsize=fntsize)
+    ax[1].tick_params(labelsize=tcksize)
+  if(figname is not None):
+    plt.savefig(figname+'.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
+  if(show):
+    plt.show()
+

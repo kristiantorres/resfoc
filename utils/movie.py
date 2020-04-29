@@ -773,5 +773,5 @@ def resangframes(resang,dz,dx,dro,oro,jx=10,transp=False,show=True,**kwargs):
       pclip=kwargs.get('pclip',1.0),labelsize=kwargs.get('labelsize',14),
       ticksize=kwargs.get('ticksize',14),interp=kwargs.get('interp','none'),
       xmax=kwargs.get('xmax',nx*dx),zmax=kwargs.get('zmax',nz*dz),show=show,
-      xlabel='X (km)',zlabel='Z (km)')
+      xlabel='X (km)',ylabel='Z (km)')
 
