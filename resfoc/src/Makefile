@@ -17,6 +17,10 @@ rstoltbig: rstoltbig.o ficosft.o cosft.o kiss_fft.o kiss_fftr.o stretch.o
 		-g stretch.o kiss_fft.o kiss_fftr.o cosft.o ficosft.o rstoltbig.o rstoltbigpy.cpp -o \
 		../rstoltbig`${PYPATH}/bin/python3-config --extension-suffix`
 
+rhoshifts: rhoshifts.o
+	g++ -O3 -fPIC -ffast-math -fopenmp -std=c++1y -shared -Wall `${PYPATH}/bin/python3 -m pybind11 --includes` \
+		-g rhoshifts.o rhoshiftspy.cpp -o ../rhoshifts`${PYPATH}/bin/python3-config --extension-suffix`
+
 depth2time: depth2time.o stretch.o
 	g++ -O3 -fPIC -ffast-math -fopenmp -std=c++1y -shared -Wall `${PYPATH}/bin/python3 -m pybind11 --includes` \
 		-g stretch.o depth2time.o depth2timepy.cpp -o ../depth2time`${PYPATH}/bin/python3-config --extension-suffix`

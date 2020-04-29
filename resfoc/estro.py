@@ -3,11 +3,84 @@ Functions for estimating the RMS velocity ratio (rho)
 from residual migration images
 
 @author: Joseph Jennings
-@version: 2020.04.12
+@version: 2020.04.29
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from resfoc.ssim import ssim
+from resfoc.rhoshifts import rhoshifts
+from scipy.ndimage import map_coordinates
+
+def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
+  """
+  Computes semblance from residually migrated angle gathers
+  and picks the rho from the maximum semblance
+
+  Parameters
+    resang    - input residually migrated angle gathers [nro,nx,na,nz]
+    oro       - the origin of the rho axis
+    dro       - the sampling of the rho axis
+    agc       - apply AGC before computing semblance [True]
+    rect1semb - number of points to smooth semblance on depth axis [10]
+    rect2semb - number of points to smooth semblance on rho axis [3]
+    smooth    - flag for smoothing the picked rho(z) function
+    rect1pick - number of points to smooth the rho picks on depth axis [40]
+    rect2pick - number of points to smooth the rho picks along the spatial axis [40]
+    gate      - picking parameter (more to come) [3]
+    an        - picking parameter (more to come) [1]
+    niter     - number of iterations for shaping regularization smoothing [100]
+
+  Returns an estimate of rho(x,z) with shape [nx,nz]
+  """
+  pass
+
+def refocusimg(rimgs,rho,dro,ro1=None):
+  """
+  Refocuses the image based on an input rho map
+
+  Parameters
+    rimgs - input residually migrated images [nro,nx,nz]. 
+            Input can be angle stack or zero offset.
+    rho   - input smooth rho map
+    dro   - the sampling along the rho axis
+    ro1   - the index of the rho=1 image. [(nro-1)/2]
+
+  Returns a refocused image [nx,nz]
+  """
+  # Get dimensions of the input images
+  [nro,nx,nz] = rimgs.shape
+  if(rho.shape[0] != nx or rho.shape[1] != nz):
+    raise Exception("Input rho map must have same spatial dimensions as residually migrated images")
+
+  # Get rho=1 index
+  if(ro1 is None):
+    ro1 = int((nro-1)/2)
+
+  # Create coordinate array
+  coords = np.zeros([3,nro,nx,nz],dtype='float32')
+
+  # Compute the coordinates for shifting
+  rhoshifts(nro,nx,nz,dro,rho,coords)
+
+  # Apply shifts
+  rfc = map_coordinates(rimgs,coords)
+
+  # Extract at rho = 1
+  return rfc[ro1]
+
+def refocusang(resang,rho,dro):
+  """
+  Refocuses all angles based on an input rho map
+
+  Parameters
+    resang - input residually migrated angle gathers [nro,nx,na,nz]
+    rho    - input smooth rho map
+    dro    - the sampling along the rho axis
+    ro1    - the index of the rho=1 image [(nro-1)/2]
+
+    Returns a refocused image and flattened gathers [nx,na,nz]
+  """
+  pass
 
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
