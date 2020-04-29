@@ -2,7 +2,7 @@
 Useful functions for plotting. No interactive plots.
 See utils.movie for interactive plotting
 @author: Joseph Jennings
-@version: 2020.03.24
+@version: 2020.04.28
 """
 import numpy as np
 from utils.signal import ampspec1d
