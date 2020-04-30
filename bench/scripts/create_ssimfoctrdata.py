@@ -14,8 +14,10 @@ from utils.ptyprint import progressbar, create_inttag
 import numpy as np
 import deeplearn.utils as dlut
 from resfoc.estro import estro_tgt
+from resfoc.gain import agc
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
+from utils.movie import viewimgframeskey
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)
@@ -137,6 +139,7 @@ for ifile in progressbar(range(nfiles), "nfiles"):
   fig,ax = plt.subplots(1,2,figsize=(14,7))
   ax[0].imshow(rho.T,cmap='seismic',vmin=0.98,vmax=1.02)
   ax[1].imshow(pzro,cmap='jet',vmin=-100,vmax=100)
+  viewimgframeskey(rzro.T,show=False)
   plt.show()
   # Create image patches
   rzrop = np.squeeze(pe.extract(rzro.T))
