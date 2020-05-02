@@ -3,10 +3,14 @@
 #imgs=../fltdat/imgsmall.H
 #imgs=../image/zofltimgsmall.H
 #imgs=../image/zofltimgbigwind.H
-imgs=../image/zofltimgbigwrngwind2.H
+#imgs=../image/zofltimgbigwrngwind2.H
+#imgs=../focdat/refocsembwind.H
+#imgs=../focdat/refocimagewind.H
+imgs=../focdat/imgtesttt3wind.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu10.json
-figpfx=./fig/resmigs/bigwrng/two
+#figpfx=./fig/resmigs/bigwrng/two
+figpfx=./fig/test/
 #figpfx=./fig/truimgs/big/
 # Patching
 nxo=512
@@ -19,7 +23,7 @@ strdz=128
 thresh=0.8
 verb=y
 show=n
-gpus=2
+gpus=6
 # Plotting
 pmin=0.4
 aratio=1.0

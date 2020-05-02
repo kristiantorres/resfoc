@@ -59,24 +59,24 @@ class F3Pred(callbacks.Callback):
 
 class ShowPred(callbacks.Callback):
 
-  def __init__(self,fpath,rpath,ppath,psize=(19,128,128),ssize=(19,64,64),thresh=0.5,predpath=None,figpath=None):
+  def __init__(self,fpath,rpath,ppath,psize=(19,128,128),ssize=(19,64,64),predpath=None,figpath=None):
     # Initialize SEPlib
     sep = seppy.sep()
     # Residual migration image
     raxes,res = sep.read_file(rpath)
     res = res.reshape(raxes.n,order='F')
-    #rzro = res[:,:,16,:]
-    rzro = res[psize[1]:,:,16,:]
+    rzro = res[:,:,16,:]
+    #rzro = res[psize[1]:,:,16,:] # Remove first row of patches
     [nz,nx,nh,self.nro] = raxes.n; [dz,dx,dh,self.dro] = raxes.d; [ox,ox,oh,self.oro] = raxes.o
     # Perturbation
     paxes,ptb = sep.read_file(ppath)
     self.ptb = ptb.reshape(paxes.n,order='F')
-    self.ptb = self.ptb[psize[1]:,:]
+    #self.ptb = self.ptb[psize[1]:,:] # Remove first row of patches
     # Well focused image
     iaxes,img = sep.read_file(fpath)
     img = img.reshape(iaxes.n,order='F')
-    #izro = img[:,:,16]
-    izro = img[psize[1]:,:,16]
+    izro = img[:,:,16]
+    #izro = img[psize[1]:,:,16] # Remove first row of patches
     # Patch it
     self.pe = PatchExtractor(psize,stride=ssize)
     rzrop = np.squeeze(self.pe.extract(rzro.T))
@@ -85,22 +85,22 @@ class ShowPred(callbacks.Callback):
     self.rzropt = np.transpose(rzrop,(0,2,3,1))
     # Compute ground truth
     self.rho = estro_tgt(rzro.T,izro.T,self.dro,self.oro,nzp=psize[2],nxp=psize[1],strdx=ssize[1],strdz=ssize[2])
-    # Save values
-    self.thresh = thresh
 
   def on_epoch_end(self,epoch,logs={}):
     # Make a prediction on the input image
     print("Predicting on test image...")
     pred = self.model.predict(self.rzropt,verbose=1)
-    print(pred)
+    #print(pred)
     # Apply threshold
-    #tpred = thresh(pred,self.thresh)
     pred = pred.reshape([self.px,self.pz,self.nro])
-    prho = onehot2rho(pred,self.dro,self.oro,nz=512-128)
-    #prho = onehot2rho(tpred,self.dro,self.oro,nz=512)
-    fig,ax = plt.subplots(1,3,figsize=(14,7))
-    ax[0].imshow(prho.T,cmap='seismic',vmin=0.97,vmax=1.03)
-    ax[1].imshow(self.rho.T,cmap='seismic',vmin=0.97,vmax=1.03)
-    ax[2].imshow(self.ptb,cmap='jet',vmin=-100,vmax=100)
-    plt.show()
+    print(np.isnan(np.sum(pred)))
+    #prho = onehot2rho(pred,self.dro,self.oro,nz=512-128)
+    prho = onehot2rho(pred,self.dro,self.oro,nz=512,nzp=64,nxp=64,strdz=32,strdx=32)
+    if(epoch%10 == 0):
+      fig,ax = plt.subplots(1,3,figsize=(14,7))
+      ax[0].imshow(prho.T,cmap='seismic',vmin=0.97,vmax=1.03)
+      ax[1].imshow(self.rho.T,cmap='seismic',vmin=0.97,vmax=1.03)
+      ax[2].imshow(self.ptb,cmap='jet',vmin=-100,vmax=100)
+      plt.savefig("./fig/trainresfind/resfind%d.png"%(epoch),dpi=150,bbox_inches='tight',transparent=True)
+      plt.close()
 
