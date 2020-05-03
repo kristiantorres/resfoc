@@ -1,4 +1,3 @@
-
 #include <math.h>
 #include <algorithm>
 #include <tbb/blocked_range.h>
@@ -55,7 +54,7 @@ void evntcre8::deposit(float vel,
   float luse = layerT * (1 + (.5 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))) * layer_rand);
 
   for (int i1 = 0; i1 < nzot; i1++) {
-    int ii = (i1 - iold) * + _d1 / luse;
+    int ii = (i1 - iold) * _d1 / luse;
     if (ii != iold) {
       vu = (1. + ((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) - .5) * dev_layer);
     }
@@ -209,6 +208,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
             if (dir < 0. || radius > fullRadius)
               thetaNew = thetaOld - shiftTheta;
 
+
             // Convert to polar coordinates
             float dPR  = radius * cosf(thetaNew * pi / 180.);
             float newZ = radius * sinf(thetaNew * pi / 180.) + zcenter;
@@ -274,6 +274,140 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
   /* Free memory */
   delete[] shiftx; delete[] shifty; delete[] shiftz;
 
+}
+
+void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
+    float thetashift, float distdie, float thetadie, float scalethrw,
+    float *olblot, float *nlblot, float *oshiftx, float *oshiftz) {
+
+  float dst1 = nz*_d1;
+  float dst2 = _n2*_d2;
+  float dst3 = _n3*_d3;
+
+  /* Location of the beginning of the tear */
+  float zbeg = dst1 * begz;
+  float xbeg = dst2 * begx;
+
+  // Die off distance from the tear perpendicular to the tear and radius direction
+  distdie *= dst3;
+
+  // Definition of pi
+  float pi = atan(1.) * 4;
+
+  /* Angle of fault */
+  float theta0 = atan2f(dz, daz);
+  theta0 = theta0 + 2 * pi;
+  theta0 = theta0 * 180. / pi;
+
+  /* Azimuth normal to fault */
+  if (azim < 0.) azim += 360.;  // Put azimuth in the 0-360
+  azim *= pi / 180.;            // convert to radians
+  float sign   =  cosf(azim);   // Make either 0 or 180
+
+  /* Cylindrical coordinate 0,0,0 is at */
+  float zcenter = zbeg - dz;
+  float xcenter = xbeg - daz * sign;
+
+  /* Distance from fault to center */
+  float fullRadius = sqrtf(dz * dz + daz * daz);
+
+  /* Internal shift arrays */
+  float *shiftx = new float[_n2*nz];
+  float *shiftz = new float[_n2*nz];
+
+  /* Compute shifts */
+  for (int i2 = 0; i2 < _n2; i2++) {
+    // X component of distance from center
+    float p2 = _d2 * i2 - xcenter;
+    // Rotate 180 if desired
+    p2 *= sign;
+
+    for (int i1 = 0; i1 < nz; i1++) {
+      // Z component of distance from center
+      float p1 = _d1 * i1 - zcenter;
+
+      // Save output shift values
+      oshiftx[i2*nz + i1] = i2;
+      oshiftz[i2*nz + i1] = i1;
+
+      // Compute the angle from vertical for the current point
+      float thetaOld = atan2f(p1, p2) * 180. / pi + 360;
+      float thetaCompare;
+      if(p1 < 0 && p2 == 0.0) {
+        thetaCompare = 270.0;
+      } else if(p1 > 0 && p2 == 0.0 ){
+        thetaCompare = 450.0;
+      } else if(p1 == 0.0 && p2 == 0.0) {
+        thetaCompare = 1000000;
+      } else {
+        thetaCompare = atanf(p1 / p2) * 180. / pi + 360.;
+      }
+
+      // Radius of current point
+      float radius = sqrtf(p2 * p2 + p1 * p1);
+
+      // Save fault trajectory for label
+      float rdiff = fabsf(radius - fullRadius);
+      if(rdiff < 20) {
+        nlblot[i2*nz + i1] = 1.0;
+      }
+
+      // Check if we are in the region for faulting
+      // Criteria for radius and angle
+      float ratioAz    = rdiff / distdie;
+      float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
+
+      // Compute distance from xbeg, ybeg and zbeg
+      float diffx = xbeg - (p2*sign + xcenter);
+      float diffz = zbeg - (p1      + zcenter);
+      float distbeg = sqrtf(diffx*diffx + diffz*diffz);
+
+      if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
+        // Once we are in range compute the shift in angle
+        float scaleAz    = 1. - ratioAz;
+        float scaleTheta = 1. - ratioTheta;
+
+        // Shift in theta
+        float shiftTheta = thetashift * scaleAz * scaleTheta;
+
+        // New theta location
+        float thetaNew = thetaOld + shiftTheta;
+        // If outside the circle, flip the sign of the shift
+        if (radius > fullRadius)
+          thetaNew = thetaOld - shiftTheta;
+
+        // Convert to polar coordinates
+        float newX = radius * cosf(thetaNew * pi / 180.) * sign + xcenter;
+        float newZ = radius * sinf(thetaNew * pi / 180.)        + zcenter;
+
+        // Compute shifts to be applied
+        shiftz[i2*nz + i1] = (newZ - (_d1 * i1))/scalethrw;
+        shiftx[i2*nz + i1] = (newX - (_d2 * i2))/scalethrw;
+
+        oshiftz[i2*nz + i1] -= shiftz[i2*nz + i1]/_d1;
+        oshiftx[i2*nz + i1] -= shiftx[i2*nz + i1]/_d2;
+
+        // Save new label out
+        nlblot[i2*nz + i1] *= fabsf(shiftz[i2*nz + i1]);
+      }
+    }
+    bool found = false;
+    int i1 = 0;
+    while (i1 < nz - 1 && !found) {
+      if (fabs(shiftz[i2*nz + i1]) > 0.)
+        found = true;
+      else
+        i1++;
+    }
+    if (found) {
+      for (int i = 0; i <= i1; i++) {
+        shiftz[i2*nz + i] = shiftz[i2*nz + i1];
+      }
+    }
+  }
+
+  /* Free memory */
+  delete[] shiftz; delete[] shiftx;
 }
 
 void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
@@ -653,7 +787,19 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
       }
     }
   }
+}
 
+void evntcre8::calcref2d(int nz, float *vel, float *ref) {
+  for(int i2 = 0; i2 < _n2; ++i2) {
+    for(int i1 = 0; i1 < nz; ++i1) {
+        /* Backwards derivatives at the end */
+        if(i1 == nz-1) {
+          ref[i2*nz + i1] = vel[i2*nz + i1  ] - vel[i2*nz + i1-1];
+        } else {
+          ref[i2*nz + i1] = vel[i2*nz + i1+1] - vel[i2*nz + i1  ];
+        }
+    }
+  }
 }
 
 void evntcre8::laplacian(int nz, float *lblin, float *lblot) {
