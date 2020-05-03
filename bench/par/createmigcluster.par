@@ -4,7 +4,7 @@ moddir=/data/biondo/joseph29/projects/resfoc/bench/dat/velflts
 outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/migflts
 imgpf=fltimg
 datapath=/scratch/joseph29/migflts
-begvel=110
+begvel=310
 # Other
 verb=y
 # Cluster arguments
