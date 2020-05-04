@@ -1,82 +1,116 @@
 """
-Creates simple layered with three faults training data
-
-Outputs the following:
-  (a) A layered v(z) velocity model with three faults
-  (b) The associated reflectivity model
-  (c) The associated fault labels
-  (d) A velocity anomaly
-  (e) Poorly focused migrated image (no anomaly)
-  (f) Prestack Residual migration (subsurface offsets)
-  (g) Rho field picked from semblance
-  (h) Refocused image
+Creates a well focused image given a velocity
+anomaly and a velocity and reflectivity model
 
 @author: Joseph Jennings
-@version: 2020.05.01
+@version: 2020.05.03
 """
+import sys, os, argparse, configparser
 import numpy as np
 import inpout.seppy as seppy
-from velocity.stdmodels import layeredfaults2d
-from scaas.velocity import create_randomptbs_loc
 from scaas.trismooth import smooth
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
-from resfoc.gain import agc
-from utils.plot import plot_imgvelptb, plot_wavelet
+from utils.plot import plot_imgvelptb
 import matplotlib.pyplot as plt
 
-# Create layered model
-vel,ref,cnv,lbl = layeredfaults2d(nx=1300,ofx=0.4,dfx=0.08)
-#vel,ref,cnv,lbl = layeredfaults2d(nx=1000,ofx=0.55)
-[nz,nx] = vel.shape
-dx = 10; dz = 10
+# Parse the config file
+conf_parser = argparse.ArgumentParser(add_help=False)
+conf_parser.add_argument("-c", "--conf_file",
+                         help="Specify config file", metavar="FILE")
+args, remaining_argv = conf_parser.parse_known_args()
+defaults = {
+    "fx": 373,
+    "nxw": 512,
+    }
+if args.conf_file:
+  config = configparser.ConfigParser()
+  config.read([args.conf_file])
+  defaults = dict(config.items("defaults"))
+
+# Parse the other arguments
+# Don't surpress add_help here so it will handle -h
+parser = argparse.ArgumentParser(parents=[conf_parser],description=__doc__,
+    formatter_class=argparse.RawDescriptionHelpFormatter)
+
+# Set defaults
+parser.set_defaults(**defaults)
+
+# Input files
+ioArgs = parser.add_argument_group('Inputs and outputs')
+ioArgs.add_argument("-vel",help="Input velocity model",type=str,required=True)
+ioArgs.add_argument("-ref",help="Input reflectivity",type=str,required=True)
+ioArgs.add_argument("-ptb",help="Input velocity anomaly",type=str,required=True)
+ioArgs.add_argument("-imgo",help="Output well-focused image (offset)",type=str,required=True)
+ioArgs.add_argument("-imga",help="Output well-focused image (angle)",type=str,required=True)
+# Optional arguments
+parser.add_argument("-fx",help="First x sample for window [373]",type=int)
+parser.add_argument("-nxw",help="Size of window [512]",type=int)
+# Enables required arguments in config file
+for action in parser._actions:
+  if(action.dest in defaults):
+    action.required = False
+args = parser.parse_args(remaining_argv)
+
+# Create IO for writing at the end
+sep = seppy.sep()
+
+# Read in input models
+vaxes,vel = sep.read_file(args.vel)
+vel = vel.reshape(vaxes.n,order='F')
+vel = np.ascontiguousarray(vel).astype('float32')
+
+[nz,nx] = vaxes.n; [dz,dx] = vaxes.d; [oz,ox] = vaxes.o
+
+raxes,ref = sep.read_file(args.ref)
+ref = ref.reshape(raxes.n,order='F')
+ref = np.ascontiguousarray(ref).astype('float32')
+
+paxes,ptb = sep.read_file(args.ptb)
+ptb = ptb.reshape(paxes.n,order='F')
+ptb = np.ascontiguousarray(ptb).astype('float32')
 
 # Create migration velocity
 velsm = smooth(vel,rect1=30,rect2=30)
 
-# Create a random perturbation
-ano = create_randomptbs_loc(nz,nx,nptbs=3,romin=0.95,romax=1.00,
-                            minnaz=100,maxnaz=150,minnax=100,maxnax=400,mincz=100,maxcz=150,mincx=250,maxcx=700,
-                            mindist=100,nptsz=2,nptsx=2,octaves=2,period=80,persist=0.2,ncpu=1,sigma=20)
-
 # Create velocity with anomaly
-velwr = velsm*ano
-velptb = velwr - velsm
-plot_imgvelptb(ref,velptb,dz,dx,velmin=-100,velmax=100,thresh=5,agc=False,show=True)
+velwr = velsm + ptb
+plot_imgvelptb(ref,ptb,dz,dx,velmin=-100,velmax=100,thresh=5,agc=False,show=True)
 
 # Acquisition geometry
 dsx = 20; bx = 50; bz = 50
 prp = geom.defaultgeom(nx,dx,nz,dz,nsx=66,dsx=dsx,bx=bx,bz=bz)
-#prp = geom.defaultgeom(nx,dx,nz,dz,nsx=51,dsx=dsx,bx=bx,bz=bz)
 
-prp.plot_acq(velsm,cmap='jet',show=False)
-prp.plot_acq(ref,cmap='gray',show=False)
+prp.plot_acq(velwr,cmap='jet',show=True)
 
 # Create data axes
 ntu = 6500; dtu = 0.001;
 freq = 20; amp = 100.0; dly = 0.2;
 wav = ricker(ntu,dtu,freq,amp,dly)
-plot_wavelet(wav,dtu)
 
 # Model linearized data
 dtd = 0.004
-allshot = prp.model_lindata(velsm,ref,wav,dtd,verb=True,nthrds=24)
+allshot = prp.model_lindata(velwr,ref,wav,dtd,verb=True,nthrds=24)
 
 # Taper for migration
 prp.build_taper(70,150)
-prp.plot_taper(ref,cmap='gray')
 
 # Wave equation depth migration
-img = prp.wem(velsm,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=20)
+img = prp.wem(velwr,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=19)
 nh,oh,dh = prp.get_off_axis()
-imgt = np.transpose(img,(1,2,0))
 
-#TODO: Residual migration, conversion to time and angle, semblance, picking
+# Window to the region of interest
+nxw = args.nxw; nw = args.fx
+imgw = img[:,:,nw:nw+nxw]
+
+# Convert to angle gathers
+imgang = prp.to_angle(imgw,verb=True,nthrds=24)
+na,oa,da = prp.get_ang_axis()
+
+# Window and transpose the image and the label
+imgwt = np.transpose(imgw,(0,2,1)) # [nh,nz,nx] -> [nh,nx,nz]
 
 # Write outputs to file
-sep = seppy.sep()
-sep.write_file("veltest.H",vel,ds=[dz,dx])
-sep.write_file("lbltest.H",lbl,ds=[dz,dx])
-sep.write_file("anotest.H",ano,ds=[dz,dx])
-sep.write_file("imgtest.H",imgt,ds=[dz,dx,dh],os=[0.0,0.0,oh])
+sep.write_file(args.imgo,imgwt.T,ds=[dz,dx,dh],os=[0,0,oh])
+sep.write_file(args.imga,imgang.T,ds=[dz,da,dx],os=[0,oa,0])
 
