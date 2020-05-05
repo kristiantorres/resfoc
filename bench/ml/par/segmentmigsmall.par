@@ -1,17 +1,11 @@
 [defaults]
 # IO
-#imgs=../fltdat/imgsmall.H
-#imgs=../image/zofltimgsmall.H
-#imgs=../image/zofltimgbigwind.H
-#imgs=../image/zofltimgbigwrngwind2.H
-#imgs=../focdat/refocsembwind.H
-#imgs=../focdat/refocimagewind.H
-imgs=../focdat/imgtesttt3wind.H
+imgs=../focdat/fant/zofant3.H
+#imgs=../focdat/fant/zodeffant3.H
+#imgs=../focdat/fant/rfiifant3.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu10.json
-#figpfx=./fig/resmigs/bigwrng/two
-figpfx=./fig/test/
-#figpfx=./fig/truimgs/big/
+figpfx=./fig/fant/foc
 # Patching
 nxo=512
 nzo=512
@@ -30,9 +24,9 @@ aratio=1.0
 fs=0
 time=n
 km=y
-hbar=0.67
-barz=0.16
-barx=0.8
+hbar=0.75
+barz=0.12
+barx=0.76
 bxidx=0
 exidx=511
 cropsize=154
