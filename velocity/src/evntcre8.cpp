@@ -478,7 +478,6 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
     memcpy(shift,shftin,sizeof(float)*nn*nn);
   }
 
-
   /* Rotate shift into azimuth */
   float *shiftrot = new float[_n2*_n3]();
   float *distrot  = new float[_n2*_n3]();

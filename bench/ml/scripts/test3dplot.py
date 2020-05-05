@@ -9,9 +9,11 @@ daxes,dat = sep.read_file('./dat/invfloat.H',form='native')
 
 dat = dat.reshape(daxes.n,order='F')
 
-datw = dat[20:276,160:,40:168]
+#datw = dat[20:276,160:,40:168]
+datw = dat
 ds = [0.01,0.02,0.02]
-os = [20*0.01,160*0.02,50*0.02]
+#os = [20*0.01,160*0.02,50*0.02]
+os = [0.0,0.0,0.0]
 
 viewcube3d(datw,ds=ds,os=os,
     pclip=0.95,interp='sinc',width1=8,label1='X (km)',label2='X (km)',label3='Z (km)',
