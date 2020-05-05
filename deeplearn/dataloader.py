@@ -127,3 +127,75 @@ def load_allflddata(fldfile,dsize):
       k += 1
 
   return allx
+
+def load_allssimdata(trfile,vafile,dsize):
+  """ Loads all data and labels into numpy arrays """
+  # Get training number of examples
+  hftr = h5py.File(trfile,'r')
+  trkeys = list(hftr.keys())
+  ntr = int(len(trkeys)/2)
+  # Get the validation number of examples
+  if(vafile != None):
+    hfva = h5py.File(vafile,'r')
+    vakeys = list(hfva.keys())
+    nva = int(len(vakeys)/2)
+  else:
+    nva = 0; vakeys = []
+  # Get shape of examples
+  xshape = hftr[trkeys[0]].shape
+  yshape = hftr[trkeys[0+ntr]].shape
+  # Allocate output arrays
+  if(len(xshape) == 4):
+    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
+  ally = np.zeros([(ntr+nva)*dsize,yshape[1]],dtype='float32')
+  k = 0
+  # Get all training examples
+  for itr in progressbar(range(ntr), "numtr:"):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
+      ally[k,:]  = hftr[trkeys[itr+ntr]][iex,:]
+      k += 1
+  # Get all validation examples
+  for iva in progressbar(range(nva), "numva:"):
+    for iex in range(dsize):
+      allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
+      ally[k,:]  = hfva[vakeys[iva+nva]][iex,:]
+      k += 1
+  # Close the files
+  hftr.close()
+  if(vafile != None): hfva.close()
+
+  return allx, ally
+
+def load_allssimcleandata(trfile,vafile):
+  """ Loads a cleaned and flattened ssim data into numpy arrays """
+  # Get training number of examples
+  hftr = h5py.File(trfile,'r')
+  trkeys = list(hftr.keys())
+  ntr = int(len(trkeys)/2)
+  # Get the validation number of examples
+  if(vafile != None):
+    hfva = h5py.File(vafile,'r')
+    vakeys = list(hfva.keys())
+    nva = int(len(vakeys)/2)
+  else:
+    nva = 0; vakeys = []
+  # Get shape of examples
+  xshape = hftr[trkeys[0]].shape
+  yshape = hftr[trkeys[0+ntr]].shape
+  allx = np.zeros([(ntr+nva),xshape[0],xshape[1],xshape[2]],dtype='float32')
+  ally = np.zeros([(ntr+nva),yshape[0]],dtype='float32')
+  # Get all training examples
+  for itr in progressbar(range(ntr), "numtr:"):
+    allx[itr,:,:,:]  = hftr[trkeys[itr]    ][:]
+    ally[itr,:]      = hftr[trkeys[itr+ntr]][:]
+  # Get all validation examples
+  for iva in progressbar(range(nva), "numva:"):
+    allx[iva,:,:,:]  = hfva[vakeys[iva]    ][:]
+    ally[iva,:]      = hfva[vakeys[iva+nva]][:]
+  # Close the files
+  hftr.close()
+  if(vafile != None): hfva.close()
+
+  return allx, ally
+

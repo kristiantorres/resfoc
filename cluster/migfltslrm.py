@@ -14,7 +14,7 @@ class migjob(job.slurmjob):
     self.idx = idx
 
   def write_migpar(self,name,pars,velname,refname,idx):
-    """ Writes a par file for residual migration fault training data """
+    """ Writes a par file for migration fault training data """
     # Build the par file
     parout="""[defaults]
 # IO
@@ -25,10 +25,10 @@ dpath=%s
 imgpf=%s
 velidx=%d
 # Other
-nthreads=%d
 verb=%s
+nthreads=24
 """%(velname, refname, pars.outdir, pars.datapath,  pars.imgpf, idx, #IO
-    pars.nprocs,pars.verb) # Other
+    pars.verb) # Other
     # Write the par file
     with open(name,'w') as f:
       f.write(parout)

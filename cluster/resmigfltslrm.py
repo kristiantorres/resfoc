@@ -14,7 +14,7 @@ class resmigjob(job.slurmjob):
     self.idx = idx
 
   def write_resmigpar(self,name,pars,velname,refname,idx):
-    """Writes a par file for residual migration fault training data """
+    """ Writes a par file for residual migration fault training data """
     # Build the par file
     parout="""[defaults]
 # IO

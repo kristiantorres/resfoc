@@ -199,7 +199,7 @@ echo $SLURMD_NODENAME > %s-node.txt
     """ Gets the name of the node on which the job is running """
     queue = ' ' + queue + ' '
     if(squeuein == None):
-      squeue = 'squeue -o "%.18i %.9P %.15j %.8u %.2t %.10M %.6D %R" > squeue.out'
+      squeue = 'squeue -o "%.18i %.9P %.17j %.8u %.2t %.10M %.6D %R" > squeue.out'
       sp = subprocess.check_call(squeue,shell=True)
       with open('squeue.out', 'r') as f:
         for line in f.readlines():

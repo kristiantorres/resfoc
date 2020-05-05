@@ -2,7 +2,7 @@
 Useful functions for plotting. No interactive plots.
 See utils.movie for interactive plotting
 @author: Joseph Jennings
-@version: 2020.03.24
+@version: 2020.04.28
 """
 import numpy as np
 from utils.signal import ampspec1d
@@ -116,7 +116,7 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
+def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=None,**kwargs):
   """
   Makes a plot of all of the angle gathers by combining the spatial
   and angle axes
@@ -125,6 +125,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
     aimg   - the angle domain image [nx,na,nz]
     transp - flag indicating that the input image has shape [na,nz,nx] [False]
     jx     - subsampling along the x axis (image points to skip) [10]
+    aagc   - flag for applying agc [True]
   """
   if(transp):
     # [na,nz,nx] -> [nx,na,nz]
@@ -136,19 +137,28 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
   aimgts = aimgt[::jx,:,:]
   nxs = aimgts.shape[0]
   # Reshape to flatten the angle and CDP axes
-  aimgts = np.reshape(aimgts,[na*nxs,nz])
+  aimgtsnog = np.reshape(aimgts,[na*nxs,nz])
+  if(aagc):
+    aimgts = agc(aimgtsnog)
+  else:
+    aimgts = aimgtsnog
   # Min and max amplitudes
-  vmin = np.min(aimgts); vmax = np.max(aimgts)
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin is None or vmax is None):
+    vmin = np.min(aimgts); vmax = np.max(aimgts)
   # Plot the figure
-  fig = plt.figure(figsize=(10,10))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
   ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),nx*dx,nz*dz,kwargs.get('zmin',0.0)],
       vmin=vmin*kwargs.get('pclip',1.0),vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('labelsize',14))
-  if(show):
-    plt.show()
+  if(figname is not None and show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
 
 def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png',show=True,**kwargs):
   """
@@ -187,7 +197,9 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
   lz = np.linspace(izmin*dz,izmax*dz,izmax-izmin)
   lx = np.zeros(izmax-izmin) + xloc*dx
-  vmin1 = np.min(mig); vmax1 = np.max(mig)
+  vmin1 = kwargs.get('vmini',None); vmax1 = kwargs.get('vmaxi',None)
+  if(vmin1 is None or vmax1 is None):
+    vmin1 = np.min(mig); vmax1 = np.max(mig)
   ax1.imshow(mig[kwargs.get('xmin',0):kwargs.get('xmax',nx),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
       interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
     kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
