@@ -27,6 +27,9 @@ class evntcre8 {
     void squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
         float azim, float maxshift, float lambda, float rinline, float rxline,
         int nzot, int *lyrot, float *velot);
+    void squish_shifts(int nz, int *lyrin, float *velin, float *shftin, int mode,
+        float azim, float maxshift, float lambda, float rinline, float rxline,
+        int *lyrot, float *velot);
     /* Deposit helper functions */
     int find_max_deposit(int n1, int n2, int n3, int *lyrin);
     void fill_random(int n1, int n2, float *velot);
