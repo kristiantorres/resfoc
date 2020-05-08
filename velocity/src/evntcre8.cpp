@@ -276,7 +276,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
 
 }
 
-void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
+void evntcre8::fault_shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
     float thetashift, float distdie, float thetadie, float scalethrw,
     float *olblot, float *nlblot, float *oshiftx, float *oshiftz) {
 
@@ -332,16 +332,6 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
 
       // Compute the angle from vertical for the current point
       float thetaOld = atan2f(p1, p2) * 180. / pi + 360;
-      float thetaCompare;
-      if(p1 < 0 && p2 == 0.0) {
-        thetaCompare = 270.0;
-      } else if(p1 > 0 && p2 == 0.0 ){
-        thetaCompare = 450.0;
-      } else if(p1 == 0.0 && p2 == 0.0) {
-        thetaCompare = 1000000;
-      } else {
-        thetaCompare = atanf(p1 / p2) * 180. / pi + 360.;
-      }
 
       // Radius of current point
       float radius = sqrtf(p2 * p2 + p1 * p1);
@@ -355,14 +345,9 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
       // Check if we are in the region for faulting
       // Criteria for radius and angle
       float ratioAz    = rdiff / distdie;
-      float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
+      float ratioTheta = fabsf(thetaOld - theta0) / thetadie;
 
-      // Compute distance from xbeg, ybeg and zbeg
-      float diffx = xbeg - (p2*sign + xcenter);
-      float diffz = zbeg - (p1      + zcenter);
-      float distbeg = sqrtf(diffx*diffx + diffz*diffz);
-
-      if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
+      if (ratioAz < 1. && ratioTheta < 1.) {
         // Once we are in range compute the shift in angle
         float scaleAz    = 1. - ratioAz;
         float scaleTheta = 1. - ratioTheta;
@@ -551,9 +536,9 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
 
 }
 
-void evntcre8::squish_shifts(int nz, int *lyrin, float *velin, float *shftin, int mode,
-    float azim, float maxshift, float lambda, float rinline, float rxline,
-    int *lyrot, float *velot) {
+void evntcre8::squish_shifts(int nz, float *shftin, int mode,
+    float azim, float lambda, float rinline, float rxline,
+    float *shfty, float *shftx, float *shftz) {
   /* Compute model lengths */
   float dst2 = _d2 * _n2;
   float dst3 = _d3 * _n3;
@@ -562,9 +547,6 @@ void evntcre8::squish_shifts(int nz, int *lyrin, float *velin, float *shftin, in
   int nn = std::max(_n2, _n3) * 3;
   float *shift = new float[nn*nn]();
   float *dist  = new float[nn*nn]();
-
-  // Maximum shift in samples (nzot should be nzin + 2*iMaxShift)
-  int iMaxShift = maxshift / _d1;
 
   float wavelength = std::max(dst2, dst3)*lambda;
 
@@ -602,12 +584,12 @@ void evntcre8::squish_shifts(int nz, int *lyrin, float *velin, float *shftin, in
       }
     }
 
-    /* Scale by max shift */
-    for (int i3 = 0; i3 < nn; i3++) {
-      for (int i2 = 0; i2 < nn; i2++) {
-        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
-      }
-    }
+//    /* Scale by max shift */
+//    for (int i3 = 0; i3 < nn; i3++) {
+//      for (int i2 = 0; i2 < nn; i2++) {
+//        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
+//      }
+//    }
 
   } else{
     /* Copy input shift function */
@@ -646,33 +628,15 @@ void evntcre8::squish_shifts(int nz, int *lyrin, float *velin, float *shftin, in
   /* Apply shifts */
   for (int i3 = 0; i3 < _n3; i3++) {
     for (int i2 = 0; i2 < _n2; i2++) {
-      int ib = std::min(std::max(i3 + (int)(sn * shiftrot[i3*_n2 + i2] / _d3), 0), _n3 - 1);
-      int ia = std::min(std::max(i2 + (int)(cs * shiftrot[i3*_n2 + i2] / _d3), 0), _n2 - 1);
 
-      int i1 = shiftrot[i3*_n2 + i2] / _d1; // Rotated shift to be applied
-      int ibeg = i1;            // Loop up to maximum shift
-      fprintf(stderr,"ibeg=%d\n",ibeg);
-      for (int i = 0; i < ibeg; i++) {
-        lyrot[i3*nz*_n2 + i2*nz + i] = -1;
-        velot[i3*nz*_n2 + i2*nz + i] = -1;
-      }
+      float beg = shiftrot[i3*_n2 + i2]; // Rotated shift to be applied
 
-      for (i1 = 0; i1 < nz; i1++) {
-        float f2 = (float)(i1 - 1) / (float)nz;
-        float f3 = top[i3*_n2 + i2]*(1.-f2) + f2 * bot[i3*_n2 + i2];
+      //TODO: will need to bring back distrot for cosine shifts
 
-        f3 *= distrot[i3*_n2 + i2];
-
-        int ix = i1 - (int)(f3 / _d1);
-
-        ix = std::min(ix, nz - 1);
-        int shift = std::max(0,ix-ibeg);
-        lyrot[i3*nz*_n2 + i2*nz + i1] = lyrin[i3*nz*_n2 + i2*nz + shift];
-        velot[i3*nz*_n2 + i2*nz + i1] = velin[i3*nz*_n2 + i2*nz + shift];
-      }
-      for (int i1 = nz + ibeg; i1 < nz; i1++) {
-        lyrot[i3*nz*_n2 + i2*nz + i1] = lyrin[ib*nz*_n2 + ia*nz + nz-1];
-        velot[i3*nz*_n2 + i2*nz + i1] = velin[ib*nz*_n2 + ia*nz + nz-1];
+      for (int i1 = 0; i1 < nz; i1++) {
+        shftz[i3*nz*_n2 + i2*nz + i1] = (i1*_d1 - beg)/_d1;
+        shftx[i3*nz*_n2 + i2*nz + i1] = i2;
+        shfty[i3*nz*_n2 + i2*nz + i1] = i3;
       }
     }
   }
@@ -681,8 +645,40 @@ void evntcre8::squish_shifts(int nz, int *lyrin, float *velin, float *shftin, in
   delete[] shift;    delete[] dist;
   delete[] shiftrot; delete[] distrot;
   delete[] top;      delete[] bot;
+}
 
+void evntcre8::fill_top_bottom(int nz, float maxshift,
+    float basevel, int *lyrot, float *velot) {
 
+  float velup = -1.0;
+
+  for(int i3 = 0; i3 < _n3; ++i3) {
+    for(int i2 = 0; i2 < _n2; ++i2) {
+      for(int i1 = 0; i1 < nz-1; ++i1) {
+        /* First find the top interface */
+        int diff1 = lyrot[i3*nz*_n2 + i2*nz + i1+1] - lyrot[i3*nz*_n2 + i2*nz + i1];
+        if(diff1 == 2) {
+          /* Grab a sample 10 samples down and continue that up */
+          if(velup == -1.0) {
+            velup = velot[i3*nz*_n2 + i2*nz + i1+10]; //XXX: Assumes that the layer is > 10 samples thick
+          }
+          for(int it = 0; it < 8; ++it) {
+            velot[i3*nz*_n2 + i2*nz + i1+5-it] = velup;
+            lyrot[i3*nz*_n2 + i2*nz + i1+5-it] = 1;
+          }
+        }
+
+        /* Handle the bottom-most interface */
+        int diff2 = lyrot[i3*nz*_n2 + i2*nz + i1+1] - lyrot[i3*nz*_n2 + i2*nz + i1];
+        if(diff2 == -1) {
+          for(int ib = i1; ib < nz; ++ib) {
+            velot[i3*nz*_n2 + i2*nz + ib] = basevel;
+            lyrot[i3*nz*_n2 + i2*nz + ib] = 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
