@@ -43,7 +43,7 @@ dx = 25
 xdist = dx*nx
 zdist = dz*nz
 
-begz = 0.3; begx = 0.5
+begz = 0.9; begx = 0.8
 
 dfz = 5000.0; daz = 5000.0
 zbeg = begz*zdist; xbeg = begx*xdist
@@ -99,14 +99,15 @@ for ix in range(nx):
     # Check if we are in the region for faulting
     # Criteria for radius and angle
     ratioAz    = np.abs(fullradius - radius)/distdie
-    ratioTheta = np.abs(thetaCompare - theta0)/thetadie
+    ratioTheta = np.abs(thetaOld - theta0)/thetadie
  
     # Make sure not too far away from xbeg
     diffx = xbeg - (px*azicor + xcenter)
     diffz = zbeg - (pz        + zcenter)
     distbeg = np.sqrt(diffx*diffx + diffz*diffz)
 
-    if(ratioAz < 1 and ratioTheta < 1 and distbeg < 8000):
+    if(ratioAz < 1 and ratioTheta < 1):
+      print(thetaCompare,theta0)
     #if(ratioAz < 1 and ratioTheta < 1):
       # Once we are in range, compute the displacement
       scaleAz    = 1 - ratioAz
