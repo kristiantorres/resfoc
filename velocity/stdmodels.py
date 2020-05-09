@@ -301,41 +301,20 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   # Thresh should be a function of theta_shift
 
   # Generate the fault positions
-  #nfl = 6
-  #lfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.01,minhor=0.08,mingrb=0.05,nfaults=nfl)
-  #for ifl in progressbar(range(nfl), "nlfaults:"):
-  #  iflpar = lfpars[ifl]
-  #  zvar = rndut.randfloat(-0.01,0.01)
-  #  z = ofz + zvar
-  #  mb.fault2d(begx=iflpar[0],begz=z,daz=8000,dz=5000,azim=iflpar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.1)
+  flttype = np.random.choice([0,1,2,3,4,5])
 
-  #nfs = 6
-  #sfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.02,minhor=0.2,mingrb=0.2,nfaults=nfs)
-  #for ifl in progressbar(range(nfs), "nlfaults:"):
-  #  ifspar = sfpars[ifl]
-  #  zvar = rndut.randfloat(-0.01,0.01)
-  #  z = ofz + zvar
-  #  mb.fault2d(begx=ifspar[0],begz=ofz,daz=7500,dz=15000,azim=ifspar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.1)
- 
-  #z0m = 0.25; nfm = 10
-  #mfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.02,minhor=0.02,mingrb=0.02,nfaults=nfm)
-  #z0m = 0.25; nfm = 20
-  #mfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.005,minhor=0.005,mingrb=0.005,nfaults=nfm)
-  #for ifl in progressbar(range(nfm), "nmfaults:"):
-  #  ifmpar = mfpars[ifl]
-  #  zvar = rndut.randfloat(-0.01,0.01)
-  #  z = z0m + zvar
-  #  mb.fault2d(begx=ifmpar[0],begz=z,daz=4000,dz=2500,azim=ifmpar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.2)
-
-  #z0t = 0.25; nft = 20
-  #tfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.005,minhor=0.005,mingrb=0.005,nfaults=nft)
-  #z0t = 0.25; nft = 10
-  #tfpars = mb.getfaultpos2d(0.3,0.7,minblk=0.02,minhor=0.02,mingrb=0.02,nfaults=nft)
-  #for ifl in progressbar(range(nft), "ntfaults:"):
-  #  iftpar = tfpars[ifl]
-  #  zvar = rndut.randfloat(-0.01,0.01)
-  #  z = z0t + zvar
-  #  mb.fault2d(begx=iftpar[0],begz=z,daz=2000,dz=1250,azim=iftpar[1],theta_die=11,theta_shift=4.0,dist_die=2.0,throwsc=10.0,thresh=0.15)
+  if(flttype == 0):
+    largefaultblock(mb,0.3,0.7,ofz,nfl=6)
+  elif(flttype == 1):
+    slidingfaultblock(mb,0.3,0.7,ofz,nfl=6)
+  elif(flttype == 2):
+    mediumfaultblock(mb,0.3,0.7,0.25,space=0.02,nfl=10)
+  elif(flttype == 3):
+    mediumfaultblock(mb,0.3,0.7,0.25,space=0.005,nfl=20)
+  elif(flttype == 4):
+    tinyfaultblock(mb,0.3,0.7,0.25,space=0.02,nfl=10)
+  else:
+    tinyfaultblock(mb,0.3,0.7,0.25,space=0.005,nfl=20)
 
   # Get the model
   vel = gaussian_filter(mb.vel[:,:nzi].T,sigma=rect).astype('float32')
@@ -360,4 +339,36 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   imgwind = img[f1:f1+nz,:]
 
   return velwind,refwind,imgwind,lblwind
+
+def largefaultblock(mb,minpos,maxpos,ofz,nfl=6):
+  lfpars = mb.getfaultpos2d(minpos,maxpos,minblk=0.01,minhor=0.08,mingrb=0.05,nfaults=nfl)
+  for ifl in progressbar(range(nfl), "nlfaults:"):
+    iflpar = lfpars[ifl]
+    zvar = rndut.randfloat(-0.01,0.01)
+    z = ofz + zvar
+    mb.fault2d(begx=iflpar[0],begz=z,daz=8000,dz=5000,azim=iflpar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.1)
+
+def slidingfaultblock(mb,minpos,maxpos,ofz,nfl=6):
+  sfpars = mb.getfaultpos2d(minpos,maxpos,minblk=0.02,minhor=0.2,mingrb=0.2,nfaults=nfl)
+  for ifl in progressbar(range(nfl), "nsfaults:"):
+    ifspar = sfpars[ifl]
+    zvar = rndut.randfloat(-0.01,0.01)
+    z = ofz + zvar
+    mb.fault2d(begx=ifspar[0],begz=ofz,daz=7500,dz=15000,azim=ifspar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.1)
+
+def mediumfaultblock(mb,minpos,maxpos,ofz,space,nfl=10):
+  mfpars = mb.getfaultpos2d(minpos,maxpos,minblk=space,minhor=space,mingrb=space,nfaults=nfl)
+  for ifl in progressbar(range(nfl), "nmfaults:"):
+    ifmpar = mfpars[ifl]
+    zvar = rndut.randfloat(-0.01,0.01)
+    z = ofz + zvar
+    mb.fault2d(begx=ifmpar[0],begz=z,daz=4000,dz=2500,azim=ifmpar[1],theta_die=11,theta_shift=3.0,dist_die=2.0,throwsc=10.0,thresh=0.2)
+
+def tinyfaultblock(mb,minpos,maxpos,ofz,space,nfl=10):
+  tfpars = mb.getfaultpos2d(minpos,maxpos,space,space,space,nfaults=nfl)
+  for ifl in progressbar(range(nfl), "ntfaults:"):
+    iftpar = tfpars[ifl]
+    zvar = rndut.randfloat(-0.01,0.01)
+    z = ofz + zvar
+    mb.fault2d(begx=iftpar[0],begz=z,daz=2000,dz=1250,azim=iftpar[1],theta_die=11,theta_shift=4.0,dist_die=2.0,throwsc=10.0,thresh=0.15)
 
