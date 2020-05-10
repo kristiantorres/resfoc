@@ -1,12 +1,12 @@
 [defaults]
 # IO
-imgs=../focdat/storm/rfistorm2wind.H
+imgs=../focdat/imgundwind2.H
 #imgs=../focdat/fant/zofant3.H
 #imgs=../focdat/fant/zodeffant3.H
 #imgs=../focdat/fant/rfiifant3.H
 wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
 arch=./dat/networks/xwarch-gpu10.json
-figpfx=./fig/storm2/rfi
+figpfx=./fig/und/subsamp
 # Patching
 nxo=512
 nzo=512
