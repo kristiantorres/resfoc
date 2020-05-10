@@ -250,9 +250,9 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   def key_event(e):
     nonlocal curr_pos,vmin,vmax
 
-    if e.key == "right":
+    if e.key == "n":
         curr_pos = curr_pos + 1
-    elif e.key == "left":
+    elif e.key == "m":
         curr_pos = curr_pos - 1
     else:
         return
@@ -347,9 +347,9 @@ def viewpltframeskey(data,ox=0.0,dx=1.0,transp=True,show=True,**kwargs):
   def key_event(e):
     nonlocal curr_pos,xs
 
-    if e.key == "right":
+    if e.key == "n":
         curr_pos = curr_pos + 1
-    elif e.key == "left":
+    elif e.key == "m":
         curr_pos = curr_pos - 1
     else:
         return
