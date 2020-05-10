@@ -883,6 +883,61 @@ class mdlbuild:
     self.ec8.calcref2d(nz,velsm,ref)
     return ref
 
+  def getfaultpos2d(self,begx,endx,minblk,minhor,mingrb,nfaults):
+    """
+    Generates fault positions and azimuths for a large 2D fault block.
+    Ensures that the fault system is geologically realistic
+
+    Parameters:
+      begx    - the leftmost x position of a fault
+      endx    - the rightmost x position of a fault
+      minblk  - the minimum distance within a fault block (same azimuth)
+      minhor  - the minimum distance within a horst block (0 left and 180 right)
+      mingrb  - the minimum distance within a graben block (180 left and 0 right)
+      nfaults - the total number of faults
+
+    Returns a list of x positions and azimuths
+    """
+    pts = []; k = 0
+    while(len(pts) < nfaults):
+      # Create an x position and azimuth 
+      pt = []
+      pt.append(randfloat(begx,endx))
+      pt.append(np.random.choice([0,180]))
+      if(k == 0):
+        pts.append(pt)
+      else:
+        keeppoint = True
+        for opt in pts:
+          # Check their azimuths
+          if(opt[1] == pt[1]):
+            if(np.abs(opt[0]-pt[0]) < minblk):
+              keeppoint = False
+              break
+          else:
+            # Check orientations
+            if(opt[1] == 180 and opt[0] < pt[0]):
+              if(np.abs(opt[0]-pt[0]) < mingrb):
+                keeppoint = False
+                break
+            if(opt[1] == 180 and opt[0] > pt[0]):
+              if(np.abs(opt[0]-pt[0]) < minhor):
+                keeppoint = False
+                break
+            if(opt[1] == 0 and opt[0] < pt[0]):
+              if(np.abs(opt[0]-pt[0]) < minhor):
+                keeppoint = False
+                break
+            if(opt[1] == 0 and opt[0] > pt[0]):
+              if(np.abs(opt[0]-pt[0]) < mingrb):
+                keeppoint = False
+                break
+        if(keeppoint == True):
+          pts.append(pt)
+      k += 1
+
+    return pts
+
   def find_faultpos(self,nfaults,mindist,begx=0.05,endx=0.95,begz=0.05,endz=0.95):
     """ 
     Finds random fault positions between the begx, endx, begz and endz positions 
