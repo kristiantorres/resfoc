@@ -25,6 +25,7 @@ class mdlbuild:
     self.vel = np.zeros([self.__ny,self.__nx,nbase],dtype='float32')
     self.lyr = np.zeros([self.__ny,self.__nx,nbase],dtype='int32')
     self.lbl = np.zeros([self.__ny,self.__nx,nbase],dtype='float32')
+    self.__basevel = basevel
     self.vel[:] = basevel; self.lyr[:] = 0
     self.enum = 1 # Geological event number
     # Event creating object
@@ -77,6 +78,7 @@ class mdlbuild:
     # Update the layer and velocity models
     self.vel = velot
     self.lyr = lyrot
+
 
   def vofz(self,nlayer=20,minvel=1600,maxvel=5000,npts=2,octaves=3,persist=0.3):
     """ Generate a random v(z) that defines propagation velocities """
@@ -188,18 +190,14 @@ class mdlbuild:
     # Output velocity model
     velot = np.zeros(self.vel.shape,dtype='float32')
     # Output shifts
-    shiftx = np.zeros(self.vel.shape,dtype='float32')
-    shiftz = np.zeros(self.vel.shape,dtype='float32')
     coords = np.zeros([2,*self.vel.shape],dtype='float32')
     # Output labels
     lblto = np.zeros(self.vel.shape,dtype='float32')
     lbltn = np.zeros(self.vel.shape,dtype='float32')
-    self.ec8.shifts2d(nz,self.lbl,
-                      azim,begx,begz,dz,daz,
-                      theta_shift,dist_die,theta_die,throwsc,
-                      lblto,lbltn,shiftx,shiftz)
-    # Build coordinate array
-    coords[0] = shiftx; coords[1] = shiftz
+    self.ec8.fault_shifts2d(nz,self.lbl,
+                            azim,begx,begz,dz,daz,
+                            theta_shift,dist_die,theta_die,throwsc,
+                            lblto,lbltn,coords[0],coords[1])
     # Fault velocity model with an accurate interpolation
     velot = map_coordinates(self.vel,coords)
     # Fault label and lyr with nearest neighbor
@@ -686,9 +684,36 @@ class mdlbuild:
     self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
         theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
+  def squish(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin',order=3):
     """
     Folds the current geologic model along a specific azimuth.
+
+    Computes a shift field using either cosines or perlin noise (modes) and then
+    interpolates the model based on those shifts. This function is general enough
+    in that it can perform from nearest-neighbor to high-order spline interpolation
+
+    Parameters:
+      amp     - The maximum amplitude of the folded event [100]
+      azim    - The azimuth along which the event should be folded [90]
+      lam     - The wavelength (lambda) of the fold
+      rinline - Amount of random variation in the inline (fast spatial axis) direction
+      rxline  - Amount of random variation in the crossline (sloww spatial axis) direction
+      mode    - Either a Perlin noise or cosine mode ['perlin']
+      order   - Order of interpolation to perform [3]
+    """
+    if(order == 0):
+      # Do the old way using just nearest neighbor
+      self.squish_nn(amp,azim,lam,rinline,rxline,npts,octaves,persist,mode)
+    elif(order > 0):
+      # New way using a generalized interpolator
+      self.squish_gen(amp,azim,lam,rinline,rxline,npts,octaves,persist,mode)
+    else:
+      raise Exception("Interpolation order not recognized. Please provide an order >= 0")
+
+  def squish_nn(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin'):
+    """
+    Folds the current geologic model along a specific azimuth using a nearest-neighbor
+    interpolation.
 
     Parameters:
       amp     - The maximum amplitude of the folded event [100]
@@ -731,6 +756,55 @@ class mdlbuild:
     # Update the model
     self.lyr = lyrot
     self.vel = velot
+
+  def squish_gen(self,amp=100,azim=90.0,lam=0.1,rinline=0,rxline=0,npts=3,octaves=3,persist=0.6,mode='perlin',order=3):
+    """
+    Folds the current geologic model along a specific azimuth.
+
+    Computes a shift field using either cosines or perlin noise (modes) and then
+    interpolates the model based on those shifts. This function is general enough
+    in that it can perform from nearest-neighbor to high-order spline interpolation
+
+    Parameters:
+      amp     - The maximum amplitude of the folded event [100]
+      azim    - The azimuth along which the event should be folded [90]
+      lam     - The wavelength (lambda) of the fold
+      rinline - Amount of random variation in the inline (fast spatial axis) direction
+      rxline  - Amount of random variation in the crossline (sloww spatial axis) direction
+      order   - Order of interpolation to perform [3]
+    """
+    nzin = self.vel.shape[2]
+    # Allocate shift array
+    nn = 3*max(self.__nx,self.__ny)
+    shf = np.zeros([nn,nn],dtype='float32')
+    if(mode == 'cos'):
+      raise Exception("Generalized squish cosine mode has not yet been implemented")
+    elif(mode == 'perlin'):
+      # Compute the perlin shift function
+      shf1d = noise_generator.perlin(x=np.linspace(0,npts,nn), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=1)
+      shf1d -= np.mean(shf1d); shf1d *= 10*amp
+      shf = np.ascontiguousarray(np.tile(shf1d,(nn,1)).T).astype('float32')
+      # Find the maximum shift to be applied (add 5 for the size of the interpolation kernel)
+      pamp = np.max(np.abs(shf1d))
+      maxshift = int(pamp/self.__dz) + 5
+      # Expand the model
+      nzot = nzin + 2*maxshift
+      velot = np.zeros([self.__ny,self.__nx,nzot],dtype='float32')
+      lyrot = np.zeros([self.__ny,self.__nx,nzot],dtype='int32')
+      self.ec8.expand(maxshift,maxshift,nzin,self.lyr,self.vel,nzot,lyrot,velot)
+      # Compute the shifts to be applied
+      coords = np.zeros([3,*velot.shape],dtype='float32')
+      self.ec8.squish_shifts(nzot,shf,1,azim,lam,rinline,rxline,coords[0],coords[1],coords[2])
+      # Interpolate the model
+      veloti = map_coordinates(velot,coords,order=order,mode='constant',cval=-1)
+      lyroti = map_coordinates(lyrot,coords,order=0    ,mode='constant',cval=-1)
+      # Take care of the top and bottom (padded region)
+      idx = veloti <= 0
+      veloti[idx] = -1
+      self.ec8.fill_top_bottom(nzot,pamp,self.__basevel,lyroti,veloti)
+    # Update the model
+    self.lyr = lyroti
+    self.vel = veloti
 
   def findsqlyrs(self,nlyrs,ntot,mindist):
     """

@@ -21,12 +21,16 @@ class evntcre8 {
     void fault(int nz, int *lyrin, float *velin, float *lblin, float azim, float begx, float begy, float begz, float dz, float daz,
         float thetashift, float perpdie, float distdie, float thetadie, float dir, float scalethrw,
         int *lyrot, float *velot, float *olblot, float *nlblot);
-    void shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
+    void fault_shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
         float thetashift, float distdie, float thetadie, float scalethrw,
         float *olblot, float *nlblot, float *shiftx, float *shiftz);
     void squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
         float azim, float maxshift, float lambda, float rinline, float rxline,
         int nzot, int *lyrot, float *velot);
+    void squish_shifts(int nz, float *shftin, int mode,
+        float azim, float lambda, float rinline, float rxline,
+        float *shfty, float *shftx, float *shftz);
+    void fill_top_bottom(int nz, float maxshift, float basevel, int *lyrot, float *velot);
     /* Deposit helper functions */
     int find_max_deposit(int n1, int n2, int n3, int *lyrin);
     void fill_random(int n1, int n2, float *velot);
