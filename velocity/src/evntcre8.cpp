@@ -276,7 +276,7 @@ void evntcre8::fault(int nz, int *lyrin, float *velin, float *lblin, float azim,
 
 }
 
-void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
+void evntcre8::fault_shifts2d(int nz, float *lblin, float azim, float begx, float begz, float dz, float daz,
     float thetashift, float distdie, float thetadie, float scalethrw,
     float *olblot, float *nlblot, float *oshiftx, float *oshiftz) {
 
@@ -332,16 +332,6 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
 
       // Compute the angle from vertical for the current point
       float thetaOld = atan2f(p1, p2) * 180. / pi + 360;
-      float thetaCompare;
-      if(p1 < 0 && p2 == 0.0) {
-        thetaCompare = 270.0;
-      } else if(p1 > 0 && p2 == 0.0 ){
-        thetaCompare = 450.0;
-      } else if(p1 == 0.0 && p2 == 0.0) {
-        thetaCompare = 1000000;
-      } else {
-        thetaCompare = atanf(p1 / p2) * 180. / pi + 360.;
-      }
 
       // Radius of current point
       float radius = sqrtf(p2 * p2 + p1 * p1);
@@ -355,14 +345,9 @@ void evntcre8::shifts2d(int nz, float *lblin, float azim, float begx, float begz
       // Check if we are in the region for faulting
       // Criteria for radius and angle
       float ratioAz    = rdiff / distdie;
-      float ratioTheta = fabsf(thetaCompare - theta0) / thetadie;
+      float ratioTheta = fabsf(thetaOld - theta0) / thetadie;
 
-      // Compute distance from xbeg, ybeg and zbeg
-      float diffx = xbeg - (p2*sign + xcenter);
-      float diffz = zbeg - (p1      + zcenter);
-      float distbeg = sqrtf(diffx*diffx + diffz*diffz);
-
-      if (ratioAz < 1. && ratioTheta < 1. && distbeg < 8000) {
+      if (ratioAz < 1. && ratioTheta < 1.) {
         // Once we are in range compute the shift in angle
         float scaleAz    = 1. - ratioAz;
         float scaleTheta = 1. - ratioTheta;
@@ -478,7 +463,6 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
     memcpy(shift,shftin,sizeof(float)*nn*nn);
   }
 
-
   /* Rotate shift into azimuth */
   float *shiftrot = new float[_n2*_n3]();
   float *distrot  = new float[_n2*_n3]();
@@ -550,6 +534,151 @@ void evntcre8::squish(int nz, int *lyrin, float *velin, float *shftin, int mode,
   delete[] shiftrot; delete[] distrot;
   delete[] top;      delete[] bot;
 
+}
+
+void evntcre8::squish_shifts(int nz, float *shftin, int mode,
+    float azim, float lambda, float rinline, float rxline,
+    float *shfty, float *shftx, float *shftz) {
+  /* Compute model lengths */
+  float dst2 = _d2 * _n2;
+  float dst3 = _d3 * _n3;
+
+  /* Allocate shift and dist arrays */
+  int nn = std::max(_n2, _n3) * 3;
+  float *shift = new float[nn*nn]();
+  float *dist  = new float[nn*nn]();
+
+  float wavelength = std::max(dst2, dst3)*lambda;
+
+  /* Use cosine to compute the shift action */
+  if(mode == 0) {
+    /* Compute shift and dist arrays */
+    float w[] = {1.2, 5., 1.9, 2.4, 3.8, 1.4, 4.2, 3.1, 3.4, 2.0};
+    std::vector<float> wv(w, w + sizeof(w) / sizeof(float));
+    for (auto a = wv.begin(); a != wv.end(); ++a) *a *= wavelength;
+    float pi = atan(1.) * 4;
+    for (int i2 = 0; i2 < nn; i2++) {
+      for (int i1 = 0; i1 < nn; i1++) {
+        shift[i2*nn + i1] = cosf(_d2 / wavelength * pi * i2);
+      }
+    }
+
+    /* Add some randomness to shift */
+    std::vector<float> rands(20);
+    for (int i = 0; i < 20; i++) {
+      rands[i] = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - .5) * 2.;
+    }
+
+    float mxv = 0;
+    for (int iw = 0; iw < 10; iw++) {
+      float d2 = 0;
+      for (int i3 = 0; i3 < nn; i3++) {
+        float dd = cosf(d2 / wv[iw] * pi) * rands[10 + iw] * rxline;
+        float d = 0;
+        for (int i2 = 0; i2 < nn; i2++) {
+          shift[i3*nn + i2] += dd * cosf(d / wv[iw] * pi) * rands[iw] * rinline;
+
+          if (iw == 9) mxv = std::max(mxv, fabsf(shift[i3*nn + i2]));
+          d += _d2;
+        }
+      }
+    }
+
+//    /* Scale by max shift */
+//    for (int i3 = 0; i3 < nn; i3++) {
+//      for (int i2 = 0; i2 < nn; i2++) {
+//        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
+//      }
+//    }
+
+  } else{
+    /* Copy input shift function */
+    memcpy(shift,shftin,sizeof(float)*nn*nn);
+  }
+
+  /* Rotate shift into azimuth */
+  float *shiftrot = new float[_n2*_n3]();
+  float *distrot  = new float[_n2*_n3]();
+
+  float cs = cosf(azim * atan(1.) / 45.);
+  float sn = sinf(azim * atan(1.) / 45.);
+
+  rotate_array(cs, sn, nn, shift, _n2, _d2, _n3, _d3, shiftrot);
+  if(mode == 0) {
+    calcshift_fastaxis(nn, _d2, shift, dist);
+    rotate_array(cs, sn, nn, dist , _n2, _d2, _n3, _d3, distrot );
+  }
+
+  /* Create top and bottom arrays */
+  float *top = new float[_n2*_n3]();
+  float *bot = new float[_n2*_n3]();
+
+  /* Apply random shifts for cosine mode */
+  if(mode == 0) {
+    fill_random(_n2, _n3, top);
+    fill_random(_n2, _n3, bot);
+    for(int k = 0; k < 3; ++k) {
+      smooth(_n2, _n3, top, 25, 25);
+      smooth(_n2, _n3, bot, 25, 25);
+    }
+    scale(_n2, _n3, top, 0.45); scale(_n2, _n3, bot, 0.45);
+    add  (_n2, _n3, top, 0.55); add  (_n2, _n3, bot, 0.55);
+  }
+
+  /* Apply shifts */
+  for (int i3 = 0; i3 < _n3; i3++) {
+    for (int i2 = 0; i2 < _n2; i2++) {
+
+      float beg = shiftrot[i3*_n2 + i2]; // Rotated shift to be applied
+
+      //TODO: will need to bring back distrot for cosine shifts
+
+      for (int i1 = 0; i1 < nz; i1++) {
+        shftz[i3*nz*_n2 + i2*nz + i1] = (i1*_d1 - beg)/_d1;
+        shftx[i3*nz*_n2 + i2*nz + i1] = i2;
+        shfty[i3*nz*_n2 + i2*nz + i1] = i3;
+      }
+    }
+  }
+
+  /* Free memory */
+  delete[] shift;    delete[] dist;
+  delete[] shiftrot; delete[] distrot;
+  delete[] top;      delete[] bot;
+}
+
+void evntcre8::fill_top_bottom(int nz, float maxshift,
+    float basevel, int *lyrot, float *velot) {
+
+  float velup = -1.0;
+
+  for(int i3 = 0; i3 < _n3; ++i3) {
+    for(int i2 = 0; i2 < _n2; ++i2) {
+      for(int i1 = 0; i1 < nz-1; ++i1) {
+        /* First find the top interface */
+        int diff1 = lyrot[i3*nz*_n2 + i2*nz + i1+1] - lyrot[i3*nz*_n2 + i2*nz + i1];
+        if(diff1 == 2) {
+          /* Grab a sample 10 samples down and continue that up */
+          if(velup == -1.0) {
+            velup = velot[i3*nz*_n2 + i2*nz + i1+10]; //XXX: Assumes that the layer is > 10 samples thick
+          }
+          for(int it = 0; it < 8; ++it) {
+            velot[i3*nz*_n2 + i2*nz + i1+5-it] = velup;
+            lyrot[i3*nz*_n2 + i2*nz + i1+5-it] = 1;
+          }
+        }
+
+        /* Handle the bottom-most interface */
+        int diff2 = lyrot[i3*nz*_n2 + i2*nz + i1+1] - lyrot[i3*nz*_n2 + i2*nz + i1];
+        if(diff2 == -1) {
+          for(int ib = i1; ib < nz; ++ib) {
+            velot[i3*nz*_n2 + i2*nz + ib] = basevel;
+            lyrot[i3*nz*_n2 + i2*nz + ib] = 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 int evntcre8::find_max_deposit(int n1, int n2, int n3, int *lyrin) {
@@ -792,12 +921,12 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
 void evntcre8::calcref2d(int nz, float *vel, float *ref) {
   for(int i2 = 0; i2 < _n2; ++i2) {
     for(int i1 = 0; i1 < nz; ++i1) {
-        /* Backwards derivatives at the end */
-        if(i1 == nz-1) {
-          ref[i2*nz + i1] = vel[i2*nz + i1  ] - vel[i2*nz + i1-1];
-        } else {
-          ref[i2*nz + i1] = vel[i2*nz + i1+1] - vel[i2*nz + i1  ];
-        }
+      /* Backwards derivatives at the end */
+      if(i1 == nz-1) {
+        ref[i2*nz + i1] = vel[i2*nz + i1  ] - vel[i2*nz + i1-1];
+      } else {
+        ref[i2*nz + i1] = vel[i2*nz + i1+1] - vel[i2*nz + i1  ];
+      }
     }
   }
 }
