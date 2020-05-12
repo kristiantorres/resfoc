@@ -41,8 +41,9 @@ def resample(img,new_shape,kind='linear',ds=[]):
   assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
-  length=img.shape[1]
-  height=img.shape[0]
+  length=img.shape[-1]
+  height=img.shape[-2]
+  print(length,height)
   x=np.linspace(0,length,length)
   y=np.linspace(0,height,height)
   # New coordinates for interpolation

@@ -81,7 +81,7 @@ vel,ref,cnv,lbl = layeredfaults2d(nz=nz,nx=nx,ofx=0.4,dfx=0.08)
 dx = 10; dz = 10
 
 # Create migration velocity
-velsm = smooth(vel,rect1=30,rect2=30)
+velmig= smooth(vel,rect1=30,rect2=30)
 
 # Create a random perturbation
 ano = create_randomptbs_loc(nz,nx,nptbs=3,romin=0.95,romax=1.05,
@@ -89,37 +89,37 @@ ano = create_randomptbs_loc(nz,nx,nptbs=3,romin=0.95,romax=1.05,
                             mindist=100,nptsz=2,nptsx=2,octaves=2,period=80,persist=0.2,ncpu=1,sigma=20)
 
 # Create velocity with anomaly
-velwr = velsm*ano
-velptb = velwr - velsm
-plot_imgvelptb(ref,velptb,dz,dx,velmin=-100,velmax=100,thresh=5,agc=False,show=True)
+veltru = velmig*ano
+velptb = veltru - velmig
+plot_imgvelptb(ref,-velptb,dz,dx,velmin=-100,velmax=100,thresh=5,agc=False,show=True)
 
 # Acquisition geometry
 dsx = 20; bx = 50; bz = 50
 prp = geom.defaultgeom(nx,dx,nz,dz,nsx=66,dsx=dsx,bx=bx,bz=bz)
 
-prp.plot_acq(velsm,cmap='jet',show=False)
+prp.plot_acq(veltru,cmap='jet',show=False)
 
 # Create data axes
 ntu = 6500; dtu = 0.001;
 freq = 20; amp = 100.0; dly = 0.2;
 wav = ricker(ntu,dtu,freq,amp,dly)
 
-# Model linearized data
+# Model true linearized data
 dtd = 0.004
-allshot = prp.model_lindata(velsm,ref,wav,dtd,verb=True,nthrds=24)
+allshot = prp.model_lindata(veltru,ref,wav,dtd,verb=True,nthrds=24)
 
 # Taper for migration
 prp.build_taper(70,150)
 
 # Wave equation depth migration
-img = prp.wem(velwr,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=19)
+img = prp.wem(velmig,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=19)
 nh,oh,dh = prp.get_off_axis()
 
 # Window and transpose the image and the label
 imgt = np.transpose(img,(0,2,1)) # [nh,nz,nx] -> [nh,nx,nz]
 
 # Depth Residual migration
-inro = 17; idro = 0.00125
+inro = 21; idro = 0.00125
 rmig = preresmig(imgt,[dh,dx,dz],nps=[2049,1300,513],nro=inro,dro=idro,time=False,nthreads=18,verb=True)
 onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 
@@ -157,7 +157,7 @@ sembt = np.transpose(semb,(2,0,1)) # [nro,nx,nz] -> [nz,nro,nx]
 sep.write_file(args.vel,vel,ds=[dz,dx])
 sep.write_file(args.ref,ref,ds=[dz,dx])
 sep.write_file(args.lbl,lblw,ds=[dz,dx])
-sep.write_file(args.ptb,velptb,ds=[dz,dx])
+sep.write_file(args.ptb,-velptb,ds=[dz,dx])
 sep.write_file(args.res,rmig.T,ds=[dz,dx,dh,odro],os=[0,0,oh,ooro])
 sep.write_file(args.ang,stormang.T,ds=[dz,da,dx,odro],os=[0,oa,0,ooro])
 sep.write_file(args.stk,stormangstk.T,ds=[dz,dx,odro],os=[0,0,ooro])
