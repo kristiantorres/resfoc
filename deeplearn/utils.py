@@ -124,8 +124,9 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
+  pclip = kwargs.get('pclip',1.0)
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
-      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
+      vmin=kwargs.get('vmin',np.min(img))*pclip,vmax=kwargs.get('vmax',np.max(img))*pclip,
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
         kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))

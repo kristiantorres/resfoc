@@ -3,7 +3,7 @@
 outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefoc
 dpath=/scratch/joseph29/focdefoc
 prefix=
-beg=21
+beg=1022
 # Window arguments
 fx=120
 nxw=1024
