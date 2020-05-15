@@ -250,9 +250,9 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   def key_event(e):
     nonlocal curr_pos,vmin,vmax
 
-    if e.key == "right":
+    if e.key == "n":
         curr_pos = curr_pos + 1
-    elif e.key == "left":
+    elif e.key == "m":
         curr_pos = curr_pos - 1
     else:
         return
@@ -347,9 +347,9 @@ def viewpltframeskey(data,ox=0.0,dx=1.0,transp=True,show=True,**kwargs):
   def key_event(e):
     nonlocal curr_pos,xs
 
-    if e.key == "right":
+    if e.key == "n":
         curr_pos = curr_pos + 1
-    elif e.key == "left":
+    elif e.key == "m":
         curr_pos = curr_pos - 1
     else:
         return
@@ -430,14 +430,14 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
     vmax = np.max(data)*kwargs.get('pclip',1.0)
 
   # Define nonlocal variables
-  loc1 = kwargs.get('loc1',int(ns[0]/2*ds[0]+os[0]))
+  loc1 = kwargs.get('loc1',ns[0]/2*ds[0]+os[0])
   i1 = int((loc1 - os[0])/ds[0])
-  loc2 = kwargs.get('loc2',int(ns[1]/2*ds[1]+os[1]))
+  loc2 = kwargs.get('loc2',ns[1]/2*ds[1]+os[1])
   i2 = int((loc2 - os[1])/ds[1])
-  loc3 = kwargs.get('loc3',int(ns[2]/2*ds[2]+os[2]))
+  loc3 = kwargs.get('loc3',ns[2]/2*ds[2]+os[2])
   i3 = int((loc3 - os[2])/ds[2])
   ax1 = None; ax2 = None; ax3 = None; ax4 = None
-  curr_pos = 0
+  curr_pos = 0; inaxes = None; updated = False
   # Govern the keyboard movement
   j1 = kwargs.get('j1',1); j2 = kwargs.get('j2',1); j3 = kwargs.get('j3',1)
 
@@ -447,6 +447,11 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   def key_event(e):
     nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
 
+    if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+      zoomed_out = True
+    else:
+      zoomed_out = False
+
     if e.key=="u" or e.key=="d":
       if e.key=="u":
         i3-=j3
@@ -455,7 +460,10 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       i3=i3%ns[2]
       loc3=i3*ds[2]+os[2]
 
-      ax[0,0].cla()
+      if(zoomed_out):
+        ax[0,0].cla()
+      else:
+        del ax[0,0].lines[:]
 
       ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
@@ -487,7 +495,10 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       i1=i1%ns[0]
       loc1=i1*ds[0]+os[0]
 
-      ax[1,1].cla()
+      if(zoomed_out):
+        ax[1,1].cla()
+      else:
+        del ax[1,1].lines[:]
 
       ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
@@ -517,15 +528,19 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax4.set_xticklabels(['%.2f'%(loc1)])
       ax4.tick_params(labelsize=kwargs.get('ticksize',14))
 
-    elif e.key=="h" or e.key=="n":
-      if e.key=="h":
+    elif e.key=="m" or e.key=="n":
+      if e.key=="m":
         i2-=j2
       elif e.key=="n":
         i2+=j2
       i2=i2%ns[1]
       loc2=i2*ds[1]+os[1]
 
-      ax[1,0].cla()
+
+      if(zoomed_out):
+        ax[1,0].cla()
+      else:
+        del ax[1,0].lines[:]
 
       ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
@@ -564,14 +579,21 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       if e.key.isdigit():
         curr_pos=int(e.key)
       curr_pos=curr_pos%ns[3]
+      
+      if(zoomed_out): 
+        ax[0,1].cla()
+      else:
+        del ax[0,1].lines[:]
 
-      ax[0,1].cla()
       ax[0,1].get_xaxis().set_visible(False)
       ax[0,1].get_yaxis().set_visible(False)
       ax[0,1].axis('off')
       ax[0,1].text(0.5,0.5,title[curr_pos],horizontalalignment='center',verticalalignment='center',fontsize=50)
 
-      ax[1,0].cla()
+      if(zoomed_out):
+        ax[1,0].cla()
+      else:
+        del ax[1,0].lines[:]
       ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
@@ -580,7 +602,10 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax[1,0].set_ylabel(label3,fontsize=kwargs.get('labelsize',14))
 
       # yz plane
-      ax[1,1].cla()
+      if(zoomed_out):
+        ax[1,1].cla()
+      else:
+        del ax[1,1].lines[:]
       ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
@@ -594,7 +619,10 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax2.tick_params(labelsize=kwargs.get('ticksize',14))
 
       # xy plane
-      ax[0,0].cla()
+      if(zoomed_out):
+        ax[0,0].cla()
+      else:
+        del ax[0,0].lines[:]
       ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].plot(loc1*np.ones((ns[1],)),x2,c='k')
@@ -607,10 +635,12 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax4.set_xticklabels(['%.2f'%(loc1)])
       ax4.tick_params(labelsize=kwargs.get('ticksize',14))
 
+    ax[0,0].set_xlim(ax[1,0].get_xlim())
+    ax[1,1].set_ylim(ax[1,0].get_ylim())
     fig.canvas.draw()
 
   def onclick(e):
-    nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
+    nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos,inaxes,updated
     tb = plt.get_current_fig_manager().toolbar
     if(tb.mode == ""):
       if e.inaxes==ax1 or e.inaxes==ax2:
@@ -635,7 +665,15 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         i3=int((loc3-os[2])/ds[2])
         loc3=i3*ds[2]+os[2]
 
-      ax[1,0].cla()
+      if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+        zoomed_out = True
+      else:
+        zoomed_out = False
+
+      if(zoomed_out):
+        ax[1,0].cla()
+      else:
+        del ax[1,0].lines[:]
       ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
@@ -643,8 +681,11 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax[1,0].set_xlabel(label1,fontsize=kwargs.get('labelsize',14))
       ax[1,0].set_ylabel(label3,fontsize=kwargs.get('labelsize',14))
 
-      # yz plane
-      ax[1,1].cla()
+      ## yz plane
+      if(zoomed_out):
+        ax[1,1].cla()
+      else:
+        del ax[1,1].lines[:]
       ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
@@ -657,8 +698,11 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax2.set_xticklabels(['%.2f'%(loc2)])
       ax2.tick_params(labelsize=kwargs.get('ticksize',14))
 
-      # xy plane
-      ax[0,0].cla()
+      ## xy plane
+      if(zoomed_out):
+        ax[0,0].cla()
+      else:
+        del ax[0,0].lines[:]
       ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].plot(loc1*np.ones((ns[1],)),x2,c='k')
@@ -670,6 +714,34 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       ax4.set_xticklabels(['%.2f'%(loc1)])
 
       fig.canvas.draw()
+    else:
+      # Handle the zoom
+      inaxes = e.inaxes
+      updated = False
+
+  def ondraw(e):
+    nonlocal ax3,ax4,inaxes,updated
+    if(plt.get_current_fig_manager().toolbar.mode == 'zoom rect' and updated == False):
+      if (inaxes==ax1 or inaxes==ax2):
+        ax[1,0].set_ylim(ax[1,1].get_ylim())
+        ax[0,0].set_ylim(ax[1,1].get_xlim())
+        updated = True
+      if(inaxes==ax3 or inaxes==ax4):
+        ax[1,0].set_xlim(ax[0,0].get_xlim())
+        ax[1,1].set_xlim(ax[0,0].get_ylim())
+        updated = True
+      if(inaxes == ax[1,0]):
+        ax[0,0].set_xlim(ax[1,0].get_xlim())
+        ax[1,1].set_ylim(ax[1,0].get_ylim())
+        updated = True
+      fig.canvas.draw()
+
+  #def on_xlim_change(*args):
+  #  #nonlocal updated
+  #  print("here")
+  #  print(plt.get_current_fig_manager().toolbar.mode)
+  #  if(plt.get_current_fig_manager().toolbar.mode == ' '):
+  #    updated = False
 
   width1 = kwargs.get('width1',4.0); width2 = kwargs.get('width2',4.0); width3 = kwargs.get('width3',4.0)
   widths=[width1,width3]
@@ -679,6 +751,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   plt.subplots_adjust(wspace=0,hspace=0)
   fig.canvas.mpl_connect('key_press_event', key_event)
   fig.canvas.mpl_connect('button_press_event', onclick)
+  fig.canvas.mpl_connect('draw_event', ondraw)
+  #ax[1,0].callbacks.connect('xlim_changed',on_xlim_change)
 
   title = kwargs.get('title',' ')
   ax[0,1].text(0.5,0.5,title[curr_pos],horizontalalignment='center',verticalalignment='center',fontsize=50)
