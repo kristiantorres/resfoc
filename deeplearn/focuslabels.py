@@ -10,6 +10,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize
 from resfoc.ssim import ssim
 from scipy.signal.signaltools import correlate2d
+import random
 import matplotlib.pyplot as plt
 
 def faultpatch_labels(img,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,norm=True,ptchimg=False,
@@ -196,6 +197,22 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
   defocused image
 
   Parameters
+    dimg      - input defocused image [nz,nx]
+    fimg      - input focused image [nz,nx]
+    fltlbl    - input fault label [nz,nx]
+    nxp       - size of patch in x direction [64]
+    nzp       - size of patch in z direction [64]
+    strdx     - size of stride in x direction [64]
+    strdz     - size of stride in z direction [64]
+    pixthresh - number of fault pixels required to keep a patch [20]
+    metric    - metric for computing image similarity ['corr']
+    focthresh - threshold for determing if image is focused [0.7]
+    norm      - normalize patches before returning [True]
+    qcptchgrd - plot patch grid for QC [False]
+    dz        - z sampling for plotting patch grid [10]
+    dx        - x sampling for plotting patch grid [10]
+
+  Returns the selected defocused patches [nselect,nzp,nxp]
   """
   # Check that dimg, fimg and fltlbl are the same size
   if(dimg.shape[0] != fltlbl.shape[0] or dimg.shape[1] != fltlbl.shape[1]):
@@ -279,6 +296,54 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
     return sptcho,dptcho,fptcho,ptchnrmimg
   else:
     return sptcho
+
+def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
+                         norm=True,qcptchgrd=False,dz=10,dx=10):
+  """
+  Extracts random patches from a faulted image
+  """
+  # Check that dimg, fimg and fltlbl are the same size
+  if(fimg.shape[0] != fltlbl.shape[0] or fimg.shape[1] != fltlbl.shape[1]):
+    raise Exception("Input image and fault label must have same dimensions")
+
+  # Patch extraction on the images
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  fptch = pe.extract(fimg)
+  lptch = pe.extract(fltlbl)
+  numpz = fptch.shape[0]; numpx = fptch.shape[1]
+
+  # Output normalized patches
+  nptch = []
+
+  if(qcptchgrd):
+    nz = img.shape[0]; nx = img.shape[1]
+    # Plot the patch grid
+    nz = img.shape[0]; nx = img.shape[1]
+    # Plot the patch grid
+    bgz = 0; egz = (nz)*dz/1000.0; dgz = nzp*dz/1000.0
+    bgx = 0; egx = (nx)*dx/1000.0; dgx = nxp*dx/1000.0
+    zticks = np.arange(bgz,egz,dgz)
+    xticks = np.arange(bgx,egx,dgx)
+    fig = plt.figure(figsize=(10,6)); ax = fig.gca()
+    ax.imshow(img,extent=[0,(nx)*dx/1000.0,(nz)*dz/1000.0,0],cmap='gray',interpolation='sinc')
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.grid(linestyle='-',color='k',linewidth=2)
+    plt.show()
+
+  # Loop over each patch
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      # Check if patch contains faults
+      if(np.sum(lptch[izp,ixp]) >= pixthresh):
+        if(norm):
+          nptch.append(normalize(fptch[izp,ixp]))
+        else:
+          nptch.append(fptch[izp,ixp])
+
+  # Return random patches
+  return np.asarray(nptch)
+
 
 def mse(img,tgt):
   return np.linalg.norm(img-tgt)#/np.linalg.norm(img)
