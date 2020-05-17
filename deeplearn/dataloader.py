@@ -106,27 +106,26 @@ def load_alldata(trfile,vafile,dsize):
 
   return allx,ally
 
-def load_all_unlabeled_data(filein,dsize):
-  """ Loads all data and labels into numpy arrays """
+def load_all_unlabeled_data(filein):
+  """ Loads all data into a numpy array """
   # Get training number of examples
-  hftr = h5py.File(trfile,'r')
+  hftr = h5py.File(filein,'r')
   trkeys = list(hftr.keys())
   ntr = int(len(trkeys))
   # Get shape of examples
   xshape = hftr[trkeys[0]].shape
   # Allocate output arrays
-  if(len(xshape) == 4):
-    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
-  elif(len(xshape) == 3):
-    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2]],dtype='float32')
+  allx = []
   k = 0
   # Get all training examples
   for itr in progressbar(range(ntr), "numtr:"):
+    dsize = hftr[trkeys[itr]].shape[0]
     for iex in range(dsize):
-      allx[k,:,:,:]  = hftr[trkeys[itr]][iex,:,:,:]
+      allx.append(hftr[trkeys[itr]][iex])
       k += 1
   # Close the file
   hftr.close()
+  return np.asarray(allx)
 
 def load_allflddata(fldfile,dsize):
   """ Loads all field (unlabeled) data into a numpy array """
