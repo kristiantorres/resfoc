@@ -2,7 +2,7 @@
 Functions for building deep neural networks using Keras
 
 @author: Joseph Jennings
-@version: 2020.02.17
+@version: 2020.05.12
 """
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -128,7 +128,7 @@ def unetxwu(pretrained_weights = None,input_size = (128,128,1)):
 
   return model
 
-def findres(input_size = (128,128,19)):
+def findres(input_size = (64,64,19)):
   inputs = Input(input_size)
   conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(inputs)
   conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(conv1)
@@ -146,14 +146,15 @@ def findres(input_size = (128,128,19)):
   conv4 = Conv2D(512, (3,3), activation='relu', padding='same')(conv4)
 
   flat   = Flatten()(conv4)
-  dense1 = Dense(2048, kernel_initializer='normal', activation='relu')(flat)
-  #dense1 = Dense(4096, kernel_initializer='normal', activation='softmax')(flat)
-  drop1  = Dropout(0.2)(dense1)
+  dense1 = Dense(64, kernel_initializer='normal', activation='relu')(flat)
+  drop1  = Dropout(0.1)(dense1)
+
+  #dense1a = Dense(512, kernel_initializer='normal', activation='relu')(drop1)
+  #drop1a = Dropout(0.1)(dense1a)
 
   #dense2 = Dense(input_size[2], kernel_initializer='normal', activation='softmax')(flat)
-  #dense2 = Dense(input_size[2], activation=tf.nn.softmax)(flat)
-  dense2 = Dense(input_size[2], activation='softmax')(drop1)
-  drop2  = Dropout(0.2)(dense2)
+  dense2 = Dense(input_size[2], kernel_initializer='normal', activation='softmax')(drop1)
+  drop2  = Dropout(0.1)(dense2)
 
   model = Model(inputs=[inputs], outputs=[drop2])
   print(model.summary())
@@ -161,3 +162,22 @@ def findres(input_size = (128,128,19)):
 
   return model
 
+def vgg3(pretrained_weights=None, input_size=(64,64,1)):
+  inputs = Input(input_size)
+  conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(inputs)
+  pool1 = MaxPooling2D(pool_size=(2,2))(conv1) # 64 -> 32
+
+  conv2 = Conv2D(64, (3,3), activation='relu', padding='same')(pool1)
+  pool2 = MaxPooling2D(pool_size=(2,2))(conv2) # 32 -> 16
+
+  conv3 = Conv2D(128, (3,3), activation='relu', padding='same')(pool2)
+  pool3 = MaxPooling2D(pool_size=(2,2))(conv3) # 16 -> 8
+
+  flat   = Flatten()(pool3)
+  dense1 = Dense(128,activation='relu')(flat)
+  acto   = Dense(1,activation='sigmoid')(dense1)
+
+  model = Model(inputs=[inputs], outputs=[acto])
+  model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+
+  return model
