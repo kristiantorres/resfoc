@@ -88,6 +88,11 @@ ano = create_randomptbs_loc(nz,nx,nptbs=3,romin=0.95,romax=1.05,
                             minnaz=100,maxnaz=150,minnax=100,maxnax=400,mincz=100,maxcz=150,mincx=300,maxcx=900,
                             mindist=100,nptsz=2,nptsx=2,octaves=2,period=80,persist=0.2,ncpu=1,sigma=20)
 
+plt.figure()
+plt.imshow(ano,cmap='seismic',vmin=0.95,vmax=1.05)
+plt.figure()
+plt.imshow(1/ano,cmap='seismic',vmin=0.95,vmax=1.05)
+
 # Create velocity with anomaly
 veltru = velmig*ano
 velptb = veltru - velmig

@@ -2,7 +2,7 @@
 Functions for building deep neural networks using Keras
 
 @author: Joseph Jennings
-@version: 2020.02.17
+@version: 2020.05.12
 """
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -162,3 +162,22 @@ def findres(input_size = (64,64,19)):
 
   return model
 
+def vgg3(pretrained_weights=None, input_size=(64,64,1)):
+  inputs = Input(input_size)
+  conv1 = Conv2D(32, (3,3), activation='relu', padding='same')(inputs)
+  pool1 = MaxPooling2D(pool_size=(2,2))(conv1) # 64 -> 32
+
+  conv2 = Conv2D(64, (3,3), activation='relu', padding='same')(pool1)
+  pool2 = MaxPooling2D(pool_size=(2,2))(conv2) # 32 -> 16
+
+  conv3 = Conv2D(128, (3,3), activation='relu', padding='same')(pool2)
+  pool3 = MaxPooling2D(pool_size=(2,2))(conv3) # 16 -> 8
+
+  flat   = Flatten()(pool3)
+  dense1 = Dense(128,activation='relu')(flat)
+  acto   = Dense(1,activation='sigmoid')(dense1)
+
+  model = Model(inputs=[inputs], outputs=[acto])
+  model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+
+  return model

@@ -1,0 +1,17 @@
+[defaults]
+# Training inputs and outputs
+trdat=/scr1/joseph29/faultmigseg.h5
+vadat=
+wgtout=./dat/networks/xwmig-10ep.h5
+arcout=./dat/networks/xwmig-10.json
+chkpnt=/scr1/joseph29/xwmig-10ep-chkpnt.h5
+lssout=./dat/nnhistory/xwmig-10ep_loss.H
+vlsout=./dat/nnhistory/xwmig-10ep_vlss.H
+accout=./dat/nnhistory/xwmig-10ep_accu.H
+vacout=./dat/nnhistory/xwmig-10ep_vacu.H
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=5

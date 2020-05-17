@@ -128,8 +128,13 @@ def load_allflddata(fldfile,dsize):
 
   return allx
 
-def load_allssimdata(trfile,vafile,dsize):
-  """ Loads all data and labels into numpy arrays """
+def load_allpatchdata(trfile,vafile,dsize):
+  """
+  Loads all data and labels into numpy arrays
+
+  Works both for the SSIM residual migration training
+  and the patchwise fault classification training
+  """
   # Get training number of examples
   hftr = h5py.File(trfile,'r')
   trkeys = list(hftr.keys())
