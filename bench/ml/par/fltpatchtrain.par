@@ -1,0 +1,17 @@
+[defaults]
+# Training inputs and outputs
+trdat=/scr1/joseph29/faultpatch.h5
+vadat=
+wgtout=./dat/networks/faultpatch-wgts.h5
+arcout=./dat/networks/faultpatch-arch.json
+chkpnt=/scr1/joseph29/faultpatch-chkpnt.h5
+lssout=./dat/nnhistory/faultpatch_loss.H
+vlsout=./dat/nnhistory/faultpatch_vlss.H
+accout=./dat/nnhistory/faultpatch_accu.H
+vacout=./dat/nnhistory/faultpatch_vacu.H
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=5

@@ -1,0 +1,14 @@
+[defaults]
+# IO
+focptch=/scr1/joseph29/faultfocptch.h5
+defptch=/scr1/joseph29/faultdefptch.h5
+lblptch=/scr1/joseph29/faultlblptch.h5
+wgts=/scr1/joseph29/xwmig-10ep-chkpnt.h5
+arch=./dat/networks/xwmig-10.json
+focprb=/scr1/joseph29/focfltprobs.h5
+defprb=/scr1/joseph29/deffltprobs.h5
+# Other
+verb=y
+qcplot=y
+gpus=5
+
