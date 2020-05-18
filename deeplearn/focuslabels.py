@@ -300,7 +300,7 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
 def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
                          norm=True,qcptchgrd=False,dz=10,dx=10):
   """
-  Extracts random patches from a faulted image
+  Extracts image patches with faults
   """
   # Check that dimg, fimg and fltlbl are the same size
   if(fimg.shape[0] != fltlbl.shape[0] or fimg.shape[1] != fltlbl.shape[1]):
@@ -341,7 +341,7 @@ def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20
         else:
           nptch.append(fptch[izp,ixp])
 
-  # Return random patches
+  # Return patches
   return np.asarray(nptch)
 
 

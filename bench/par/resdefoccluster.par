@@ -1,0 +1,26 @@
+[defaults]
+# IO
+inpdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefoc
+outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/resdefoc
+dpath=/scratch/joseph29/resdefoc
+iprefix=
+oprefix=
+beg=0
+# Defocus arguments
+nro=21
+oro=1.0
+dro=0.00125
+na=64
+# Cluster arguments
+tjobs=1000
+ajobs=100
+nprocs=48
+nsubmit=5
+logpath=./log/resdefoc
+parpath=./par/resdefoc
+jobprefix=resdefoc-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+
