@@ -1,4 +1,9 @@
-# Classes/functions for loading in data for deep learning
+"""
+Classes and functions for loading in data for deep learning
+
+@author: Joseph Jennings
+@version: 2020.05.17
+"""
 from tensorflow.keras.utils import Sequence
 import h5py
 import numpy as np
@@ -193,6 +198,20 @@ def load_allpatchdata(trfile,vafile,dsize):
 
   return allx, ally
 
+def load_unlabeled_flat_data(filein):
+  """ Loads in flattened unlabeled data """
+  hftr = h5py.File(filein,'r')
+  trkeys = list(hftr.keys())
+  ntr = int(len(trkeys))
+  xshape = hftr[trkeys[0]].shape
+  allx = np.zeros([ntr,xshape[0],xshape[1],xshape[2]],dtype='float32')
+  for itr in progressbar(range(ntr), "numex:"):
+    allx[itr,:,:,:]  = hftr[trkeys[itr]][:]
+  # Close H5 file
+  hftr.close()
+
+  return allx
+
 def load_allssimcleandata(trfile,vafile):
   """ Loads a cleaned and flattened ssim data into numpy arrays """
   # Get training number of examples
@@ -200,7 +219,7 @@ def load_allssimcleandata(trfile,vafile):
   trkeys = list(hftr.keys())
   ntr = int(len(trkeys)/2)
   # Get the validation number of examples
-  if(vafile != None):
+  if(vafile is not None):
     hfva = h5py.File(vafile,'r')
     vakeys = list(hfva.keys())
     nva = int(len(vakeys)/2)
