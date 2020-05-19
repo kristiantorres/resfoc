@@ -212,8 +212,8 @@ def load_unlabeled_flat_data(filein):
 
   return allx
 
-def load_allssimcleandata(trfile,vafile):
-  """ Loads a cleaned and flattened ssim data into numpy arrays """
+def load_labeled_flat_data(trfile,vafile):
+  """ Loads flattened labeled data into numpy arrays """
   # Get training number of examples
   hftr = h5py.File(trfile,'r')
   trkeys = list(hftr.keys())

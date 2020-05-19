@@ -82,6 +82,31 @@ def refocusang(resang,rho,dro):
   """
   pass
 
+def estro_fltfocdefoc(rimgs,mdl,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None):
+  """
+  Estimates rho by choosing the residually migrated patch that has
+  highest fault focus probability given by the neural network
+
+  Parameters
+    rimgs - residually migrated images [nro,nz,nx]
+    mdl   - a keras CNN
+    dro   - residual migration sampling
+    oro   - residual migration origin
+    nzp   - size of patch in z dimension [64]
+    nxp   - size of patch in x dimension [64]
+    strdz - size of stride in z dimension [nzp/2]
+    strdx - size of stride in x dimension [nxp/2]
+
+  Returns an estimate of rho(x,z)
+  """
+  # Perform the patch extraction
+  #if(strdz is None): strdz = int(nzp/2)
+  #if(strdx is None): strdx = int(nxp/2)
+  # Extrach patches from residual migration image
+  #per = PatchExtractor((nro,nxp,nzp),stride=(nro,strdx,strdz))
+  #rptch = np.squeeze(per.extract(rimgst))
+
+
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
   Estimates rho by comparing residual migration images with a

@@ -1,0 +1,18 @@
+[defaults]
+# IO
+img=../focdat/focdefoc/mltestdogzo.H
+#img=../focdat/focdefoc/mltestfogzo.H
+wgts=/scr1/joseph29/fltfocdefoc-chkpnt.h5
+#wgts=/scr1/joseph29/fltfocdefoc-wgts.h5
+arch=./dat/networks/fltfocdefoc-arch.json
+figpfx=
+# Patching
+ptchx=64
+ptchz=64
+strdx=32
+strdz=32
+# Other
+thresh=0.5
+verb=y
+show=y
+gpus=5
