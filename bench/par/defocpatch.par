@@ -6,11 +6,11 @@ focprb=./dat/focfltprb.h5
 defprb=./dat/deffltprb.h5
 deflbls=./dat/deflblstest.h5
 begex=0
-endex=2500
+endex=100
 # Other
 verb=y
 qcplot=y
-nqc=10
+nqc=0
 thresh1=0.7
 thresh2=0.5
 

@@ -12,8 +12,6 @@ import numpy as np
 from deeplearn.utils import plotseglabel, plotsegprobs, normalize
 from deeplearn.dataloader import load_all_unlabeled_data,load_unlabeled_flat_data
 from deeplearn.focuslabels import corrsim
-import tensorflow as tf
-from tensorflow.keras.models import model_from_json
 import random
 import matplotlib.pyplot as plt
 
@@ -30,6 +28,8 @@ defaults = {
     "begex": 0,
     "endex": -1,
     "nqc": 100,
+    "thresh1": 0.7,
+    "thresh2": 0.5,
     }
 if args.conf_file:
   config = configparser.ConfigParser()
@@ -53,8 +53,8 @@ ioArgs.add_argument("-endex",help="Ending example to process [last example]",typ
 ioArgs.add_argument("-deflbls",help="Output H5 file containing labeled defocused patches",type=str,required=True)
 # Other arguments
 othArgs = parser.add_argument_group('Other parameters')
-othArgs.add_argument("-thresh1",help="Threshold for determining if image is defocused",type=float)
-othArgs.add_argument("-thresh2",help="Threshold for determining if image is defocused",type=float)
+othArgs.add_argument("-thresh1",help="Threshold for determining if image is defocused [0.7]",type=float)
+othArgs.add_argument("-thresh2",help="Threshold for determining if image is defocused [0.5]",type=float)
 othArgs.add_argument("-verb",help="Verbosity flag ([y] or n)",type=str)
 othArgs.add_argument("-qcplot",help="Plot focused and defocuse probablilities (y or [n])",type=str)
 othArgs.add_argument("-nqc",help="Number of focused and defocused patches to QC",type=int)
@@ -96,13 +96,16 @@ for iex in progressbar(range(args.nqc),"nqc:"):
   axarr[1].set_title('CORRPRB=%f'%(corrprb),fontsize=15)
   plt.show()
 
-# Make list copy of the well-focused images
-focout = list(np.copy(focdat))
+# Output list of defocused images
+defout = []
 
+print("Starting at %d and ending at %d"%(args.begex,args.endex))
 for iex in progressbar(range(args.begex,args.endex), "nsim:"):
   corrimg = corrsim(defdat[iex,:,:,0],focdat[iex,:,:,0])
   corrprb = corrsim(defprb[iex,:,:,0],focprb[iex,:,:,0])
-  if(corrimg < args.thresh and corrprb < args.thresh):
+  if(corrimg < args.thresh1 and corrprb < args.thresh1):
+    defout.append(defdat[iex,:,:,0])
+  elif(corrimg < args.thresh2 or corrprb < args.thresh2):
     defout.append(defdat[iex,:,:,0])
 
 print("Keeping def=%d examples"%(len(defout)))
@@ -113,7 +116,7 @@ defs = np.asarray(defout)
 ntot = defs.shape[0]
 
 # Write the labeled data to file
-hfd = h5py.File(args.defout,'w')
+hfd = h5py.File(args.deflbls,'w')
 
 for iex in progressbar(range(ntot), "iex:"):
   datatag = create_inttag(iex,nex)

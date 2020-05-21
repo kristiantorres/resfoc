@@ -28,4 +28,4 @@ nzw=256
 # Other parameters
 verb=y
 qcplot=n
-ptchplot=n
+ptchplot=y

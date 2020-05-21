@@ -173,13 +173,16 @@ for iex in progressbar(range(ntot), "nfiles:"):
   hfl.create_dataset("y"+datatag, (nptch,nzp,nxp,1), data=np.expand_dims(lptch,axis=-1), dtype=np.float32)
   # Plot image and segmentation label
   if(ptchplot):
-    for iptch in range(nptch):
-      fig,axarr = plt.subplots(1,4,figsize=(10,6))
-      axarr[0].imshow(fptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
-      axarr[1].imshow(dptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
-      axarr[2].imshow(rptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
-      axarr[3].imshow(lptch[iptch],cmap='jet',interpolation='none',vmin=0,vmax=1)
-      plt.show()
+    #for iptch in range(nptch):
+    iptch = np.random.randint(nptch)
+    fig,axarr = plt.subplots(1,4,figsize=(10,6))
+    axarr[0].imshow(fptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+    axarr[1].imshow(dptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+    axarr[2].imshow(rptch[iptch],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+    axarr[3].imshow(lptch[iptch],cmap='jet',interpolation='none',vmin=0,vmax=1)
+    #plt.savefig('./fig/onepatch.png',dpi=150,transparent=True,bbox_inches='tight')
+    plt.show()
+    plt.close()
   if(qcplot):
     pclip = 0.5
     fig = plt.figure(figsize=(8,6)); ax = fig.gca()
