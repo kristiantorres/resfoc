@@ -385,7 +385,6 @@ def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pth
   # Reshape the fault prediction array
   fltpred = fltpred.reshape([numpz,numpx,nzp,nxp])
 
-  from deeplearn.utils import plotseglabel
   # Output arrays
   hasfault = np.zeros(iptch.shape)
   flttrsh  = np.zeros(iptch.shape)
@@ -397,7 +396,6 @@ def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pth
       if(z > mindepth):
         # Threshold the patch
         flttrsh[izp,ixp] = thresh(fltpred[izp,ixp],pthresh)
-        #plotseglabel(iptch[izp,ixp],flttrsh[izp,ixp],color='blue',show=True)
         if(np.sum(flttrsh[izp,ixp]) > nthresh):
           hasfault[izp,ixp,:,:] = 1.0
 
