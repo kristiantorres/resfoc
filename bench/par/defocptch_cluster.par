@@ -1,0 +1,25 @@
+[defaults]
+# IO
+focptch=./dat/faultfocptch.h5
+defptch=./dat/faultdefptch.h5
+focprb=./dat/focfltprb.h5
+defprb=./dat/deffltprb.h5
+oprefix=./dat/defoclbl-
+begex=0
+nex=1718
+# Labeling parameters
+thresh1=0.7
+thresh2=0.5
+# Cluster arguments
+tjobs=33
+ajobs=33
+nprocs=4
+nsubmit=5
+logpath=./log/defoclbl
+parpath=./par/defoclbl
+jobprefix=defoclbl-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+
