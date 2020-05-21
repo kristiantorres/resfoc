@@ -4,33 +4,33 @@ Classes and functions for loading in data for deep learning
 @author: Joseph Jennings
 @version: 2020.05.17
 """
-#from tensorflow.keras.utils import Sequence
+from tensorflow.keras.utils import Sequence
 import h5py
 import numpy as np
 import random
 import subprocess
 from utils.ptyprint import progressbar
 
-#class resmig_generator_h5(Sequence):
-#
-#  def __init__(self, fname, batch_size):
-#    self.hfin = h5py.File(fname,'r')
-#    self.hfkeys = list(self.hfin.keys())
-#    self.nb = int(len(self.hfkeys)/2) # Half is features, half is labels
-#    self.indices = np.arange(self.nb)
-#    self.batch_size = batch_size
-#
-#  def get_xyshapes(self):
-#    return self.hfin[self.hfkeys[0]].shape[1:], self.hfin[self.hfkeys[self.nb]].shape[1:]
-#
-#  def __len__(self):
-#    return self.nb
-#
-#  def __getitem__(self,idx):
-#    xb = self.hfin[self.hfkeys[idx]]
-#    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
-#    return xb, yb
-#
+class resmig_generator_h5(Sequence):
+
+  def __init__(self, fname, batch_size):
+    self.hfin = h5py.File(fname,'r')
+    self.hfkeys = list(self.hfin.keys())
+    self.nb = int(len(self.hfkeys)/2) # Half is features, half is labels
+    self.indices = np.arange(self.nb)
+    self.batch_size = batch_size
+
+  def get_xyshapes(self):
+    return self.hfin[self.hfkeys[0]].shape[1:], self.hfin[self.hfkeys[self.nb]].shape[1:]
+
+  def __len__(self):
+    return self.nb
+
+  def __getitem__(self,idx):
+    xb = self.hfin[self.hfkeys[idx]]
+    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
+    return xb, yb
+
 #
 
 def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
@@ -212,8 +212,8 @@ def load_unlabeled_flat_data(filein):
 
   return allx
 
-def load_allssimcleandata(trfile,vafile):
-  """ Loads a cleaned and flattened ssim data into numpy arrays """
+def load_labeled_flat_data(trfile,vafile):
+  """ Loads flattened labeled data into numpy arrays """
   # Get training number of examples
   hftr = h5py.File(trfile,'r')
   trkeys = list(hftr.keys())

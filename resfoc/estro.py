@@ -7,9 +7,12 @@ from residual migration images
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
+from deeplearn.utils import normalize, thresh
+from deeplearn.focuslabels import find_flt_patches
 from resfoc.ssim import ssim
 from resfoc.rhoshifts import rhoshifts
 from scipy.ndimage import map_coordinates
+from scaas.trismooth import smooth
 
 def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
   """
@@ -39,7 +42,7 @@ def refocusimg(rimgs,rho,dro,ro1=None):
   Refocuses the image based on an input rho map
 
   Parameters
-    rimgs - input residually migrated images [nro,nx,nz]. 
+    rimgs - input residually migrated images [nro,nx,nz].
             Input can be angle stack or zero offset.
     rho   - input smooth rho map
     dro   - the sampling along the rho axis
@@ -82,9 +85,88 @@ def refocusang(resang,rho,dro):
   """
   pass
 
+def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
+                      hasfault=None,rectz=30,rectx=30,qcimgs=True):
+  """
+  Estimates rho by choosing the residually migrated patch that has
+  highest fault focus probability given by the neural network
+
+  Parameters
+    rimgs      - residually migrated images [nro,nz,nx]
+    foccnn     - CNN for determining if fault is focused or not
+    dro        - residual migration sampling
+    oro        - residual migration origin
+    nzp        - size of patch in z dimension [64]
+    nxp        - size of patch in x dimension [64]
+    strdz      - size of stride in z dimension [nzp/2]
+    strdx      - size of stride in x dimension [nxp/2]
+    hasfault   - array indicating if a patch has faults or not [None]
+                 If None, all patches are considered to have faults
+    rectz      - length of smoother in z dimension [30]
+    rectx      - length of smoother in x dimension [30]
+    qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
+                 and fault patches [nz,nx]
+
+  Returns an estimate of rho(x,z)
+  """
+  # Get image dimensions
+  nro = rimgs.shape[0]; nz = rimgs.shape[1]; nx = rimgs.shape[2]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Extract patches from residual migration image
+  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
+  rptch = np.squeeze(per.extract(rimgs))
+  # Flatten patches and make a prediction on each
+  numpz = rptch.shape[0]; numpx = rptch.shape[1]
+  rptchf = np.expand_dims(normalize(rptch.reshape([nro*numpz*numpx,nzp,nxp])),axis=-1)
+  focprd = foccnn.predict(rptchf)
+
+  # Assign prediction to entire patch for QC
+  focprdptch = np.zeros(rptchf.shape)
+  for iptch in range(nro*numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
+  focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
+
+  if(hasfault is None):
+    hasfault = np.ones([numpz,numpx,nzp,nxp],dtype='int')
+
+  # Output rho image
+  rho = np.zeros([nz,nx])
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  rhop = pe.extract(rho)
+
+  # Using hasfault array, estimate rho from fault focus probabilities
+  hlfz = int(nzp/2); hlfx = int(nxp/2)
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      if(hasfault[izp,ixp,hlfz,hlfx]):
+        # Find maximum probability and compute rho
+        iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
+        rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
+      else:
+        rhop[izp,ixp,:,:] = 1.0
+
+  # Reconstruct the rho, fault patches and fault probabiliites
+  rho       = pe.reconstruct(rhop)
+  focprdimg = per.reconstruct(focprdptch.reshape([1,numpz,numpx,nro,nzp,nxp]))
+
+  # Smooth and return rho, fault patches and fault probabilities
+  rhosm = smooth(rho.astype('float32'),rect1=rectx,rect2=rectz)
+  if(qcimgs):
+    focprdimgsm = np.zeros(focprdimg.shape)
+    # Smooth the fault focusing for each rho
+    for iro in range(nro):
+      focprdimgsm[iro] = smooth(focprdimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
+    # Return images
+    return rhosm,focprdimgsm
+  else:
+    return rhosm
+
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
-  Estimates rho by comparing residual migration images with a 
+  Estimates rho by comparing residual migration images with a
   well-focused "target image"
 
   Parameters
