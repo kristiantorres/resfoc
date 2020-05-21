@@ -17,8 +17,22 @@ def normalize(img,eps=sys.float_info.epsilon):
   """
   Normalizes an image accross channels  by removing
   the mean and dividing by the standard deviation
+
+  Parameters
+    img - the input image. If the image has three dimensions,
+          will normalize each image individually
+    eps - parameters to avoid dividing a zero standard deviation
+
+  Returns normalized image(s)
   """
-  return (img - np.mean(img))/(np.std(img) + eps)
+  if(len(img.shape) == 3):
+    imgnrm = np.zeros(img.shape)
+    nimg = img.shape[0]
+    for k in range(nimg):
+      imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+    return imgnrm
+  else:
+    return (img - np.mean(img))/(np.std(img) + eps)
 
 def resizepow2(img,kind='linear'):
   """
@@ -41,8 +55,8 @@ def resample(img,new_shape,kind='linear',ds=[]):
   assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
-  length=img.shape[1]
-  height=img.shape[0]
+  length=img.shape[-1]
+  height=img.shape[-2]
   x=np.linspace(0,length,length)
   y=np.linspace(0,height,height)
   # New coordinates for interpolation
@@ -124,9 +138,8 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
   fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
-  pclip = kwargs.get('pclip',1.0)
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
-      vmin=kwargs.get('vmin',np.min(img))*pclip,vmax=kwargs.get('vmax',np.max(img))*pclip,
+      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
         kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
