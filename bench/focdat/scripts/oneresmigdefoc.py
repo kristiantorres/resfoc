@@ -75,8 +75,6 @@ if(np.random.choice([0,1])):
 else:
   rho = np.random.randint(nro+1,fnro)*dro + foro
 
-print(rho)
-
 # Depth Residual migration for one rho
 rmig = preresmig(imgt,[dh,dx,dz],nps=[2049,1025,513],nro=1,oro=rho,dro=dro,time=False,nthreads=1,verb=True)
 onro,ooro,odro = get_rho_axis(nro=nro,dro=dro)

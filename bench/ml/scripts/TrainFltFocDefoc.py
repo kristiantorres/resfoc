@@ -120,6 +120,8 @@ foclbls = np.ones(ndef)
 allx = np.concatenate([deftot,foctrm],axis=0)
 ally = np.concatenate([deflbls,foclbls],axis=0)
 
+#TODO: shuffle the data first
+
 print(allx.shape)
 print(ally.shape)
 

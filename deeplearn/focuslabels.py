@@ -7,7 +7,7 @@ image focusing
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from deeplearn.utils import normalize
+from deeplearn.utils import normalize, thresh
 from resfoc.ssim import ssim
 from scipy.signal.signaltools import correlate2d
 import random
@@ -344,6 +344,73 @@ def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20
   # Return random patches
   return np.asarray(nptch)
 
+def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pthresh=0.2,nthresh=50,oz=0.0,
+                     qcimgs=True):
+  """
+  Determines if patches contain a fault or not
+
+  Parameters:
+    img       - input fault seismic image [nz,nx]
+    mdl       - fault segmentation keras CNN
+    dz        - depth sampling
+    mindepth  - minimum depth after which to look for faults
+    nzp       - size of patch in x dimension [64]
+    nxp       - size of patch in z dimension [64]
+    strdz     - size of stride in z dimension [None]
+    strdx     - size of stride in x dimension [None]
+    pthresh   - probability threshold for determining if a pixel contains a fault [0.2]
+    nthresh   - number of fault pixels in a patch to determined if it has a fault [50]
+    oz        - depth origin [0.0]
+    qcimgs    - flag for returning segmented fault image as well as fault patches
+                for QC
+
+  Returns a patch array where the patches are valued at either
+  one (if patch contains a fault) or zero (if it does not have a fault)
+  """
+  # Get image dimensions
+  nz = img.shape[0]; nx = img.shape[1]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Extract patches on the image
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  iptch = pe.extract(img)
+  # Flatten patches and make a prediction on each
+  numpz = iptch.shape[0]; numpx = iptch.shape[1]
+  iptchf = np.expand_dims(normalize(iptch.reshape([numpz*numpx,nzp,nxp])),axis=-1)
+  fltpred = mdl.predict(iptchf)
+
+  # Reshape the fault prediction array
+  fltpred = fltpred.reshape([numpz,numpx,nzp,nxp])
+
+  from deeplearn.utils import plotseglabel
+  # Output arrays
+  hasfault = np.zeros(iptch.shape)
+  flttrsh  = np.zeros(iptch.shape)
+  # Check if patch has a fault
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      # Compute current depth
+      z = izp*strdz*dz + oz
+      if(z > mindepth):
+        # Threshold the patch
+        flttrsh[izp,ixp] = thresh(fltpred[izp,ixp],pthresh)
+        #plotseglabel(iptch[izp,ixp],flttrsh[izp,ixp],color='blue',show=True)
+        if(np.sum(flttrsh[izp,ixp]) > nthresh):
+          hasfault[izp,ixp,:,:] = 1.0
+
+  # Reconstruct the images for QC
+  if(qcimgs):
+    faultimg = pe.reconstruct(fltpred)
+    thrshimg = pe.reconstruct(flttrsh)
+    hsfltimg = pe.reconstruct(hasfault)
+
+    return hasfault,hsfltimg,thresh(thrshimg,0.0),faultimg
+
+  else:
+    return hasfault
 
 def mse(img,tgt):
   return np.linalg.norm(img-tgt)#/np.linalg.norm(img)

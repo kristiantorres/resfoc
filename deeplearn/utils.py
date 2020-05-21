@@ -17,8 +17,22 @@ def normalize(img,eps=sys.float_info.epsilon):
   """
   Normalizes an image accross channels  by removing
   the mean and dividing by the standard deviation
+
+  Parameters
+    img - the input image. If the image has three dimensions,
+          will normalize each image individually
+    eps - parameters to avoid dividing a zero standard deviation
+
+  Returns normalized image(s)
   """
-  return (img - np.mean(img))/(np.std(img) + eps)
+  if(len(img.shape) == 3):
+    imgnrm = np.zeros(img.shape)
+    nimg = img.shape[0]
+    for k in range(nimg):
+      imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+    return imgnrm
+  else:
+    return (img - np.mean(img))/(np.std(img) + eps)
 
 def resizepow2(img,kind='linear'):
   """
