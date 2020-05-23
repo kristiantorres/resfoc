@@ -474,3 +474,75 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   if(show):
     plt.show()
 
+def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
+  """
+  Makes an isometric plot of 3D data
+
+  Parameters:
+    data - the input 3D data
+    os   - the data origins [0.0,0.0.0]
+    ds   - the data samplings [1.0,1.0,1.0]
+  """
+  # Get axes
+  [n1,n2,n3] = data.shape
+  [o1,o2,o3] = os
+  [d1,d2,d3] = ds
+
+  x1end = o1 + (n1-1)*d1
+  x2end = o2 + (n2-1)*d2
+  x3end = o3 + (n3-1)*d3
+
+  # Build mesh grid for plotting
+  x1 = np.linspace(o1, x1end, n1)
+  x2 = np.linspace(o2, x2end, n2)
+  x3 = np.linspace(o3, x3end, n3)
+  x1g, x2g = np.meshgrid(x1, x2)
+  x1g, x3g = np.meshgrid(x1, x3)
+
+  nlevels = kwargs.get('nlevels',200)
+
+  # Get plotting range
+  if(kwargs.get('stack',False)):
+    stk = np.sum(data,axis=0)
+    vmin1 = np.min(stk); vmax1 = np.max(stk)
+    vmin2 = np.min(ang); vmax2= np.max(ang)
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+  else:
+    vmin1 = kwargs.get('vmin',np.min(data))
+    vmax1 = kwargs.get('vmax',np.max(data))
+    vmin2 = vmin1; vmax2 = vmax1
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+
+  # Get locations for extracting planes
+  loc1 = kwargs.get('loc1',int(n1/2*d1+o1))
+  i1 = int((loc1 - o1)/d1)
+  loc2 = kwargs.get('loc2',int(n2/2*d2+o2))
+  i2 = int((loc2 - o2)/d2)
+  loc3 = kwargs.get('loc3',int(n3/2*d3+o3))
+  i3 = int((loc3 - o3)/d3)
+
+  # Plot data
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',8)))
+  ax = fig.gca(projection='3d')
+
+  cset = [[],[],[]]
+
+  cset[0] = ax.contourf(xg, yg, slc, zdir='z',offset=xbeg,levels=levels2,cmap='gray')
+
+  cset[1] = ax.contourf(ang, yg, np.flip(xg), zdir='x', offset=xend,levels=levels2,cmap='gray')
+
+  cset[2] = ax.contourf(xg, stk, np.flip(zg), zdir='y', offset=abeg,levels=levels1,cmap='gray')
+
+  ax.set(xlim=[x1beg,x1end],ylim=[x2beg,x2end],zlim=[x3end,x3beg])
+
+  fsize = kwargs.get('fsize',15)
+  ax.set_xlabel(kwargs.get('x1label'),fontsize=kwargs.get)
+  ax.set_ylabel(kwargs.get('x2label'),fontsize=15)
+  ax.set_zlabel(kwargs.get('x3label'),fontsize=15)
+  ax.tick_params(labelsize=15)
+
+  if(show):
+    plt.show()
+

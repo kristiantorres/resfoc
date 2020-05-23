@@ -316,16 +316,19 @@ def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20
   nptch = []
 
   if(qcptchgrd):
-    nz = img.shape[0]; nx = img.shape[1]
+    nz = fimg.shape[0]; nx = fimg.shape[1]
     # Plot the patch grid
-    nz = img.shape[0]; nx = img.shape[1]
+    nz = fimg.shape[0]; nx = fimg.shape[1]
     # Plot the patch grid
     bgz = 0; egz = (nz)*dz/1000.0; dgz = nzp*dz/1000.0
     bgx = 0; egx = (nx)*dx/1000.0; dgx = nxp*dx/1000.0
     zticks = np.arange(bgz,egz,dgz)
     xticks = np.arange(bgx,egx,dgx)
     fig = plt.figure(figsize=(10,6)); ax = fig.gca()
-    ax.imshow(img,extent=[0,(nx)*dx/1000.0,(nz)*dz/1000.0,0],cmap='gray',interpolation='sinc')
+    ax.imshow(fimg,extent=[0,(nx)*dx/1000.0,(nz)*dz/1000.0,0],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+    ax.set_xlabel('X (km)',fontsize=15)
+    ax.set_xlabel('Z (km)',fontsize=15)
+    ax.tick_params(labelsize=15)
     ax.set_xticks(xticks)
     ax.set_yticks(zticks)
     ax.grid(linestyle='-',color='k',linewidth=2)

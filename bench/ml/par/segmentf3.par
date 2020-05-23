@@ -15,9 +15,10 @@ strdz=32
 thresh=0.6
 verb=y
 show=y
-gpus=4
+gpus=1
 # Plotting
-aratio=23.5
+#aratio=23.5
+aratio=0.5
 fs=390
 time=y
 km=y

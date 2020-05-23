@@ -15,7 +15,7 @@ from deeplearn.keraspredict import focdefocflt
 from resfoc.gain import agc
 from resfoc.estro import estro_fltfocdefoc, refocusimg
 from deeplearn.focuslabels import find_flt_patches
-from deeplearn.utils import plotsegprobs, plotseglabel
+from deeplearn.utils import plotsegprobs, plotseglabel, thresh
 from utils.image import remove_colorbar
 from numba import cuda
 import matplotlib.pyplot as plt
@@ -129,7 +129,7 @@ else:
   plotseglabel(rho1img,timg,color='blue',show=False)
   plt.figure(3)
   plt.imshow(rho1img,cmap='gray',interpolation='sinc')
-  plt.imshow(hfimg,cmap='jet',alpha=0.1)
+  plt.imshow(thresh(hfimg,0.0),cmap='jet',alpha=0.1)
   plt.show()
   rho,fltfocs = estro_fltfocdefoc(gimgt,focmdl,dro,oro,hasfault=hasfault)
 
@@ -142,6 +142,15 @@ rhosmb = rhosmb.reshape(raxes.n,order='F')
 # Refocus the image with both
 rfismb = refocusimg(gimgt,rhosmb,dro)
 rfiflt = refocusimg(gimgt,rho,dro)
+
+faxes,fog = sep.read_file('../focdat/focdefoc/mltestfog.H')
+fog = np.ascontiguousarray(fog.reshape(faxes.n,order='F').T)
+gfog = agc(fog.astype('float32'))
+fog = gfog[16,256:512+256,:]
+
+# Write out the refocused images
+sep.write_file('rfismbcomp.H',rfismb,ds=[dx,dz])
+sep.write_file('rfifltfoc.H',rfiflt,ds=[dx,dz])
 
 # Plot rho on the defocused image
 fsize=15
@@ -174,8 +183,23 @@ cbar3.set_label(r'$\rho$',fontsize=fsize)
 # Plot the refocused images
 fig4 = plt.figure(3,figsize=(8,8)); ax4 = fig4.gca()
 ax4.imshow(rfismb,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax4.set_xlabel('X (km)',fontsize=fsize)
+ax4.set_ylabel('Z (km)',fontsize=fsize)
+ax4.set_title('Semblance',fontsize=fsize)
+ax4.tick_params(labelsize=fsize)
 
 fig5 = plt.figure(4,figsize=(8,8)); ax5 = fig5.gca()
 ax5.imshow(rfiflt,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax5.set_xlabel('X (km)',fontsize=fsize)
+ax5.set_ylabel('Z (km)',fontsize=fsize)
+ax5.set_title('Fault focus',fontsize=fsize)
+ax5.tick_params(labelsize=fsize)
+
+fig6 = plt.figure(5,figsize=(8,8)); ax6 = fig6.gca()
+ax6.imshow(fog.T,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax6.set_xlabel('X (km)',fontsize=fsize)
+ax6.set_ylabel('Z (km)',fontsize=fsize)
+ax6.set_title('Well focused',fontsize=fsize)
+ax6.tick_params(labelsize=fsize)
 
 plt.show()
