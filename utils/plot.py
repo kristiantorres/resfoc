@@ -8,6 +8,7 @@ import numpy as np
 from utils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
   """
@@ -529,9 +530,9 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
 
   cset = [[],[],[]]
 
-  cset[0] = ax.contourf(xg, yg, slc, zdir='z',offset=xbeg,levels=levels2,cmap='gray')
+  cset[0] = ax.contourf(x1g, x2g, data[i1,:,:], zdir='z',offset=x1beg,levels=levels2,cmap='gray')
 
-  cset[1] = ax.contourf(ang, yg, np.flip(xg), zdir='x', offset=xend,levels=levels2,cmap='gray')
+  cset[1] = ax.contourf(ang, yg, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
 
   cset[2] = ax.contourf(xg, stk, np.flip(zg), zdir='y', offset=abeg,levels=levels1,cmap='gray')
 
