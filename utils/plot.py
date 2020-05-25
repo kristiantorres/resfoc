@@ -475,19 +475,24 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   if(show):
     plt.show()
 
-def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
+def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,verb=True,**kwargs):
   """
   Makes an isometric plot of 3D data
 
   Parameters:
-    data - the input 3D data
-    os   - the data origins [0.0,0.0.0]
-    ds   - the data samplings [1.0,1.0,1.0]
+    data   - the input 3D data
+    os     - the data origins [0.0,0.0.0]
+    ds     - the data samplings [1.0,1.0,1.0]
+    transp - flag for transposing second and third axes
+    show   - flag for displaying the plot
+    verb   - print the elevation and azimuth for the plot
   """
+  if(transp):
+    data = np.transpose(data,(0,2,1))
   # Get axes
-  [n1,n2,n3] = data.shape
-  [o1,o2,o3] = os
-  [d1,d2,d3] = ds
+  [n3,n2,n1] = data.shape
+  [o3,o2,o1] = os
+  [d3,d2,d1] = ds
 
   x1end = o1 + (n1-1)*d1
   x2end = o2 + (n2-1)*d2
@@ -497,24 +502,10 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   x1 = np.linspace(o1, x1end, n1)
   x2 = np.linspace(o2, x2end, n2)
   x3 = np.linspace(o3, x3end, n3)
-  x1g, x2g = np.meshgrid(x1, x2)
   x1g, x3g = np.meshgrid(x1, x3)
+  x1g, x2g = np.meshgrid(x1, x2)
 
   nlevels = kwargs.get('nlevels',200)
-
-  # Get plotting range
-  if(kwargs.get('stack',False)):
-    stk = np.sum(data,axis=0)
-    vmin1 = np.min(stk); vmax1 = np.max(stk)
-    vmin2 = np.min(ang); vmax2= np.max(ang)
-    levels1 = np.linspace(vmin1,vmax1,nlevels)
-    levels2 = np.linspace(vmin2,vmax2,nlevels)
-  else:
-    vmin1 = kwargs.get('vmin',np.min(data))
-    vmax1 = kwargs.get('vmax',np.max(data))
-    vmin2 = vmin1; vmax2 = vmax1
-    levels1 = np.linspace(vmin1,vmax1,nlevels)
-    levels2 = np.linspace(vmin2,vmax2,nlevels)
 
   # Get locations for extracting planes
   loc1 = kwargs.get('loc1',int(n1/2*d1+o1))
@@ -524,25 +515,53 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   loc3 = kwargs.get('loc3',int(n3/2*d3+o3))
   i3 = int((loc3 - o3)/d3)
 
+  # Get plotting range
+  if(kwargs.get('stack',False)):
+    # Get slices
+    slc1 = data[:,:,i1]
+    slc2 = data[:,i2,:]
+    slc3 = np.sum(data,axis=0)
+    # Set amplitude limits
+    vmin1 = np.min(slc3); vmax1 = np.max(slc3)
+    vmin2 = np.min(slc1); vmax2= np.max(slc1)
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+  else:
+    # Get slices
+    slc1 = data[:,:,i1]
+    slc2 = data[:,i2,:]
+    slc3 = data[i3,:,:]
+    # Set amplitude limits
+    vmin1 = kwargs.get('vmin',np.min(data))
+    vmax1 = kwargs.get('vmax',np.max(data))
+    vmin2 = vmin1; vmax2 = vmax1
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+
   # Plot data
   fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',8)))
   ax = fig.gca(projection='3d')
 
   cset = [[],[],[]]
 
-  cset[0] = ax.contourf(x1g, x2g, data[i1,:,:], zdir='z',offset=x1beg,levels=levels2,cmap='gray')
+  cset[0] = ax.contourf(x1g, x3g, slc2, zdir='z',offset=o1,levels=levels2,cmap='gray')
 
-  cset[1] = ax.contourf(ang, yg, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
+  cset[1] = ax.contourf(slc1, x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
 
-  cset[2] = ax.contourf(xg, stk, np.flip(zg), zdir='y', offset=abeg,levels=levels1,cmap='gray')
+  cset[2] = ax.contourf(x1g, slc3, np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
 
-  ax.set(xlim=[x1beg,x1end],ylim=[x2beg,x2end],zlim=[x3end,x3beg])
+  ax.set(xlim=[o1,x1end],ylim=[o3,x3end],zlim=[x2end,o2])
 
   fsize = kwargs.get('fsize',15)
-  ax.set_xlabel(kwargs.get('x1label'),fontsize=kwargs.get)
-  ax.set_ylabel(kwargs.get('x2label'),fontsize=15)
-  ax.set_zlabel(kwargs.get('x3label'),fontsize=15)
-  ax.tick_params(labelsize=15)
+  ax.set_xlabel(kwargs.get('x1label'),fontsize=fsize)
+  ax.set_ylabel(kwargs.get('x2label'),fontsize=fsize)
+  ax.set_zlabel(kwargs.get('x3label'),fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
+
+  ax.view_init(elev=kwargs.get('elev',30),azim=kwargs.get('azim',-60))
+
+  if(verb):
+    print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
 
   if(show):
     plt.show()
