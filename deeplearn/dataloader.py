@@ -111,7 +111,7 @@ def load_alldata(trfile,vafile,dsize):
 
   return allx,ally
 
-def load_all_unlabeled_data(filein):
+def load_all_unlabeled_data(filein,begex=None,endex=None):
   """ Loads all data into a numpy array """
   # Get training number of examples
   hftr = h5py.File(filein,'r')
@@ -123,7 +123,9 @@ def load_all_unlabeled_data(filein):
   allx = []
   k = 0
   # Get all training examples
-  for itr in progressbar(range(ntr), "numtr:"):
+  if(begex is None or endex is None):
+    begex = 0; endex = ntr
+  for itr in progressbar(range(begex,endex), "numtr:"):
     dsize = hftr[trkeys[itr]].shape[0]
     for iex in range(dsize):
       allx.append(hftr[trkeys[itr]][iex])

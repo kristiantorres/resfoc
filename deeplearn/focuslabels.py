@@ -10,6 +10,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize, thresh
 from resfoc.ssim import ssim
 from scipy.signal.signaltools import correlate2d
+from scaas.trismooth import smooth
 import random
 import matplotlib.pyplot as plt
 
@@ -300,7 +301,7 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
 def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
                          norm=True,qcptchgrd=False,dz=10,dx=10):
   """
-  Extracts random patches from a faulted image
+  Extracts patches from a faulted image
   """
   # Check that dimg, fimg and fltlbl are the same size
   if(fimg.shape[0] != fltlbl.shape[0] or fimg.shape[1] != fltlbl.shape[1]):
@@ -344,8 +345,37 @@ def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20
         else:
           nptch.append(fptch[izp,ixp])
 
-  # Return random patches
   return np.asarray(nptch)
+
+def flt_patches(iptch,lptch,pixthresh=20):
+  """
+  Returns a list of image patches that only contain faults.
+  Similar to extract_focfltptchs but does not perform the
+  patch extraction. Assumes input is in patch form
+
+  Parameters:
+    iptch     - image patches [numpz,numpx,nzp,nxp]
+    lptch     - fault label patches [numpz,numpx,nzp,nxp]
+    pixthresh - number of fault pixels in a patch to determine if it contains
+                a fault [20]
+  """
+  # Check shapes
+  if(iptch.shape != lptch.shape):
+    raise Exception("Image patches and label patches must have same shape")
+
+  # Get dimensions
+  numpz = imgps.shape[0]; numpx = imgps.shape[1]
+
+  # Output image fault patches
+  fptch = []
+
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      # Check if patch contains faults
+      if(np.sum(lptch[izp,ixp]) >= pixthresh):
+        fptch.append(fptch[izp,ixp])
+
+  return np.asarray(fptch)
 
 def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pthresh=0.2,nthresh=50,oz=0.0,
                      qcimgs=True):
@@ -412,6 +442,27 @@ def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pth
 
   else:
     return hasfault
+
+def semblance_power(img,transp=False):
+  """
+  A semblance metric for measuring flatness of angle gathers.
+
+  Parameters:
+    img - the input image [na,nx,nx]
+  """
+  if(len(img.shape) != 3):
+    raise Exception("Input image must be 3D")
+
+  stack   = np.sum(img,axis=0)
+  stacksq = stack*stack
+  num = smooth(stacksq.astype('float32'),rect1=3,rect2=10)
+
+  sqstack = np.sum(img*img,axis=0)
+  denom = smooth(sqstack.astype('float32'),rect1=3,rect2=10)
+
+  semb = num/denom
+
+  return np.sum(semb)
 
 def mse(img,tgt):
   return np.linalg.norm(img-tgt)#/np.linalg.norm(img)
