@@ -86,8 +86,8 @@ rmigt = convert2time(rmig,dz,dt=dtd,oro=rho,dro=odro,verb=True)
 
 # Convert to angle
 rmigtt = np.ascontiguousarray(np.transpose(rmigt,(0,1,3,2))).astype('float32') # [nro,nh,nx,nz] -> [nro,nh,nz,nx]
-stormang = off2ang(rmigtt,oh,dh,dz,oro=ooro,dro=odro,verb=True,nthrds=24)
-na,oa,da = get_ang_axis()
+stormang = off2ang(rmigtt,oh,dh,dz,na=args.na,oro=ooro,dro=odro,verb=True,nthrds=24)
+na,oa,da = get_ang_axis(na=args.na)
 
 # Write to file
 sep.write_file(args.reso,rmig.T,ds=[dz,dx,dh],os=[0,0,oh],dpath=args.dpath+'/')

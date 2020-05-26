@@ -106,9 +106,11 @@ def manage_slurmjobs(actjobs,bcmd,jobprefix,lefjobs,ajobs,nprocs=48,nleft=2,nsub
       else:
         sepqfull = True; hr2qfull = True
         if(verb): print("Both sep and twohour queues are full. Not submitting for now...")
+    #TODO: I need to update the queues inside this loop
     # Make sure that at least two are waiting in both queues
     sepq = slurm.get_numjobs('sep',qfile=qlines)
     #TODO: remove the sepqfull and add a while loop while (nleft - sepq['Q'] - 1 > 0) and update sepq each time
+    # Ensure that at least nleft jobs are waiting in the queue
     if(sepqfull and sepq['Q'] < nleft and len(lefjobs) > 0):
       for ijob in range(nleft - sepq['Q'] - 1):
         cmd = bcmd + lefjobs[0].pfname

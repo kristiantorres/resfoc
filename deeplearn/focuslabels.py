@@ -10,7 +10,6 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize, thresh
 from resfoc.ssim import ssim
 from scipy.signal.signaltools import correlate2d
-import random
 import matplotlib.pyplot as plt
 
 def faultpatch_labels(img,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,norm=True,ptchimg=False,
@@ -297,18 +296,34 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
   else:
     return sptcho
 
-def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
+def extract_fltptchs(img,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
                          norm=True,qcptchgrd=False,dz=10,dx=10):
   """
-  Extracts random patches from a faulted image
+  Extracts patches from a faulted image
+
+  Parameters:
+    img    - the input seismic image with faults [nz,nx]
+    fltlbl - image containing the fault positions [nz,nx]
+    nxp    - size of the patch in x [64]
+    nzp    - size of the patch in z [64]
+    strdx  - size of patch stride in x [32]
+    strdz  - size of patch stride in z [32]
+    pixthresh - number of fault pixels in image to determine if
+                patch has a fault [20]
+    norm   - normalize the patches [True]
+    qcptchgrd - show a plot of the patch grid on the image [False]
+    dz        - depth sampling for plotting patch grid [10]
+    dx        - lateral sampling for plotting patch grid [10]
+
+    Returns an array of image patches that contains faults [nptch,nzp,nxp]
   """
-  # Check that dimg, fimg and fltlbl are the same size
-  if(fimg.shape[0] != fltlbl.shape[0] or fimg.shape[1] != fltlbl.shape[1]):
+  # Check that img and fltlbl are the same size
+  if(img.shape[0] != fltlbl.shape[0] or img.shape[1] != fltlbl.shape[1]):
     raise Exception("Input image and fault label must have same dimensions")
 
   # Patch extraction on the images
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
-  fptch = pe.extract(fimg)
+  fptch = pe.extract(img)
   lptch = pe.extract(fltlbl)
   numpz = fptch.shape[0]; numpx = fptch.shape[1]
 
@@ -341,7 +356,6 @@ def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20
         else:
           nptch.append(fptch[izp,ixp])
 
-  # Return random patches
   return np.asarray(nptch)
 
 def find_flt_patches(img,mdl,dz,mindepth,nzp=64,nxp=64,strdz=None,strdx=None,pthresh=0.2,nthresh=50,oz=0.0,

@@ -86,15 +86,15 @@ for iex in progressbar(range(args.nqc),"nqc:"):
   idx = np.random.randint(nex)
   corrimg = corrsim(defdat[idx,:,:,0],focdat[idx,:,:,0])
   corrprb = corrsim(defprb[idx,:,:,0],focprb[idx,:,:,0])
-  plotsegprobs(focdat[idx,:,:,0],focprb[idx,:,:,0],interp='sinc',show=False,pmin=0.2)
-  plotsegprobs(defdat[idx,:,:,0],defprb[idx,:,:,0],interp='sinc',show=False,pmin=0.2)
+  #plotsegprobs(focdat[idx,:,:,0],focprb[idx,:,:,0],interp='sinc',show=False,pmin=0.2)
+  #plotsegprobs(defdat[idx,:,:,0],defprb[idx,:,:,0],interp='sinc',show=False,pmin=0.2)
   #plotseglabel(focdat[idx,:,:,0],fltdat[idx,:,:,0],interp='sinc',show=False)
-  fig,axarr = plt.subplots(1,2,figsize=(10,6))
-  axarr[0].imshow(focdat[idx,:,:,0],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
-  axarr[0].set_title('idx=%d CORRIMG=%f'%(idx,corrimg),fontsize=15)
-  axarr[1].imshow(defdat[idx,:,:,0],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
-  axarr[1].set_title('CORRPRB=%f'%(corrprb),fontsize=15)
-  plt.show()
+  #fig,axarr = plt.subplots(1,2,figsize=(10,6))
+  #axarr[0].imshow(focdat[idx,:,:,0],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+  #axarr[0].set_title('idx=%d CORRIMG=%f'%(idx,corrimg),fontsize=15)
+  #axarr[1].imshow(defdat[idx,:,:,0],cmap='gray',interpolation='sinc',vmin=-2.5,vmax=2.5)
+  #axarr[1].set_title('CORRPRB=%f'%(corrprb),fontsize=15)
+  #plt.show()
 
 # Output list of defocused images
 defout = []
