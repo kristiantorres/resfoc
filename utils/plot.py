@@ -2,12 +2,13 @@
 Useful functions for plotting. No interactive plots.
 See utils.movie for interactive plotting
 @author: Joseph Jennings
-@version: 2020.04.28
+@version: 2020.05.25
 """
 import numpy as np
 from utils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
   """
@@ -109,7 +110,7 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('labelsize',14))
   # Plot the extended axis
-  vmina = np.min(aimg); vmaxa = np.max(aimg); pclipa = kwargs.get('pclipa',1.0)
+  vmina = np.mina(aimg); vmaxa = np.max(aimg); pclipa = kwargs.get('pclipa',1.0)
   ax[1].imshow(aimg[:,:,xloc].T,extent=[oa,oa+(na)*da,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
       cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('vmina',vmina)*pclipa,
       vmax=kwargs.get('vmaxa',vmaxa)*pclipa)
@@ -117,11 +118,11 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
   ax[1].set_ylabel(' ',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
   ax[1].set_yticks([])
-  plt.subplots_adjust(wspace=kwargs.get('wspace',-0.4))
+  plt.subplots_adjust(wspace=-0.4)
   if(show):
     plt.show()
 
-def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
+def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=None,**kwargs):
   """
   Makes a plot of all of the angle gathers by combining the spatial
   and angle axes
@@ -130,6 +131,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
     aimg   - the angle domain image [nx,na,nz]
     transp - flag indicating that the input image has shape [na,nz,nx] [False]
     jx     - subsampling along the x axis (image points to skip) [10]
+    aagc   - flag for applying agc [True]
   """
   if(transp):
     # [na,nz,nx] -> [nx,na,nz]
@@ -141,19 +143,28 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,show=True,**kwargs):
   aimgts = aimgt[::jx,:,:]
   nxs = aimgts.shape[0]
   # Reshape to flatten the angle and CDP axes
-  aimgts = np.reshape(aimgts,[na*nxs,nz])
+  aimgtsnog = np.reshape(aimgts,[na*nxs,nz])
+  if(aagc):
+    aimgts = agc(aimgtsnog)
+  else:
+    aimgts = aimgtsnog
   # Min and max amplitudes
-  vmin = np.min(aimgts); vmax = np.max(aimgts)
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin is None or vmax is None):
+    vmin = np.min(aimgts); vmax = np.max(aimgts)
   # Plot the figure
-  fig = plt.figure(figsize=(10,10))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
   ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),nx*dx,nz*dz,kwargs.get('zmin',0.0)],
       vmin=vmin*kwargs.get('pclip',1.0),vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('labelsize',14))
-  if(show):
-    plt.show()
+  if(figname is not None and show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
 
 def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png',show=True,**kwargs):
   """
@@ -192,7 +203,9 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
   lz = np.linspace(izmin*dz,izmax*dz,izmax-izmin)
   lx = np.zeros(izmax-izmin) + xloc*dx
-  vmin1 = np.min(mig); vmax1 = np.max(mig)
+  vmin1 = kwargs.get('vmini',None); vmax1 = kwargs.get('vmaxi',None)
+  if(vmin1 is None or vmax1 is None):
+    vmin1 = np.min(mig); vmax1 = np.max(mig)
   ax1.imshow(mig[kwargs.get('xmin',0):kwargs.get('xmax',nx),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
       interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
     kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
@@ -464,6 +477,98 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   if(figname is not None):
     plt.savefig(figname+'.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
+  if(show):
+    plt.show()
+
+def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,verb=True,**kwargs):
+  """
+  Makes an isometric plot of 3D data
+
+  Parameters:
+    data   - the input 3D data
+    os     - the data origins [0.0,0.0.0]
+    ds     - the data samplings [1.0,1.0,1.0]
+    transp - flag for transposing second and third axes
+    show   - flag for displaying the plot
+    verb   - print the elevation and azimuth for the plot
+  """
+  if(transp):
+    data = np.transpose(data,(0,2,1))
+  # Get axes
+  [n3,n2,n1] = data.shape
+  [o3,o2,o1] = os
+  [d3,d2,d1] = ds
+
+  x1end = o1 + (n1-1)*d1
+  x2end = o2 + (n2-1)*d2
+  x3end = o3 + (n3-1)*d3
+
+  # Build mesh grid for plotting
+  x1 = np.linspace(o1, x1end, n1)
+  x2 = np.linspace(o2, x2end, n2)
+  x3 = np.linspace(o3, x3end, n3)
+  x1g, x3g = np.meshgrid(x1, x3)
+  x1g, x2g = np.meshgrid(x1, x2)
+
+  nlevels = kwargs.get('nlevels',200)
+
+  # Get locations for extracting planes
+  loc1 = kwargs.get('loc1',int(n1/2*d1+o1))
+  i1 = int((loc1 - o1)/d1)
+  loc2 = kwargs.get('loc2',int(n2/2*d2+o2))
+  i2 = int((loc2 - o2)/d2)
+  loc3 = kwargs.get('loc3',int(n3/2*d3+o3))
+  i3 = int((loc3 - o3)/d3)
+
+  # Get plotting range
+  if(kwargs.get('stack',False)):
+    # Get slices
+    slc1 = data[:,:,i1]
+    slc2 = data[:,i2,:]
+    slc3 = np.sum(data,axis=0)
+    # Set amplitude limits
+    vmin1 = np.min(slc3); vmax1 = np.max(slc3)
+    vmin2 = np.min(slc1); vmax2= np.max(slc1)
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+  else:
+    # Get slices
+    slc1 = data[:,:,i1]
+    slc2 = data[:,i2,:]
+    slc3 = data[i3,:,:]
+    # Set amplitude limits
+    vmin1 = kwargs.get('vmin',np.min(data))
+    vmax1 = kwargs.get('vmax',np.max(data))
+    vmin2 = vmin1; vmax2 = vmax1
+    levels1 = np.linspace(vmin1,vmax1,nlevels)
+    levels2 = np.linspace(vmin2,vmax2,nlevels)
+
+  # Plot data
+  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',8)))
+  ax = fig.gca(projection='3d')
+
+  cset = [[],[],[]]
+
+  cset[0] = ax.contourf(x1g, x3g, slc2, zdir='z',offset=o1,levels=levels2,cmap='gray')
+
+  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
+
+  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
+
+  ax.set(xlim=[o1,x1end],ylim=[o3,x3end],zlim=[x2end,o2])
+
+  fsize = kwargs.get('fsize',15)
+  ax.set_xlabel(kwargs.get('x1label'),fontsize=fsize)
+  ax.set_ylabel(kwargs.get('x2label'),fontsize=fsize)
+  ax.set_zlabel(kwargs.get('x3label'),fontsize=fsize)
+  ax.set_title(kwargs.get('title'),fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
+
+  ax.view_init(elev=kwargs.get('elev',30),azim=kwargs.get('azim',-60))
+
+  if(verb):
+    print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
+
   if(show):
     plt.show()
 
