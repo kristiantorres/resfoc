@@ -546,9 +546,9 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   cset[0] = ax.contourf(x1g, x3g, slc2, zdir='z',offset=o1,levels=levels2,cmap='gray')
 
-  cset[1] = ax.contourf(slc1, x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
+  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
 
-  cset[2] = ax.contourf(x1g, slc3, np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
+  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
 
   ax.set(xlim=[o1,x1end],ylim=[o3,x3end],zlim=[x2end,o2])
 
@@ -556,6 +556,7 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
   ax.set_xlabel(kwargs.get('x1label'),fontsize=fsize)
   ax.set_ylabel(kwargs.get('x2label'),fontsize=fsize)
   ax.set_zlabel(kwargs.get('x3label'),fontsize=fsize)
+  ax.set_title(kwargs.get('title'),fontsize=fsize)
   ax.tick_params(labelsize=fsize)
 
   ax.view_init(elev=kwargs.get('elev',30),azim=kwargs.get('azim',-60))
