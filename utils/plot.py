@@ -2,7 +2,7 @@
 Useful functions for plotting. No interactive plots.
 See utils.movie for interactive plotting
 @author: Joseph Jennings
-@version: 2020.04.28
+@version: 2020.05.25
 """
 import numpy as np
 from utils.signal import ampspec1d
@@ -95,10 +95,13 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
   """
   # Get image dimensions
   na = aimg.shape[0]; nz = aimg.shape[1]; nx = aimg.shape[2]
+  # Get image magnitudes
+  stk = np.sum(aimg,axis=0)
+  vmini = np.min(stk); vmaxi = np.max(stk); pclipi = kwargs.get('pclipi',1.0)
   fig,ax = plt.subplots(1,2,figsize=(kwargs.get('wbox',15),kwargs.get('hbox',8)),gridspec_kw={'width_ratios':[2,1]})
   # Plot the image
-  ax[0].imshow(np.sum(aimg,axis=0),extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-    cmap=kwargs.get('cmap','gray'))
+  ax[0].imshow(stk,extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
+    cmap=kwargs.get('cmap','gray'),vmin=kwargs.get('vmini',vmini)*pclipi,vmax=kwargs.get('vmaxi',vmaxi)*pclipi)
   # Plot a line at the specified image point
   lz = np.linspace(0.0,(nz)*dz,nz)
   lx = np.zeros(nz) + xloc*dx
@@ -107,8 +110,10 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('labelsize',14))
   # Plot the extended axis
+  vmina = np.mina(aimg); vmaxa = np.max(aimg); pclipa = kwargs.get('pclipa',1.0)
   ax[1].imshow(aimg[:,:,xloc].T,extent=[oa,oa+(na)*da,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500))
+      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('vmina',vmina)*pclipa,
+      vmax=kwargs.get('vmaxa',vmaxa)*pclipa)
   ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel(' ',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
