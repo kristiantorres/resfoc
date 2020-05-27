@@ -1,0 +1,29 @@
+[defaults]
+# IO
+focptch=./dat/angfaultfocptch.h5
+defptch=./dat/angfaultdefptch.h5
+fltptch=./dat/angfaultlblptch.h5
+focprb=./dat/stkfocfltprb.h5
+defprb=./dat/stkdeffltprb.h5
+oprefix=./dat/defocanglbl-
+begex=0
+nex=100
+totex=104790
+# Labeling parameters
+pixthresh=20
+thresh1=0.7
+thresh2=0.5
+thresh3=0.7
+# Cluster arguments
+tjobs=10
+ajobs=10
+nprocs=48
+nsubmit=5
+logpath=./log/defocanglbl
+parpath=./par/defocanglbl
+jobprefix=defocanglbl-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+

@@ -4,32 +4,32 @@ Classes and functions for loading in data for deep learning
 @author: Joseph Jennings
 @version: 2020.05.17
 """
-from tensorflow.keras.utils import Sequence
+#from tensorflow.keras.utils import Sequence
 import h5py
 import numpy as np
 import random
 import subprocess
 from utils.ptyprint import progressbar
 
-class resmig_generator_h5(Sequence):
-
-  def __init__(self, fname, batch_size):
-    self.hfin = h5py.File(fname,'r')
-    self.hfkeys = list(self.hfin.keys())
-    self.nb = int(len(self.hfkeys)/2) # Half is features, half is labels
-    self.indices = np.arange(self.nb)
-    self.batch_size = batch_size
-
-  def get_xyshapes(self):
-    return self.hfin[self.hfkeys[0]].shape[1:], self.hfin[self.hfkeys[self.nb]].shape[1:]
-
-  def __len__(self):
-    return self.nb
-
-  def __getitem__(self,idx):
-    xb = self.hfin[self.hfkeys[idx]]
-    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
-    return xb, yb
+#class resmig_generator_h5(Sequence):
+#
+#  def __init__(self, fname, batch_size):
+#    self.hfin = h5py.File(fname,'r')
+#    self.hfkeys = list(self.hfin.keys())
+#    self.nb = int(len(self.hfkeys)/2) # Half is features, half is labels
+#    self.indices = np.arange(self.nb)
+#    self.batch_size = batch_size
+#
+#  def get_xyshapes(self):
+#    return self.hfin[self.hfkeys[0]].shape[1:], self.hfin[self.hfkeys[self.nb]].shape[1:]
+#
+#  def __len__(self):
+#    return self.nb
+#
+#  def __getitem__(self,idx):
+#    xb = self.hfin[self.hfkeys[idx]]
+#    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
+#    return xb, yb
 
 #
 
@@ -111,7 +111,7 @@ def load_alldata(trfile,vafile,dsize):
 
   return allx,ally
 
-def load_all_unlabeled_data(filein):
+def load_all_unlabeled_data(filein,begex=None,endex=None):
   """ Loads all data into a numpy array """
   # Get training number of examples
   hftr = h5py.File(filein,'r')
@@ -123,7 +123,9 @@ def load_all_unlabeled_data(filein):
   allx = []
   k = 0
   # Get all training examples
-  for itr in progressbar(range(ntr), "numtr:"):
+  if(begex is None or endex is None):
+    begex = 0; endex = ntr
+  for itr in progressbar(range(begex,endex), "numtr:"):
     dsize = hftr[trkeys[itr]].shape[0]
     for iex in range(dsize):
       allx.append(hftr[trkeys[itr]][iex])
@@ -198,15 +200,22 @@ def load_allpatchdata(trfile,vafile,dsize):
 
   return allx, ally
 
-def load_unlabeled_flat_data(filein):
+def load_unlabeled_flat_data(filein,begex=None,endex=None):
   """ Loads in flattened unlabeled data """
   hftr = h5py.File(filein,'r')
   trkeys = list(hftr.keys())
   ntr = int(len(trkeys))
   xshape = hftr[trkeys[0]].shape
-  allx = np.zeros([ntr,xshape[0],xshape[1],xshape[2]],dtype='float32')
-  for itr in progressbar(range(ntr), "numex:"):
-    allx[itr,:,:,:]  = hftr[trkeys[itr]][:]
+  if(begex is None or endex is None):
+    begex = 0; endex = ntr
+    allx = np.zeros([ntr,xshape[0],xshape[1],xshape[2]],dtype='float32')
+  else:
+    nex = endex - begex
+    allx = np.zeros([nex,xshape[0],xshape[1],xshape[2]],dtype='float32')
+  k = 0
+  for itr in progressbar(range(begex,endex), "numex:"):
+    allx[k,:,:,:]  = hftr[trkeys[itr]][:]
+    k += 1
   # Close H5 file
   hftr.close()
 
