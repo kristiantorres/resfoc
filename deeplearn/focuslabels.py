@@ -298,10 +298,26 @@ def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthr
   else:
     return sptcho
 
-def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
+def extract_fltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
                          norm=True,qcptchgrd=False,dz=10,dx=10):
   """
   Extracts patches from a faulted image
+
+  Parameters:
+    fimg   - the input seismic image with faults [nz,nx]
+    fltlbl - image containing the fault positions [nz,nx]
+    nxp    - size of the patch in x [64]
+    nzp    - size of the patch in z [64]
+    strdx  - size of patch stride in x [32]
+    strdz  - size of patch stride in z [32]
+    pixthresh - number of fault pixels in image to determine if
+                patch has a fault [20]
+    norm   - normalize the patches [True]
+    qcptchgrd - show a plot of the patch grid on the image [False]
+    dz        - depth sampling for plotting patch grid [10]
+    dx        - lateral sampling for plotting patch grid [10]
+
+  Returns an array of image patches that contains faults [nptch,nzp,nxp]
   """
   # Check that dimg, fimg and fltlbl are the same size
   if(fimg.shape[0] != fltlbl.shape[0] or fimg.shape[1] != fltlbl.shape[1]):
