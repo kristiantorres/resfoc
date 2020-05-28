@@ -1,0 +1,20 @@
+[defaults]
+# Training inputs and outputs
+focdat=/scr1/joseph29/faultfocptch.h5
+defdat=/scr1/joseph29/alldefocs.h5
+resdat=/scr1/joseph29/faultresptch.h5
+vadat=
+wgtout=/scr1/joseph29/fltfocdefoc-wgts.h5
+arcout=./dat/networks/fltfocdefoc-arch.json
+chkpnt=/scr1/joseph29/fltfocdefoc-chkpnt.h5
+lssout=./dat/nnhistory/fltfocdefoc_loss.H
+vlsout=./dat/nnhistory/fltfocdefoc_vlss.H
+accout=./dat/nnhistory/fltfocdefoc_accu.H
+vacout=./dat/nnhistory/fltfocdefoc_vacu.H
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=5
+nqc=100

@@ -1,0 +1,21 @@
+[defaults]
+# IO
+img=../focdat/refocus/mltest/mltestdogstk.H
+focwgts=/scr1/joseph29/fltfocdefoc-chkpnt.h5
+focarch=./dat/networks/fltfocdefoc-arch.json
+# Patching
+ptchx=64
+ptchz=64
+strdx=32
+strdz=32
+# Fault finding
+fltwgts=
+fltarch=
+fltprbthresh=0.2
+fltnumthresh=50
+mindepth=960
+# Other
+verb=y
+show=y
+gpus=1
+

@@ -164,6 +164,92 @@ def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, 
   else:
     return rhosm
 
+def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
+                      hasfault=None,rectz=30,rectx=30,qcimgs=True):
+  """
+  Estimates rho by choosing the residually migrated patch that has
+  highest angle and fault focus probability given by the neural network
+
+  Parameters
+    rimgs      - residually migrated angle gathers images [nro,na,nz,nx]
+    foccnn     - CNN for determining if angle gather/fault is focused or not
+    dro        - residual migration sampling
+    oro        - residual migration origin
+    nzp        - size of patch in z dimension [64]
+    nxp        - size of patch in x dimension [64]
+    strdz      - size of stride in z dimension [nzp/2]
+    strdx      - size of stride in x dimension [nxp/2]
+    rectz      - length of smoother in z dimension [30]
+    rectx      - length of smoother in x dimension [30]
+    qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
+                 and fault patches [nz,nx]
+
+  Returns an estimate of rho(x,z)
+  """
+  # Get image dimensions
+  nro = rimgs.shape[0]; na = rings.shape[1]; nz = rimgs.shape[2]; nx = rimgs.shape[3]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Build the Patch Extractor
+  per = PatchExtractor((na,nzp,nxp),stride=(na,strdz,strdx))
+
+  #TODO: Patching needs to be 4D
+  # Loop over each residual migration image and extract patches
+  angptchs = []
+  for iro in range(nro):
+    # Extract angle cubes from residual migration image
+    aptch = np.squeeze(pea.extract(rimgs[iro]))
+    # Get shapes
+    numpz = aptch.shape[0]; numpx = aptch.shape[1]
+    # Flatten and append to output list
+    angptchs.append(aptch.reshape([numpz*numpx,nzp,nxp]))
+
+  angptchs = np.expand_dims(np.concatenate(angptchs,axis=0),axis=-1)
+  focprd = foccnn.predict(angptchs)
+
+  # Assign prediction to entire patch for QC
+  focprdptch = np.zeros(rptchf.shape)
+  for iptch in range(nro*numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
+  focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
+
+  if(hasfault is None):
+    hasfault = np.ones([numpz,numpx,nzp,nxp],dtype='int')
+
+  # Output rho image
+  rho = np.zeros([nz,nx])
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  rhop = pe.extract(rho)
+
+  # Using hasfault array, estimate rho from fault focus probabilities
+  hlfz = int(nzp/2); hlfx = int(nxp/2)
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      if(hasfault[izp,ixp,hlfz,hlfx]):
+        # Find maximum probability and compute rho
+        iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
+        rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
+      else:
+        rhop[izp,ixp,:,:] = 1.0
+
+  # Reconstruct the rho, fault patches and fault probabiliites
+  rho       = pe.reconstruct(rhop)
+  focprdimg = per.reconstruct(focprdptch.reshape([1,numpz,numpx,nro,nzp,nxp]))
+
+  # Smooth and return rho, fault patches and fault probabilities
+  rhosm = smooth(rho.astype('float32'),rect1=rectx,rect2=rectz)
+  if(qcimgs):
+    focprdimgsm = np.zeros(focprdimg.shape)
+    # Smooth the fault focusing for each rho
+    for iro in range(nro):
+      focprdimgsm[iro] = smooth(focprdimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
+    # Return images
+    return rhosm,focprdimgsm
+  else:
+    return rhosm
+
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
   Estimates rho by comparing residual migration images with a

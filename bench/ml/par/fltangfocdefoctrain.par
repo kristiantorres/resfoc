@@ -1,0 +1,21 @@
+[defaults]
+# Training inputs and outputs
+focdat=/scr1/joseph29/angfaultfocptch.h5
+defdat=/scr1/joseph29/alldefocangs.h5
+resdat=/scr1/joseph29/angfaultresptch.h5
+vadat=
+numex=5040
+wgtout=/scr1/joseph29/angfltfocdefoc-wgts.h5
+arcout=./dat/networks/angfltfocdefoc-arch.json
+chkpnt=/scr1/joseph29/angfltfocdefoc-chkpnt.h5
+lssout=./dat/nnhistory/angfltfocdefoc_loss.H
+vlsout=./dat/nnhistory/angfltfocdefoc_vlss.H
+accout=./dat/nnhistory/angfltgfocdefoc_accu.H
+vacout=./dat/nnhistory/angfltfocdefoc_vacu.H
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=1
+nqc=0

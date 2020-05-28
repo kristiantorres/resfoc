@@ -1,0 +1,25 @@
+[defaults]
+# IO
+img=./dat/f3cube.H
+focwgts=/scr1/joseph29/fltfocdefoc-chkpnt.h5
+focarch=./dat/networks/fltfocdefoc-arch.json
+# Patching
+#ptchx=64
+#ptchz=64
+ptchx=128
+ptchz=128
+strdx=32
+strdz=32
+# Fault finding
+#fltwgts=/scr1/joseph29/xwmig-10ep-chkpnt.h5
+#fltarch=./dat/networks/xwmig-10ep.h5
+fltwgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
+fltarch=./dat/networks/xwarch-gpu25.json
+fltprbthresh=0.2
+fltnumthresh=50
+mindepth=1.25
+# Other
+verb=y
+show=y
+gpus=1
+
