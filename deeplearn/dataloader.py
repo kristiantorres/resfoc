@@ -237,15 +237,25 @@ def load_labeled_flat_data(trfile,vafile):
   # Get shape of examples
   xshape = hftr[trkeys[0]].shape
   yshape = hftr[trkeys[0+ntr]].shape
-  allx = np.zeros([(ntr+nva),xshape[0],xshape[1],xshape[2]],dtype='float32')
+  ndim = len(xshape)
+  if(ndim == 3):
+    allx = np.zeros([(ntr+nva),xshape[0],xshape[1],xshape[2]],dtype='float32')
+  elif(ndim == 4):
+    allx = np.zeros([(ntr+nva),xshape[0],xshape[1],xshape[2],xshape[3]],dtype='float32')
   ally = np.zeros([(ntr+nva),yshape[0]],dtype='float32')
   # Get all training examples
   for itr in progressbar(range(ntr), "numtr:"):
-    allx[itr,:,:,:]  = hftr[trkeys[itr]    ][:]
+    if(ndim == 3):
+      allx[itr,:,:,:]  = hftr[trkeys[itr]    ][:]
+    elif(ndim == 4):
+      allx[itr,:,:,:,:]  = hftr[trkeys[itr]    ][:]
     ally[itr,:]      = hftr[trkeys[itr+ntr]][:]
   # Get all validation examples
   for iva in progressbar(range(nva), "numva:"):
-    allx[iva,:,:,:]  = hfva[vakeys[iva]    ][:]
+    if(ndim == 3):
+      allx[iva,:,:,:]  = hfva[vakeys[iva]    ][:]
+    elif(ndim == 4):
+      allx[iva,:,:,:,:]  = hfva[vakeys[iva]    ][:]
     ally[iva,:]      = hfva[vakeys[iva+nva]][:]
   # Close the files
   hftr.close()
