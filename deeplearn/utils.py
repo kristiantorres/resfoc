@@ -4,7 +4,7 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2020.05.21
+@version: 2020.05.28
 """
 import sys
 import numpy as np
@@ -37,7 +37,14 @@ def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
     else:
       return (img - np.mean(img))/(np.std(img) + eps)
   elif(mode == '3d'):
-    return (img - np.mean(img))/(np.std(img) + eps)
+    if(len(img.shape) == 4):
+      imgnrm = np.zeros(img.shape)
+      nimg = img.shape[0]
+      for k in range(nimg):
+        imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+      return imgnrm
+    else:
+      return (img - np.mean(img))/(np.std(img) + eps)
   else:
     raise Exception("Mode not recognized")
 
