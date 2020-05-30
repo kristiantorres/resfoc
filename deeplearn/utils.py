@@ -4,16 +4,17 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2020.03.13
+@version: 2020.05.28
 """
 import sys
 import numpy as np
 from scipy import interpolate
+from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from utils.image import remove_colorbar
 
-def normalize(img,eps=sys.float_info.epsilon):
+def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
   Normalizes an image accross channels  by removing
   the mean and dividing by the standard deviation
@@ -22,17 +23,30 @@ def normalize(img,eps=sys.float_info.epsilon):
     img - the input image. If the image has three dimensions,
           will normalize each image individually
     eps - parameters to avoid dividing a zero standard deviation
+    mode - normalize in 2D or 3D (['2d'] or '3d')
 
   Returns normalized image(s)
   """
-  if(len(img.shape) == 3):
-    imgnrm = np.zeros(img.shape)
-    nimg = img.shape[0]
-    for k in range(nimg):
-      imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
-    return imgnrm
+  if(mode == '2d'):
+    if(len(img.shape) == 3):
+      imgnrm = np.zeros(img.shape)
+      nimg = img.shape[0]
+      for k in range(nimg):
+        imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+      return imgnrm
+    else:
+      return (img - np.mean(img))/(np.std(img) + eps)
+  elif(mode == '3d'):
+    if(len(img.shape) == 4):
+      imgnrm = np.zeros(img.shape)
+      nimg = img.shape[0]
+      for k in range(nimg):
+        imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+      return imgnrm
+    else:
+      return (img - np.mean(img))/(np.std(img) + eps)
   else:
-    return (img - np.mean(img))/(np.std(img) + eps)
+    raise Exception("Mode not recognized")
 
 def resizepow2(img,kind='linear'):
   """
@@ -207,3 +221,53 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
     # Crop and pad the image so they are the same size
     remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
 
+def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
+  """
+  Extract patches from an image and normalize each patch. Works for 2D
+  and for 3D when the third dimension stride is one.
+
+  Parameters:
+    img   - the input image [n3,nz,nx]
+    nzp   - size of the patch in z dimension [64]
+    nxp   - size of the patch in x dimension [64]
+    strdz - size of patch stride in z dimension [32]
+    strdx - size of patch stride in x dimension [32]
+    norm  - normalize the patches [True]
+    flat  - return the patches flattened [nptch,nzp,nxp] or in a grid [numpz,numpx,nzp,nxp]
+
+    Returns normalized image patches
+  """
+  if(len(img.shape) == 2):
+    # Extract patches
+    pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+    ptch = pe.extract(img)
+
+    # Get patch dimensions
+    numpz = ptch.shape[0]; numpx = ptch.shape[1]
+
+    # Flatten and normalize
+    if(norm):
+      ptchf = normalize(ptch.reshape([numpz*numpx,nzp,nxp]),mode='2d')
+    else:
+      ptchf = ptch.reshape([numpz*numpx,nzp,nxp])
+
+  elif(len(img.shape) == 3):
+    # Get size of third dimension
+    n3 = img.shape[0]
+
+    # Extract patches
+    pea = PatchExtractor((n3,nzp,nxp),stride=(1,strdz,strdx))
+    ptch = np.squeeze(pea.extract(img))
+
+    # Get patch dimensions
+    numpz = ptch.shape[0]; numpx = ptch.shape[1]
+
+    # Flatten and normalize
+    if(norm):
+      ptchf = normalize(ptch.reshape([numpz*numpx,n3,nzp,nxp]),mode='3d')
+    else:
+      ptchf = ptch.reshape([numpz*numpx,n3,nzp,nxp])
+  else:
+    raise Exception("function supported only up to 3D")
+
+  return ptchf

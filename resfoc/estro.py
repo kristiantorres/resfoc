@@ -193,23 +193,28 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   if(strdz is None): strdz = int(nzp/2)
   if(strdx is None): strdx = int(nxp/2)
 
-  # Build the Patch Extractor
+  # Build the Patch Extractors
   pea = PatchExtractor((nro,na,nzp,nxp),stride=(nro,na,strdz,strdx))
-  aptch = np.squeeze(per.extract(rimgs))
+  aptch = np.squeeze(pea.extract(rimgs))
   # Flatten patches and make a prediction on each
   numpz = aptch.shape[0]; numpx = aptch.shape[1]
   aptchf = np.expand_dims(normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp])),axis=-1)
   focprd = foccnn.predict(aptchf)
 
   # Assign prediction to entire patch for QC
-  focprdptch = np.zeros([numpz*numpx*nro,nzp,nxp)
+  focprdptch = np.zeros([numpz*numpx*nro,nzp,nxp])
   for iptch in range(nro*numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
   focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
 
   # Output rho image
-  rho = np.zeros([nz,nx])
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  rho = np.zeros([nz,nx])
   rhop = pe.extract(rho)
+
+  # Output probabilities
+  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
+  focprdimg = np.zeros([nro,nz,nx])
+  _ = per.extract(focprdimg)
 
   # Estimate rho from angle-fault focus probabilities
   hlfz = int(nzp/2); hlfx = int(nxp/2)
@@ -218,8 +223,6 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
         # Find maximum probability and compute rho
         iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
         rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
-      else:
-        rhop[izp,ixp,:,:] = 1.0
 
   # Reconstruct rho and probabiliites
   rho       = pe.reconstruct(rhop)

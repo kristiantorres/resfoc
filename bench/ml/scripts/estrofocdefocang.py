@@ -13,7 +13,8 @@ import random
 from tensorflow.keras.models import model_from_json
 from deeplearn.keraspredict import focdefocflt
 from resfoc.gain import agc
-from resfoc.estro import estro_fltfocdefoc, refocusimg
+from joblib import Parallel, delayed
+from resfoc.estro import estro_fltangfocdefoc, refocusimg
 from deeplearn.focuslabels import find_flt_patches
 from deeplearn.utils import plotsegprobs, plotseglabel, thresh
 from utils.image import remove_colorbar
@@ -80,11 +81,16 @@ if(len(gpus) != 0):
 # Read in the image
 iaxes,img = sep.read_file(args.img)
 img = img.reshape(iaxes.n,order='F')
-img = np.ascontiguousarray(img.T).astype('float32')
-gimg = agc(img)
-gimgt = np.ascontiguousarray(np.transpose(gimg,(0,2,1)))
-
-[nz,nx,nro] = iaxes.n; [dz,dx,dro] = iaxes.d; [oz,ox,oro] = iaxes.o
+img = np.ascontiguousarray(img.T).astype('float32') # [nro,nx,na,nz]
+stk = np.sum(img,axis=2)
+## Apply AGC
+# Angle gathers
+[nz,na,nx,nro] = iaxes.n; [dz,da,dx,dro] = iaxes.d; [oz,da,ox,oro] = iaxes.o
+gimg =  np.asarray(Parallel(n_jobs=24)(delayed(agc)(img[iro]) for iro in range(nro)))
+gimgt = np.ascontiguousarray(np.transpose(gimg,(0,2,3,1))) # [nro,nx,na,nz] -> [nro,na,nz,nx]
+# Stack
+stkg = agc(stk)
+stkgt = np.transpose(stkg,(0,2,1)) # [nro,nx,nz] -> [nro,nz,nx]
 
 # Read in the fault focusing network
 with open(args.focarch,'r') as f:
@@ -96,23 +102,24 @@ if(verb): focmdl.summary()
 # Set GPUs
 tf.compat.v1.GPUOptions(allow_growth=True)
 
-# Defocused image
-rho1img = gimgt[21]
-
 # Read in the fault detection network
-if(args.fltarch is ''):
-  onlyfaults = False
-  rho,fltfocs = estro_fltfocdefoc(gimgt,focmdl,dro,oro)
+rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
+
+# Write out the estimated rho
+sep.write_file('rhoangcnn.H',rho,ds=[dz,dz])
 
 cuda.close()
+
+# Defocused image
+rho1img = stkgt[21]
 
 # Read in rho
 raxes,rhosmb = sep.read_file('../focdat/refocus/mltest/mltestdogrho.H')
 rhosmb = rhosmb.reshape(raxes.n,order='F')
 
-# Refocus the image with both
-rfismb = refocusimg(gimgt,rhosmb,dro)
-rfiflt = refocusimg(gimgt,rho,dro)
+## Refocus the image with both
+rfismb = refocusimg(stkgt,rhosmb,dro)
+rficnn = refocusimg(stkgt,rho,dro)
 
 faxes,fog = sep.read_file('../focdat/focdefoc/mltestfog.H')
 fog = np.ascontiguousarray(fog.reshape(faxes.n,order='F').T)
@@ -120,8 +127,8 @@ gfog = agc(fog.astype('float32'))
 fog = gfog[16,256:512+256,:]
 
 # Write out the refocused images
-sep.write_file('rfismbcomp.H',rfismb,ds=[dx,dz])
-sep.write_file('rfifltfoc.H',rfiflt,ds=[dx,dz])
+#sep.write_file('rfismbcomp.H',rfismb,ds=[dx,dz])
+sep.write_file('rficnnfoc.H',rficnn,ds=[dx,dz])
 
 # Plot rho on the defocused image
 fsize=15
@@ -160,7 +167,7 @@ ax4.set_title('Semblance',fontsize=fsize)
 ax4.tick_params(labelsize=fsize)
 
 fig5 = plt.figure(4,figsize=(8,8)); ax5 = fig5.gca()
-ax5.imshow(rfiflt,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax5.imshow(rficnn,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
 ax5.set_xlabel('X (km)',fontsize=fsize)
 ax5.set_ylabel('Z (km)',fontsize=fsize)
 ax5.set_title('Fault focus',fontsize=fsize)
