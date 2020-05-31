@@ -9,6 +9,7 @@ from utils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
   """
@@ -561,8 +562,19 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   ax.view_init(elev=kwargs.get('elev',30),azim=kwargs.get('azim',-60))
 
-  if(verb):
-    print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
+  class FixZorderCollection(Line3DCollection):
+    _zorder = 1000
+
+    @property
+    def zorder(self):
+      return self._zorder
+
+    @zorder.setter
+    def zorder(self, value):
+      pass
+
+    if(verb):
+      print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
 
   if(show):
     plt.show()
