@@ -10,6 +10,7 @@ from resfoc.gain import agc
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from matplotlib.collections import LineCollection
 
 def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
   """
@@ -561,6 +562,14 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
   ax.tick_params(labelsize=fsize)
 
   ax.view_init(elev=kwargs.get('elev',30),azim=kwargs.get('azim',-60))
+
+  pts = [[(0.32,0.0),(0.32,0.64)]]
+  pts2 = [[(0.0,0.32),(0.64,0.32)]]
+  
+  lines = LineCollection(pts,zorder=1000,color='k',lw=2)
+  lines2 = LineCollection(pts2,zorder=1000,color='k',lw=2)
+  #ax.add_collection3d(lines,zdir='y',zs=o2)
+  #ax.add_collection3d(lines2,zdir='y',zs=o2)
 
   class FixZorderCollection(Line3DCollection):
     _zorder = 1000
