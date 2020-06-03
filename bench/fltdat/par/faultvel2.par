@@ -1,0 +1,25 @@
+[defaults]
+# IO
+outdir=./dat/velflts2
+datapath=/scr2/joseph29/velflts2/
+beg=0
+end=9999
+prefix=
+nmodels=1
+# Velocity model
+nx=1000
+ox=0.0
+dx=25.0
+ny=200
+oy=0.0
+dy=25.0
+nz=1000
+oz=0.0
+dz=12.5
+# Processing
+nzo=1000
+nxo=1000
+slcy=100
+rect=0.5
+# Other
+verb=y

@@ -11,5 +11,5 @@ strdz=32
 # Other
 verb=y
 show=y
-gpus=1
+gpus=2
 

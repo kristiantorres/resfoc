@@ -8,7 +8,7 @@ from scaas.trismooth import smooth
 from utils.rand import randfloat
 
 class mdlbuild:
-  """ 
+  """
   Builds random geologically feasible velocity models.
   Based on the syntheticModel code from Bob Clapp
 
@@ -34,11 +34,11 @@ class mdlbuild:
   def deposit(self,velval=1400,thick=30,band1=0.4,band2=0.02,band3=0.02,dev_pos=0.0,
               layer=23,layer_rand=0.3,dev_layer=0.26):
     """
-    Creates a deposition event in the geological model. 
-    
+    Creates a deposition event in the geological model.
+
     Parameters:
-      A general summary of the parameters. 
-      
+      A general summary of the parameters.
+
       Lateral variation:
       The band1-3 parameters basically are three parameters used
       to define a 3D bandpass filter which is applied to a cube of random numbers. The different
@@ -48,9 +48,9 @@ class mdlbuild:
 
       Vertical variation:
       The parameters layer,layer_rand and dev_layer dertermine the variation of the layering
-      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a 
+      within a unit. Thick and dev_layer have the most impact where layer_rand is more of a
       fine tuning parameter
-      
+
       velval     - base value of velocity in the layer in m/s [1400]
       thick      - thickness of the layer in samples [30]
       band1      - bandpass parameter for axis 1 [0.4]
@@ -109,10 +109,10 @@ class mdlbuild:
       perp_die    - Controls the die off perpendicular to the fault
                     (e.g., if fault is visible in x, die off is in y).
                     Large number results in slower dieoff [0.5]
-      dist_die    - Controls the die off in the same plane of the fault 
+      dist_die    - Controls the die off in the same plane of the fault
                     (e.g., if fault is visible in x, die off is also in x)
                     Large number results in slower dieoff [0.3]
-      theta_die   - Controls the die off along the fault (essentially the throw). The larger 
+      theta_die   - Controls the die off along the fault (essentially the throw). The larger
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
       dirf        - Direction of fault movement [0.1]
@@ -166,10 +166,10 @@ class mdlbuild:
       begz        - Relative location of the beginning of the fault in z [0.5]
       dz          - Distance away from the center of a circle in z [7000]
       daz         - Distance away in azimuth [8000]
-      dist_die    - Controls the die off in the same plane of the fault 
+      dist_die    - Controls the die off in the same plane of the fault
                     (e.g., if fault is visible in x, die off is also in x)
                     Large number results in slower dieoff [0.3]
-      theta_die   - Controls the die off along the fault (essentially the throw). The larger 
+      theta_die   - Controls the die off along the fault (essentially the throw). The larger
                     the number the larger the fault will be. Acts similar to daz. [12]
       theta_shift - Shift in theta for fault [4.0]
       throwsc     - The total shift in z is divided by this amount (leads to smaller throw) [1.0]
@@ -560,7 +560,7 @@ class mdlbuild:
       # Move along x or y
       begx += dx; begy += dy
 
-  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,tscale=1.0,rand=True):
+  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
     """
     Puts in a tiny fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -572,12 +572,18 @@ class mdlbuild:
       begy - beginning position in x for fault [0.5]
       tscale - divides the shift in z by this amount
       rand - small random variations in the throw of faults [True]
+      twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
     """
     daz=3000.0; dz = 3000.0
     if(rand):
       daz += np.random.rand()*(2*1000) - 1000.0
       dz  += np.random.rand()*(2*500)  - 500.0
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+    if(twod):
+      self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,
+                 theta_shift=4.0,dist_die=0.3)
+    else:
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,
+                 theta_shift=4.0,dist_die=0.3,perp_die=1.0)
 
   def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
     """
@@ -605,7 +611,7 @@ class mdlbuild:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
           theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True):
+  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
     """
     Puts in a medium fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -617,16 +623,21 @@ class mdlbuild:
       begy   - beginning position in x for fault [0.5]
       tscale - divides the shift z by this amount [10.0]
       rand   - small random variations in the throw of faults [True]
+      twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
     """
     daz = 15000; dz = 12000
     if(rand):
       daz    += np.random.rand()*(2000) - 1000
       dz     += np.random.rand()*(2000) - 1000
       tscale += np.random.rand()*(2)
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-        theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+    if(twod):
+      self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=1.5,throwsc=tscale)
+    else:
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=6.0,rand=True):
+  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=6.0,rand=True,twod=False):
     """
     Puts in a large fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -638,14 +649,19 @@ class mdlbuild:
       begy   - beginning position in x for fault [0.5]
       tscale - divides the shift z by this amount [10.0]
       rand   - small random variations in the throw of faults [True]
+      twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
     """
     daz = 25000; dz = 10000
     if(rand):
       daz    += np.random.rand()*(2000) - 1000
       dz     += np.random.rand()*(2000) - 1000
       tscale += np.random.rand()*(3)
-    self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-        theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=200/tscale)
+    if(twod):
+      self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=12.0,theta_shift=4.0,dist_die=1.5,throwsc=tscale)
+    else:
+      self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
+          theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=200/tscale)
 
   def slidingfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
     """
@@ -900,7 +916,7 @@ class mdlbuild:
     """
     pts = []; k = 0
     while(len(pts) < nfaults):
-      # Create an x position and azimuth 
+      # Create an x position and azimuth
       pt = []
       pt.append(randfloat(begx,endx))
       pt.append(np.random.choice([0,180]))
@@ -939,10 +955,10 @@ class mdlbuild:
     return pts
 
   def find_faultpos(self,nfaults,mindist,begx=0.05,endx=0.95,begz=0.05,endz=0.95):
-    """ 
-    Finds random fault positions between the begx, endx, begz and endz positions 
-  
-    Parameters: 
+    """
+    Finds random fault positions between the begx, endx, begz and endz positions
+
+    Parameters:
       nfaults: number of fault positions to find
       mindist: minimum distance between faults
       begx: minimum x position for placing faults
@@ -967,9 +983,9 @@ class mdlbuild:
         if(keeppoint == True):
           pts.append(pt)
       k += 1
-  
+
     return pts
-  
+
   def distance(self,pt1,pt2):
     """ Compute the distance between two points """
     return np.linalg.norm(np.asarray(pt1)-np.asarray(pt2))

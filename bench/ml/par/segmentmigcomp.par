@@ -1,0 +1,43 @@
+[defaults]
+# IO
+#imgs=../focdat/imgundwind2.H
+#imgs=../focdat/fant/zofant3.H
+#imgs=../focdat/fant/zodeffant3.H
+#imgs=../focdat/fant/rfiifant3.H
+imgs=./rfismbcomp.H
+#imgs=./rfifltfoc.H
+#imgs=./rficnnfoc.H
+#imgs=mltestdogzowind.H
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu10ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu10.json
+#wgts=/scr1/joseph29/xwmig-10ep-chkpnt.h5
+#arch=./dat/networks/xwmig-10.json
+#wgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
+#arch=./dat/networks/xwarch-gpu25.json
+#figpfx=./fig/und/subsamp
+figpfx=./fig/comp/semb
+# Patching
+nxo=512
+nzo=512
+ptchx=128
+ptchz=128
+strdx=128
+strdz=128
+# Other
+thresh=0.8
+verb=y
+show=n
+gpus=2
+# Plotting
+pmin=0.4
+aratio=1.0
+fs=0
+time=n
+km=y
+hbar=0.75
+barz=0.12
+barx=0.76
+bxidx=0
+exidx=511
+cropsize=154
+

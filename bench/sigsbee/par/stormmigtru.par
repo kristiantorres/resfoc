@@ -1,0 +1,9 @@
+[defaults]
+vel=velr.H
+dat=dattru.H
+fimgo=beefimgostorm.H
+# Optional
+sbeg=96
+send=128
+fx=0
+nxw=3201

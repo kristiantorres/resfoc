@@ -1,0 +1,10 @@
+[defaults]
+vel=velr.H
+dat=dattru.H
+fimgo=beefimgojarvis.H
+# Optional
+sbeg=128
+send=161
+fx=0
+nxw=3201
+nthrds=20

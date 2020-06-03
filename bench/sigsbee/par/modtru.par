@@ -1,0 +1,7 @@
+[defaults]
+vel=velr.H
+ref=refr.H
+dat=dattru.H
+# Optional
+nxo=3201
+nzo=1201
