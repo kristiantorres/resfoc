@@ -4,6 +4,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/tbb.h>
 #include <fftw3.h>
+#include "sinc.h"
 #include "evntcre8.h"
 
 evntcre8::evntcre8(int nx, int ny, float dx, float dy, float dz) {
@@ -584,12 +585,12 @@ void evntcre8::squish_shifts(int nz, float *shftin, int mode,
       }
     }
 
-//    /* Scale by max shift */
-//    for (int i3 = 0; i3 < nn; i3++) {
-//      for (int i2 = 0; i2 < nn; i2++) {
-//        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
-//      }
-//    }
+    //    /* Scale by max shift */
+    //    for (int i3 = 0; i3 < nn; i3++) {
+    //      for (int i2 = 0; i2 < nn; i2++) {
+    //        shift[i3*nn + i2] = maxshift * shift[i3*nn + i2] / mxv;
+    //      }
+    //    }
 
   } else{
     /* Copy input shift function */
@@ -918,8 +919,8 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
   }
 }
 
-void evntcre8::calcref2d(int nz, float *vel, float *ref) {
-  for(int i2 = 0; i2 < _n2; ++i2) {
+void evntcre8::calcref2d(int nx, int nz, float *vel, float *ref) {
+  for(int i2 = 0; i2 < nx; ++i2) {
     for(int i1 = 0; i1 < nz; ++i1) {
       /* Backwards derivatives at the end */
       if(i1 == nz-1) {

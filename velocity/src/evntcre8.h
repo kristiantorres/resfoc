@@ -30,6 +30,8 @@ class evntcre8 {
     void squish_shifts(int nz, float *shftin, int mode,
         float azim, float lambda, float rinline, float rxline,
         float *shfty, float *shftx, float *shftz);
+    void apply_shiftsz(int nz, float *shiftz, float *velin, float *velot);
+    void apply_shiftsxyz(int nz, float *shiftx, float *shifty, float *shiftz, float *velin, float *velot);
     void fill_top_bottom(int nz, float maxshift, float basevel, int *lyrot, float *velot);
     /* Deposit helper functions */
     int find_max_deposit(int n1, int n2, int n3, int *lyrin);
@@ -56,7 +58,7 @@ class evntcre8 {
     void recBackward(std::vector<float> &vec1, std::vector<float> &vec2, const int len);
     /* Other functions */
     void calcref(int nz, float *vel, float *ref);
-    void calcref2d(int nz, float *vel, float *ref);
+    void calcref2d(int nx, int nz, float *vel, float *ref);
 
   private:
     int _n2, _n3;

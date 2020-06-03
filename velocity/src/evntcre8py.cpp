@@ -210,14 +210,15 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("nz"), py::arg("vel"), py::arg("ref")
          )
      .def("calcref2d",[](evntcre8 &ec8,
+            int nx,
             int nz,
             py::array_t<float, py::array::c_style> vel,
             py::array_t<float, py::array::c_style> ref
             )
             {
-               ec8.calcref2d(nz, vel.mutable_data(), ref.mutable_data());
+               ec8.calcref2d(nx, nz, vel.mutable_data(), ref.mutable_data());
             },
-            py::arg("nz"), py::arg("vel"), py::arg("ref")
+            py::arg("nx"), py::arg("nz"), py::arg("vel"), py::arg("ref")
          );
 
 }
