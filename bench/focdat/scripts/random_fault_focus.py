@@ -76,8 +76,8 @@ plt.show()
 velmig = smooth(vel,rect1=30,rect2=30)
 
 # Acquisition geometry
-dsx = 20; bx = 50; bz = 50
-prp = geom.defaultgeom(nx,dx,nz,dz,nsx=52,dsx=dsx,bx=bx,bz=bz)
+dsx = 10; bx = 50; bz = 50
+prp = geom.defaultgeom(nx,dx,nz,dz,nsx=103,dsx=dsx,bx=bx,bz=bz)
 
 prp.plot_acq(velmig,cmap='jet',show=True)
 

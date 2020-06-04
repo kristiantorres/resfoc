@@ -81,17 +81,20 @@ def tpow3d(dat,dt,tpow,ot=0.0,norm=True):
   # Scale the data
   return (dat*tpxr).astype('float32')
 
-def agc(dat,rect1=125):
+def agc(dat,rect1=125,transp=False):
   """
   Applies an automatic gain control (AGC) to the data/image
   Applies it trace by trace (assumes t or z is the fast axis)
 
   Parameters:
-    dat   - the input data/image [nx,nt/nz]
-    rect1 - size of AGC window along the fast axis
+    dat    - the input data/image [nx,nt/nz]
+    rect1  - size of AGC window along the fast axis
+    transp - transpose a 2D image so that t/z is the fast axis
 
   Returns the gained data
   """
+  if(transp):
+    dat = np.ascontiguousarray(dat.T)
   # First compute the absolute value of the data
   databs = np.abs(dat)
   # Smooth the absolute value
