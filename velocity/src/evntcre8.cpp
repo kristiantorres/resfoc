@@ -918,8 +918,8 @@ void evntcre8::calcref(int nz, float *vel, float *ref) {
   }
 }
 
-void evntcre8::calcref2d(int nz, float *vel, float *ref) {
-  for(int i2 = 0; i2 < _n2; ++i2) {
+void evntcre8::calcref2d(int nx, int nz, float *vel, float *ref) {
+  for(int i2 = 0; i2 < nx; ++i2) {
     for(int i1 = 0; i1 < nz; ++i1) {
       /* Backwards derivatives at the end */
       if(i1 == nz-1) {

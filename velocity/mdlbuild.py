@@ -13,7 +13,7 @@ class mdlbuild:
   Based on the syntheticModel code from Bob Clapp
 
   @author: Joseph Jennings
-  @version: 2020.02.05
+  @version: 2020.06.02
   """
 
   def __init__(self,nx,dx,ny,dy,dz,nbase=50,basevel=4000):
@@ -151,7 +151,7 @@ class mdlbuild:
     self.lbl[idx] = 1
 
   def fault2d(self,begx=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.15,slcy=None):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.15,slcy=None,fpr=False):
     """
     Creates a 2D fault event in the geologic model.
 
@@ -175,6 +175,7 @@ class mdlbuild:
       throwsc     - The total shift in z is divided by this amount (leads to smaller throw) [1.0]
       thresh      - Threshold applied for obtaining the fault labels [50]
       slcy        - y index from where to extract the slice for faulting [ny/2]
+      fpr         - Gives the fault a fault plane reflection [False]
     """
     # Check that azim is either 0 or 180
     if(azim != 0.0 and azim != 180.0):
@@ -199,7 +200,7 @@ class mdlbuild:
                             theta_shift,dist_die,theta_die,throwsc,
                             lblto,lbltn,coords[0],coords[1])
     # Fault velocity model with an accurate interpolation
-    velot = map_coordinates(self.vel,coords)
+    velot = map_coordinates(self.vel,coords,mode='reflect')
     # Fault label and lyr with nearest neighbor
     lblto = map_coordinates(self.lbl,coords,order=0)
     lyrot = map_coordinates(self.lyr,coords,order=0)
@@ -210,13 +211,59 @@ class mdlbuild:
     self.lyr = lyrot
     # Apply a threshold
     lbltn = lbltn/np.max(lbltn)
+    lbltm = np.copy(lbltn)
     idx = lbltn > thresh
     lbltn[ idx] = 1; lbltn[~idx] = 0
+    # Create mask for fault plane reflection
+    if(fpr):
+      # Randomly vary decay and strength
+      dec = randfloat(0.9,0.95);
+      rectdecay = randfloat(10,15)
+      fpmask = self.fpr_mask(lbltm,lbltn,dec=dec,rectdecay=rectdecay)
+      self.vel *= fpmask
     # Update label
     self.lbl += lbltn
     # Apply final threshold to label
     idx = self.lbl > 1
     self.lbl[idx] = 1
+
+  def fpr_mask(self,lbltm,lbltn,dec=0.9,rectdecay=10,rectspread=3):
+    """
+    Creates a mask for creating the effect of a fault plane reflection
+    along a fault
+
+    Parameters:
+      lbltm      - the normalized fault displacement
+      lbltn      - the fault label (thresholded fault displacement)
+      dec        - the percent decrease of the velocity along the fault
+                   (if None, randomly selected between 90-95%
+      rectdecay  - smoothing length that controls the decay of
+                   the reflection [10 points]
+      rectspread - smoothing length that controls the spread of the reflection [3 points]
+    """
+    # Create a mask that smoothly increases from dec to 1.0
+    lbltmsm = smooth(lbltm,rect1=rectdecay,rect2=rectdecay)
+    mcomp  = 1 - lbltmsm        # Mask complement
+    mcomp += 1 - np.min(mcomp)  # Bring up to 1.0
+    ampmask = mcomp*lbltn
+
+    # Set the entire label to be velocity decrease percent
+    fpmask = 1-lbltn
+    zidx = fpmask == 0
+    fpmask[zidx] = dec
+    # Based on this value, change the max on the amplitude mask (avoids going over one)
+    newmax = 1/dec
+    midx = ampmask > newmax
+    ampmask[midx] = newmax
+    # Scale the constant velocity decrease by the amplitude mask
+    fpmask *= ampmask
+    # Set all zeros to ones
+    zidx = fpmask == 0
+    fpmask[zidx] = 1.0
+    # Smooth to spread out over a few pixels
+    fpmasksm = smooth(fpmask,rect1=rectspread,rect2=rectspread)
+
+    return fpmasksm
 
   def get_label(self):
     """
@@ -560,19 +607,20 @@ class mdlbuild:
       # Move along x or y
       begx += dx; begy += dy
 
-  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
+  def tinyfault(self,azim=0.0,begz=0.2,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False,fpr=False,**kwargs):
     """
     Puts in a tiny fault
     For now, will only give nice faults along 0,90,180,270 azimuths
 
     Parameters:
-      azim - azimuth along which faults are oriented [0.0]
-      begz - beginning position in z for fault [0.2]
-      begx - beginning position in x for fault [0.5]
-      begy - beginning position in x for fault [0.5]
+      azim   - azimuth along which faults are oriented [0.0]
+      begz   - beginning position in z for fault [0.2]
+      begx   - beginning position in x for fault [0.5]
+      begy   - beginning position in x for fault [0.5]
       tscale - divides the shift in z by this amount
-      rand - small random variations in the throw of faults [True]
+      rand   - small random variations in the throw of faults [True]
       twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
+      fpr    - add a fault plane reflection to the fault [False]
     """
     daz=3000.0; dz = 3000.0
     if(rand):
@@ -580,12 +628,12 @@ class mdlbuild:
       dz  += np.random.rand()*(2*500)  - 500.0
     if(twod):
       self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,
-                 theta_shift=4.0,dist_die=0.3)
+                 theta_shift=4.0,dist_die=kwargs.get('dist_die',0.3),fpr=fpr)
     else:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,theta_die=9.0,
-                 theta_shift=4.0,dist_die=0.3,perp_die=1.0)
+                 theta_shift=4.0,dist_die=kwargs.get('dist_die',0.3),perp_die=1.0)
 
-  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
+  def smallfault(self,azim=0.0,begz=0.3,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False,fpr=False,**kwargs):
     """
     Puts in a small fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -598,6 +646,7 @@ class mdlbuild:
       tscale - divides the shift in z by this amount
       rand   - small random variations in the throw of faults [True]
       twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
+      fpr    - add fault plane reflection to fault [False]
     """
     daz = 8000; dz = 5000
     if(rand):
@@ -606,12 +655,12 @@ class mdlbuild:
       tscale += np.random.rand()*2
     if(twod):
       self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=11.0,theta_shift=4.0,dist_die=0.3,throwsc=tscale)
+          theta_die=11.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',0.3),throwsc=tscale,fpr=fpr)
     else:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=11.0,theta_shift=4.0,dist_die=0.3,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+          theta_die=11.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',0.3),perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False):
+  def mediumfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=1.0,rand=True,twod=False,fpr=False,**kwargs):
     """
     Puts in a medium fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -624,6 +673,7 @@ class mdlbuild:
       tscale - divides the shift z by this amount [10.0]
       rand   - small random variations in the throw of faults [True]
       twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
+      fpr    - add fault plane reflection to fault [False]
     """
     daz = 15000; dz = 12000
     if(rand):
@@ -632,12 +682,12 @@ class mdlbuild:
       tscale += np.random.rand()*(2)
     if(twod):
       self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=11.0,theta_shift=4.0,dist_die=1.5,throwsc=tscale)
+          theta_die=11.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',1.5),throwsc=tscale,fpr=fpr)
     else:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=11.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=50/tscale)
+          theta_die=11.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',1.5),perp_die=1.0,throwsc=tscale,thresh=50/tscale)
 
-  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=6.0,rand=True,twod=False):
+  def largefault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,tscale=6.0,rand=True,twod=False,fpr=False,**kwargs):
     """
     Puts in a large fault
     For now, will only give nice faults along 0,90,180,270 azimuths
@@ -650,6 +700,7 @@ class mdlbuild:
       tscale - divides the shift z by this amount [10.0]
       rand   - small random variations in the throw of faults [True]
       twod   - make fault only in 2D (all faults must be put in 2D if one is put in 2D) [False]
+      fpr    - add fault plane reflection to fault [False]
     """
     daz = 25000; dz = 10000
     if(rand):
@@ -658,10 +709,10 @@ class mdlbuild:
       tscale += np.random.rand()*(3)
     if(twod):
       self.fault2d(begx=begx,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=12.0,theta_shift=4.0,dist_die=1.5,throwsc=tscale)
+          theta_die=12.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',1.5),throwsc=tscale,fpr=fpr)
     else:
       self.fault(begx=begx,begy=begy,begz=begz,daz=daz,dz=dz,azim=azim,
-          theta_die=12.0,theta_shift=4.0,dist_die=1.5,perp_die=1.0,throwsc=tscale,thresh=200/tscale)
+          theta_die=12.0,theta_shift=4.0,dist_die=kwargs.get('dist_die',1.5),perp_die=1.0,throwsc=tscale,thresh=200/tscale)
 
   def slidingfault(self,azim=0.0,begz=0.6,begx=0.5,begy=0.5,rand=True):
     """
@@ -897,6 +948,17 @@ class mdlbuild:
     ref = np.zeros(self.vel.shape,dtype='float32')
     velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
     self.ec8.calcref2d(nz,velsm,ref)
+    return ref
+
+  def calcrefl2d(self,velin):
+    """ Computes the reflectivity given an input model """
+    nx = velin.shape[0]; nz = velin.shape[1]
+    ref = np.zeros(velin.shape,dtype='float32')
+    velsm = gaussian_filter(velin,sigma=0.5).astype('float32')
+    if(nx != self.__nx):
+      self.ec8.calcref2d(nx,nz,velsm,ref)
+    else:
+      self.ec8.calcref2d(self.__nx,nz,velsm,ref)
     return ref
 
   def getfaultpos2d(self,begx,endx,minblk,minhor,mingrb,nfaults):
