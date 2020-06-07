@@ -13,6 +13,7 @@ from resfoc.ssim import ssim
 from resfoc.rhoshifts import rhoshifts
 from scipy.ndimage import map_coordinates
 from scaas.trismooth import smooth
+from scaas.noise_generator import perlin
 
 def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
   """
@@ -164,6 +165,82 @@ def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, 
   else:
     return rhosm
 
+def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
+                         rectz=30,rectx=30,qcimgs=True):
+  """
+  Estimates rho by choosing the residually migrated patch that has
+  highest angle gather and fault focus probability given by the neural network
+
+  Parameters
+    rimgs      - residually migrated angle gathers images [nro,na,nz,nx]
+    foccnn     - CNN for determining if angle gather/fault is focused or not
+    dro        - residual migration sampling
+    oro        - residual migration origin
+    nzp        - size of patch in z dimension [64]
+    nxp        - size of patch in x dimension [64]
+    strdz      - size of stride in z dimension [nzp/2]
+    strdx      - size of stride in x dimension [nxp/2]
+    rectz      - length of smoother in z dimension [30]
+    rectx      - length of smoother in x dimension [30]
+    qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
+                 and fault patches [nz,nx]
+
+  Returns an estimate of rho(x,z)
+  """
+  # Get image dimensions
+  nro = rimgs.shape[0]; na = rimgs.shape[1]; nz = rimgs.shape[2]; nx = rimgs.shape[3]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Build the Patch Extractors
+  pea = PatchExtractor((nro,na,nzp,nxp),stride=(nro,na,strdz,strdx))
+  aptch = np.squeeze(pea.extract(rimgs))
+  # Flatten patches and make a prediction on each
+  numpz = aptch.shape[0]; numpx = aptch.shape[1]
+  aptchf = np.expand_dims(normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp])),axis=-1)
+  focprd = foccnn.predict(aptchf)
+
+  # Assign prediction to entire patch for QC
+  focprdptch = np.zeros([numpz*numpx*nro,nzp,nxp])
+  for iptch in range(nro*numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
+  focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
+
+  # Output rho image
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  rho = np.zeros([nz,nx])
+  rhop = pe.extract(rho)
+
+  # Output probabilities
+  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
+  focprdimg = np.zeros([nro,nz,nx])
+  _ = per.extract(focprdimg)
+
+  # Estimate rho from angle-fault focus probabilities
+  hlfz = int(nzp/2); hlfx = int(nxp/2)
+  for izp in range(numpz):
+    for ixp in range(numpx):
+        # Find maximum probability and compute rho
+        iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
+        rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
+
+  # Reconstruct rho and probabiliites
+  rho       = pe.reconstruct(rhop)
+  focprdimg = per.reconstruct(focprdptch.reshape([1,numpz,numpx,nro,nzp,nxp]))
+
+  # Smooth and return rho, fault patches and fault probabilities
+  rhosm = smooth(rho.astype('float32'),rect1=rectx,rect2=rectz)
+  if(qcimgs):
+    focprdimgsm = np.zeros(focprdimg.shape)
+    # Smooth the fault focusing for each rho
+    for iro in range(nro):
+      focprdimgsm[iro] = smooth(focprdimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
+    # Return images
+    return rhosm,focprdimgsm
+  else:
+    return rhosm
+
 def estro_tgt(rimgs,fimg,dro,oro,nzp=128,nxp=128,strdx=64,strdz=64,transp=False,patches=False,onehot=False):
   """
   Estimates rho by comparing residual migration images with a
@@ -285,4 +362,67 @@ def ssim_ro(rimgs,fimg):
     ssims[iro] = ssim(rimgs[iro],fimg)
 
   return np.argmax(ssims)
+
+def anglemask(nz,na,zpos=None,apos=None,rectz=10,recta=10,mode='slant',rand=True):
+  """
+  Creates an angle mask that can be applied to an
+  angle gather to limit the number of angles (illumination)
+
+  Parameters:
+    nz    - number of depth samples
+    na    - number of angle samples
+    zpos  - percentage in z where to begin the mask [0.3]
+    apos  - percentage in a where to end the mask [0.6]
+    rectz - number of points to smooth the mask in z [10]
+    recta - number of points to smooth the mask in a [10]
+    mode  - mode of creating mask. Either a vertical mask ('vert') or slanted ['slant']
+    rand  - add smooth random variation to the mask [True]
+
+  Returns a single angle gather mask [nz,na]
+  """
+  # Create z(a) linear function
+  if(zpos is None):
+    z0 = int(0.3*nz)
+  else:
+    z0 = int(zpos*nz)
+  if(apos is None):
+    a0 = int(0.6*na)
+  else:
+    a0 = int(apos*na)
+
+  if(mode == 'vert'):
+    abeg = a0; aend = na-a0
+    mask = np.ones([nz,na])
+    mask[:,0:abeg] = 0.0
+    mask[:,aend:] = 0.0
+
+  elif(mode == 'slant'):
+    zf = nz-1; af = na-1
+
+    # Slope and intercept
+    m = (zf - z0)/(a0 - af)
+    b = (z0*a0 - zf*af)/(a0 - af)
+
+    a = np.array(range(a0,na))
+    zofa = (a*m + b).astype(int)
+
+    if(rand):
+      noise = 250*perlin(x=np.linspace(0,2,len(zofa)), octaves=2, persist=0.3, ncpu=1)
+      noise = noise - np.mean(noise)
+      zofa += noise.astype(int)
+
+    # Create mask
+    liner = np.ones([nz,na])
+    j = 0
+    for ia in a:
+      liner[zofa[j]:,ia] = 0
+      j += 1
+
+    # Flip for symmetry
+    linel = np.fliplr(liner)
+    mask = linel*liner
+
+  masksm = smooth(mask.astype('float32'),rect1=recta,rect2=rectz)
+
+  return masksm
 

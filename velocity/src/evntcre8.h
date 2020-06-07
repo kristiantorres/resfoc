@@ -56,7 +56,7 @@ class evntcre8 {
     void recBackward(std::vector<float> &vec1, std::vector<float> &vec2, const int len);
     /* Other functions */
     void calcref(int nz, float *vel, float *ref);
-    void calcref2d(int nz, float *vel, float *ref);
+    void calcref2d(int nx, int nz, float *vel, float *ref);
 
   private:
     int _n2, _n3;

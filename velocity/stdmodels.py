@@ -16,6 +16,133 @@ import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
 from utils.signal import bandpass
 
+def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,maxvel=5000,rect=0.5,**kwargs):
+  """
+  Builds a 2D highly faulted and folded velocity model.
+  Returns the velocity model, reflectivity, fault labels and a zero-offset image
+
+  Parameters:
+    nz     - number of depth samples [512]
+    nx     - number of lateral samples [1024]
+    dz     - depth sampling interval [25.0]
+    dx     - lateral sampling interval [25.0]
+    nlayer - number of deposited layers (there exist many fine layers within a deposit) [20]
+    minvel - minimum velocity in model [1600]
+    maxvel - maximum velocity in model [5000]
+    rect   - length of gaussian smoothing [0.5]
+
+  Returns
+    The velocity, reflectivity, fault label and image all of size [nx,nz]
+  """
+  # Internal model size
+  nzi = 1000; nxi = 1000
+  # Model building object
+  mb = mdlbuild.mdlbuild(nxi,dx,ny,dy=dx,dz=dz,basevel=5000)
+
+  # First build the v(z) model
+  props = mb.vofz(nlayer,minvel,maxvel)
+
+  # Specify the thicknesses
+  thicks = np.random.randint(40,61,nlayer)
+
+  # Determine when to fold the deposits
+  sqlyrs = sorted(mb.findsqlyrs(3,nlayer,5))
+  csq = 0
+
+  dlyr = 0.05
+  for ilyr in progressbar(range(nlayer), "ndeposit:", 40):
+    mb.deposit(velval=props[ilyr],thick=thicks[ilyr],band2=0.01,band3=0.05,dev_pos=0.0,layer=150,layer_rand=0.00,dev_layer=dlyr)
+    # Random folding
+    if(ilyr in sqlyrs):
+      if(sqlyrs[csq] < 15):
+        # Random amplitude variation in the folding
+        amp = np.random.rand()*(3000-500) + 500
+        mb.squish(amp=amp,azim=90.0,lam=0.4,rinline=0.0,rxline=0.0,mode='perlin',order=3)
+      elif(sqlyrs[csq] >= 15 and sqlyrs[csq] < 18):
+        amp = np.random.rand()*(1800-500) + 500
+        mb.squish(amp=amp,azim=90.0,lam=0.4,rinline=0.0,rxline=0.0,mode='perlin',order=3)
+      else:
+        amp = np.random.rand()*(500-300) + 300
+        mb.squish(amp=amp,azim=90.0,lam=0.4,rinline=0.0,rxline=0.0,mode='perlin')
+      csq += 1
+
+  # Water deposit
+  mb.deposit(1480,thick=50,layer=150,dev_layer=0.0)
+
+  # Smooth any unconformities
+  mb.smooth_model(rect1=1,rect2=5,rect3=1)
+
+  # Trim model before faulting
+  mb.trim(0,1100)
+
+  # Fault it up!
+  azims = [0.0,180.0]
+  fprs  = [True,False]
+
+  # Large faults
+  nlf = np.random.randint(2,5)
+  for ifl in progressbar(range(nlf), "nlfaults:", 40):
+    azim = np.random.choice(azims)
+    fpr  = np.random.choice(fprs)
+    xpos = rndut.randfloat(0.1,0.9)
+    mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=2.0,tscale=6.0,fpr=fpr,twod=True)
+
+  # Medium faults
+  nmf = np.random.randint(3,6)
+  for ifl in progressbar(range(nmf), "nmfaults:", 40):
+    azim = np.random.choice(azims)
+    fpr  = np.random.choice(fprs)
+    xpos = rndut.randfloat(0.05,0.95)
+    mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=2.0,tscale=3.0,fpr=fpr,twod=True)
+
+  # Small faults (sliding or small)
+  nsf = np.random.randint(5,10)
+  for ifl in progressbar(range(nsf), "nsfaults:", 40):
+    azim = np.random.choice(azims)
+    fpr  = np.random.choice(fprs)
+    xpos = rndut.randfloat(0.05,0.95)
+    zpos = rndut.randfloat(0.2,0.5)
+    mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=2.0,tscale=2.0,fpr=fpr,twod=True)
+
+  # Tiny faults
+  ntf = np.random.randint(5,10)
+  for ifl in progressbar(range(ntf), "ntfaults:", 40):
+    azim = np.random.choice(azims)
+    xpos = rndut.randfloat(0.05,0.95)
+    zpos = rndut.randfloat(0.15,0.3)
+    mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=2.0,tscale=2.0,twod=True)
+
+  # Parameters for ricker wavelet
+  nt = kwargs.get('nt',250); ot = 0.0; dt = kwargs.get('dt',0.001); ns = int(nt/2)
+  amp = 1.0; dly = kwargs.get('dly',0.125)
+  minf = kwargs.get('minf',60.0); maxf = kwargs.get('maxf',100.0)
+  f = kwargs.get('f',None)
+
+  # Get model
+  vel = gaussian_filter(mb.vel[:,:nzi],sigma=rect).astype('float32')
+  lbl = mb.get_label2d()[:,:nzi]
+
+  # Resample to output size
+  velr = dlut.resample(vel,[nx,nz],kind='quintic')
+  lblr = dlut.thresh(dlut.resample(lbl,[nx,nz],kind='linear'),0)
+  refr = mb.calcrefl2d(velr)
+
+  # Create normalized image
+  if(f is None):
+    f = rndut.randfloat(minf,maxf)
+  wav = ricker(nt,dt,f,amp,dly)
+  img = dlut.normalize(np.array([np.convolve(refr[ix,:],wav) for ix in range(nx)])[:,ns:nz+ns])
+  # Create noise
+  nze = dlut.normalize(bandpass(np.random.rand(nx,nz)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
+  img += img + nze
+
+  velt = np.ascontiguousarray(velr.T).astype('float32')
+  reft = np.ascontiguousarray(refr.T).astype('float32')
+  imgt = np.ascontiguousarray(img.T).astype('float32')
+  lblt = np.ascontiguousarray(lbl.T).astype('float32')
+
+  return velt,reft,imgt,lblt
+
 def layeredfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,maxvel=3000,rect=0.5,
                     nfx=3,ofx=0.4,dfx=0.1,ofz=0.3):
   """
@@ -70,7 +197,7 @@ def layeredfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,maxvel=
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)
@@ -150,7 +277,7 @@ def undulatingfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,maxv
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)
@@ -301,7 +428,7 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   # Trim model before faulting
   mb.trim(0,1100)
 
-  # Thresh should be a function of theta_shift
+  #XXX: Thresh should be a function of theta_shift
 
   # Generate the fault positions
   flttype = np.random.choice([0,1,2,3,4,5])
@@ -326,7 +453,7 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)

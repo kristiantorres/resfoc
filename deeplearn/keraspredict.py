@@ -9,7 +9,7 @@ from deeplearn.utils import thresh, normalize, resizepow2
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from scaas.trismooth import smooth
 
-def segmentfaults(img,mdl,npz=128,npx=128,strdz=None,strdx=None,verb=False):
+def segmentfaults(img,mdl,nzp=128,nxp=128,strdz=None,strdx=None,verb=False):
   """
   Segments faults on a 2D image. Returns the probablility of each
   pixel being a fault or not.
@@ -17,8 +17,8 @@ def segmentfaults(img,mdl,npz=128,npx=128,strdz=None,strdx=None,verb=False):
   Parameters:
     img   - the input image [nz,nx]
     mdl   - the trained keras model
-    npz   - z-dimension of the patch provided to the CNN [128]
-    npx   - x-dimension of the patch provided to the CNN [128]
+    nzp   - z-dimension of the patch provided to the CNN [128]
+    nxp   - x-dimension of the patch provided to the CNN [128]
     strdz - z-dimension of the patch stride (50% overlap) [npz/2]
     strdx - x-dimension of the patch stride (50% overlap) [npx/2]
     verb  - verbosity flag [False]
@@ -39,7 +39,7 @@ def segmentfaults(img,mdl,npz=128,npx=128,strdz=None,strdx=None,verb=False):
   for ip in range(numpz*numpx):
     niptch[ip,:,:] = normalize(iptch[ip,:,:])
   # Make a prediction
-  iprd  = mdl.predict(niptch,verbose=1)
+  iprd  = mdl.predict(niptch,verbose=verb)
   # Reconstruct the predictions
   ipra  = iprd.reshape([numpz,numpx,nzp,nxp])
   iprb  = pe.reconstruct(ipra)
