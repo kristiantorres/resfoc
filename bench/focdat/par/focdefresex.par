@@ -1,0 +1,20 @@
+[defaults]
+# IO
+vel=./dat/totex/vel.H
+ref=./dat/totex/ref.H
+lbl=./dat/totex/lbl.H
+cnv=./dat/totex/cnv.H
+ptb=./dat/totex/ptb.H
+fimgo=./dat/totex/fimgo.H
+fimga=./dat/totex/fimga.H
+dimgo=./dat/totex/dimgo.H
+dimga=./dat/totex/dimga.H
+rimgo=./dat/totex/rimgo.H
+rimga=./dat/totex/rimga.H
+dpath=/net/fantastic/scr2/joseph29/focdefres
+# Other
+na=64
+nro=21
+oro=1.0
+dro=0.00125
+offset=6

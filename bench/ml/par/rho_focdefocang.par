@@ -1,6 +1,6 @@
 [defaults]
 # IO
-img=../focdat/refocus/mltest/mltestdogang2.H
+img=../focdat/dat/refocus/mltest/mltestdogang2.H
 focwgts=/scr1/joseph29/angfltfocdefoc-chkpnt.h5
 focarch=./dat/networks/angfltfocdefoc-arch.json
 # Patching

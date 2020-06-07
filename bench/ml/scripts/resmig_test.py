@@ -58,7 +58,7 @@ for iro in range(nro):
   fig = plt.figure(1,figsize=(10,10)); ax = fig.gca()
   ax.imshow(reszo[iro],vmin=-2.5,vmax=2.5,interpolation='sinc',cmap='gray')
   ax.tick_params(labelsize=fsize); ax.set_xlabel(' ',fontsize=fsize); ax.set_ylabel(' ',fontsize=fsize)
-  ax.set_title(r'$\rho$=%.3f'%(rho),fontsize=fsize)
-  plotsegprobs(reszo[iro],fltprb,pmin=0.3,interp='sinc',vmin=-2.5,vmax=2.5,title=r'$\rho$=%.3f'%(rho),
+  ax.set_title(r'$\rho$=%.5f'%(rho),fontsize=fsize)
+  plotsegprobs(reszo[iro],fltprb,pmin=0.3,interp='sinc',vmin=-2.5,vmax=2.5,title=r'$\rho$=%.5f'%(rho),
                wbox=10,hbox=10,barx=0.9,show=True)
 

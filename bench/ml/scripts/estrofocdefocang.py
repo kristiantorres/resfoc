@@ -106,7 +106,7 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
 
 # Write out the estimated rho
-sep.write_file('rhoangcnn.H',rho,ds=[dz,dz])
+#sep.write_file('rhoangcnn.H',rho,ds=[dz,dz])
 
 cuda.close()
 
@@ -114,21 +114,21 @@ cuda.close()
 rho1img = stkgt[21]
 
 # Read in rho
-raxes,rhosmb = sep.read_file('../focdat/refocus/mltest/mltestdogrho.H')
+raxes,rhosmb = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrhomask2.H')
 rhosmb = rhosmb.reshape(raxes.n,order='F')
 
 ## Refocus the image with both
 rfismb = refocusimg(stkgt,rhosmb,dro)
 rficnn = refocusimg(stkgt,rho,dro)
 
-faxes,fog = sep.read_file('../focdat/focdefoc/mltestfog.H')
+faxes,fog = sep.read_file('../focdat/dat/focdefoc/mltestfog.H')
 fog = np.ascontiguousarray(fog.reshape(faxes.n,order='F').T)
 gfog = agc(fog.astype('float32'))
 fog = gfog[16,256:512+256,:]
 
 # Write out the refocused images
 #sep.write_file('rfismbcomp.H',rfismb,ds=[dx,dz])
-sep.write_file('rficnnfoc.H',rficnn,ds=[dx,dz])
+#sep.write_file('rficnnfoc.H',rficnn,ds=[dx,dz])
 
 # Plot rho on the defocused image
 fsize=15
@@ -144,6 +144,8 @@ cbar2 = fig2.colorbar(im2,cbar_ax2,format='%.2f')
 cbar2.solids.set(alpha=1)
 cbar2.ax.tick_params(labelsize=fsize)
 cbar2.set_label(r'$\rho$',fontsize=fsize)
+plt.savefig('./fig/rhosembimg.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
 
 fig3 = plt.figure(2,figsize=(8,8)); ax3 = fig3.gca()
 ax3.imshow(rho1img,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
@@ -157,6 +159,8 @@ cbar3 = fig3.colorbar(im3,cbar_ax3,format='%.2f')
 cbar3.solids.set(alpha=1)
 cbar3.ax.tick_params(labelsize=fsize)
 cbar3.set_label(r'$\rho$',fontsize=fsize)
+plt.savefig('./fig/rhoangimg.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
 
 # Plot the refocused images
 fig4 = plt.figure(3,figsize=(8,8)); ax4 = fig4.gca()
@@ -165,6 +169,8 @@ ax4.set_xlabel('X (km)',fontsize=fsize)
 ax4.set_ylabel('Z (km)',fontsize=fsize)
 ax4.set_title('Semblance',fontsize=fsize)
 ax4.tick_params(labelsize=fsize)
+plt.savefig('./fig/rfisemb.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
 
 fig5 = plt.figure(4,figsize=(8,8)); ax5 = fig5.gca()
 ax5.imshow(rficnn,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
@@ -172,6 +178,8 @@ ax5.set_xlabel('X (km)',fontsize=fsize)
 ax5.set_ylabel('Z (km)',fontsize=fsize)
 ax5.set_title('Angle focus',fontsize=fsize)
 ax5.tick_params(labelsize=fsize)
+plt.savefig('./fig/rfiang.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
 
 fig6 = plt.figure(5,figsize=(8,8)); ax6 = fig6.gca()
 ax6.imshow(fog.T,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
@@ -179,5 +187,7 @@ ax6.set_xlabel('X (km)',fontsize=fsize)
 ax6.set_ylabel('Z (km)',fontsize=fsize)
 ax6.set_title('Well focused',fontsize=fsize)
 ax6.tick_params(labelsize=fsize)
+plt.savefig('./fig/wellfoc.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
 
 plt.show()

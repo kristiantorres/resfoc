@@ -947,7 +947,7 @@ class mdlbuild:
     nz = self.vel.shape[1]
     ref = np.zeros(self.vel.shape,dtype='float32')
     velsm = gaussian_filter(self.vel,sigma=0.5).astype('float32')
-    self.ec8.calcref2d(nz,velsm,ref)
+    self.ec8.calcref2d(self.__nx,nz,velsm,ref)
     return ref
 
   def calcrefl2d(self,velin):

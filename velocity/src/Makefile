@@ -1,8 +1,8 @@
-NPPATH=${CONDA_PREFIX}/lib/python3.5/site-packages/numpy/core
+NPPATH=${CONDA_PREFIX}/lib/python3.7/site-packages/numpy/core
 
 %.o: %.cpp
-	g++ -std=c++11 -O3 -fPIC -ffast-math -fopenmp -shared -Wall -I${CONDA_PREFIX}/include/python3.5m \
-		-I${NPPATH}/include -Wl,-rpath=${CONDA_PREFIX}/lib -L${CONDA_PREFIX}/lib -lpython3.5m \
+	g++ -std=c++11 -O3 -fPIC -ffast-math -fopenmp -shared -Wall -I${CONDA_PREFIX}/include/python3.7m \
+		-I${NPPATH}/include -Wl,-rpath=${CONDA_PREFIX}/lib -L${CONDA_PREFIX}/lib -lpython3.7m \
 		-I. -c -fPIC -o $@ $<
 
 evntcre8: evntcre8.o
