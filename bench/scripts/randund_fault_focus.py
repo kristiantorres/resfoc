@@ -95,7 +95,7 @@ allshot = prp.model_lindata(veltru,ref,wav,dtd,verb=True,nthrds=24)
 # Taper for migration
 prp.build_taper(70,150)
 
-# Wave equation depth migration (both with anomaly)
+# Wave equation depth migration
 imgr = prp.wem(veltru,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=20)
 imgw = prp.wem(velmig,allshot,wav,dtd,nh=16,lap=True,verb=True,nthrds=20)
 nh,oh,dh = prp.get_off_axis()
