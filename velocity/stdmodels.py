@@ -68,6 +68,10 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
 
   # Water deposit
   mb.deposit(1480,thick=50,layer=150,dev_layer=0.0)
+
+  # Smooth any unconformities
+  mb.smooth_model(rect1=1,rect2=5,rect3=1)
+
   # Trim model before faulting
   mb.trim(0,1100)
 
@@ -193,7 +197,7 @@ def layeredfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,maxvel=
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)
@@ -273,7 +277,7 @@ def undulatingfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,maxv
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)
@@ -424,7 +428,7 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   # Trim model before faulting
   mb.trim(0,1100)
 
-  # Thresh should be a function of theta_shift
+  #XXX: Thresh should be a function of theta_shift
 
   # Generate the fault positions
   flttype = np.random.choice([0,1,2,3,4,5])
@@ -449,7 +453,7 @@ def undulatingrandfaults2d(nz=512,nx=1000,dz=12.5,dx=25.0,nlayer=21,minvel=1600,
   # Parameters for ricker wavelet
   nt = 250; ot = 0.0; dt = 0.001; ns = int(nt/2)
   amp = 1.0; dly = 0.125
-  minf = 30.0; maxf = 60.0
+  minf = 100.0; maxf = 120.0
   # Create normalized image
   f = rndut.randfloat(minf,maxf)
   wav = ricker(nt,dt,f,amp,dly)
