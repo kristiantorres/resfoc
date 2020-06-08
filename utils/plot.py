@@ -477,7 +477,7 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   if(show):
     plt.show()
 
-def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,verb=True,**kwargs):
+def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,figname=None,verb=True,**kwargs):
   """
   Makes an isometric plot of 3D data
 
@@ -504,17 +504,18 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
   x1 = np.linspace(o1, x1end, n1)
   x2 = np.linspace(o2, x2end, n2)
   x3 = np.linspace(o3, x3end, n3)
-  x1g, x3g = np.meshgrid(x1, x3)
-  x1g, x2g = np.meshgrid(x1, x2)
+  x1ga, x3ga = np.meshgrid(x1,x3)
+  x2ga, x3g  = np.meshgrid(x2, x3)
+  x1g , x2gb = np.meshgrid(x1, x2)
 
   nlevels = kwargs.get('nlevels',200)
 
   # Get locations for extracting planes
-  loc1 = kwargs.get('loc1',int(n1/2*d1+o1))
+  loc1 = kwargs.get('loc1',n1/2*d1+o1)
   i1 = int((loc1 - o1)/d1)
-  loc2 = kwargs.get('loc2',int(n2/2*d2+o2))
+  loc2 = kwargs.get('loc2',n2/2*d2+o2)
   i2 = int((loc2 - o2)/d2)
-  loc3 = kwargs.get('loc3',int(n3/2*d3+o3))
+  loc3 = kwargs.get('loc3',n3/2*d3+o3)
   i3 = int((loc3 - o3)/d3)
 
   # Get plotting range
@@ -546,11 +547,14 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   cset = [[],[],[]]
 
-  cset[0] = ax.contourf(x1g, x3g, slc2, zdir='z',offset=o1,levels=levels2,cmap='gray')
+  # Horizontal slice
+  cset[0] = ax.contourf(x1ga, x3ga, slc2, zdir='z',offset=o2,levels=levels2,cmap='gray')
 
-  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
+  # Into the screen slice
+  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x2ga), zdir='x', offset=x1end,levels=levels2,cmap='gray')
 
-  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
+  # Front slice
+  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2gb), zdir='y', offset=o3,levels=levels1,cmap='gray')
 
   ax.set(xlim=[o1,x1end],ylim=[o3,x3end],zlim=[x2end,o2])
 
@@ -565,7 +569,7 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   pts = [[(0.32,0.0),(0.32,0.64)]]
   pts2 = [[(0.0,0.32),(0.64,0.32)]]
-  
+
   lines = LineCollection(pts,zorder=1000,color='k',lw=2)
   lines2 = LineCollection(pts2,zorder=1000,color='k',lw=2)
   #ax.add_collection3d(lines,zdir='y',zs=o2)
@@ -582,9 +586,12 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
     def zorder(self, value):
       pass
 
-    if(verb):
-      print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
+  if(verb):
+    print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
 
-  if(show):
+  if(figname is None and show):
     plt.show()
+
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
 

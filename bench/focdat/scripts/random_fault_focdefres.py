@@ -18,6 +18,7 @@ from scaas.velocity import create_randomptbs_loc
 from scaas.trismooth import smooth
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
+from scaas.gradtaper import build_taper
 from resfoc.resmig import preresmig,convert2time,get_rho_axis
 from scaas.off2ang import off2ang
 import matplotlib.pyplot as plt

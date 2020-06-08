@@ -16,6 +16,8 @@ onex = hf[keys[iex]][iptch,:,:,:,0]
 
 hf.close()
 
+print(onex.shape)
+
 plot_cubeiso(onex,os=[-70.0,0.0,0.0],ds=[2.22,0.01,0.01],stack=True,show=False,hbox=8,wbox=8,elev=15,
              x1label='\nX (km)',x2label='\nAngle'+r'($\degree$)',x3label='\nDepth (km)',verb=False)
 

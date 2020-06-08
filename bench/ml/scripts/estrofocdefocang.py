@@ -110,84 +110,111 @@ rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
 
 cuda.close()
 
+# WIndowing parameters
+fx =  49; nx = 400
+fz = 120; nz = 300
+
 # Defocused image
 rho1img = stkgt[21]
 
+rho1imgw = rho1img[fz:fz+nz,fx:fx+nx]
+
 # Read in rho
-raxes,rhosmb = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrhomask2.H')
+raxes,rhosmb = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrho2.H')
 rhosmb = rhosmb.reshape(raxes.n,order='F')
+rhosmb = np.ascontiguousarray(rhosmb).astype('float32')
+
+# Window the rhos
+rhosmbw = rhosmb[fz:fz+nz,fx:fx+nx]
+rhow    = rho[fz:fz+nz,fx:fx+nx]
 
 ## Refocus the image with both
 rfismb = refocusimg(stkgt,rhosmb,dro)
 rficnn = refocusimg(stkgt,rho,dro)
 
+# Window the images
+rfismbw = rfismb[fz:fz+nz,fx:fx+nx]
+rficnnw = rficnn[fz:fz+nz,fx:fx+nx]
+
 faxes,fog = sep.read_file('../focdat/dat/focdefoc/mltestfog.H')
 fog = np.ascontiguousarray(fog.reshape(faxes.n,order='F').T)
 gfog = agc(fog.astype('float32'))
-fog = gfog[16,256:512+256,:]
+fog = gfog[16,305:305+nx,fz:fz+nz]
 
 # Write out the refocused images
-#sep.write_file('rfismbcomp.H',rfismb,ds=[dx,dz])
-#sep.write_file('rficnnfoc.H',rficnn,ds=[dx,dz])
+sep.write_file('rfismbcomp2.H',rfismb,ds=[dx,dz])
+sep.write_file('rficnnfoc2.H',rficnn,ds=[dx,dz])
+
+# Plotting window
+fxi = 305; fzi = 120
+dx /= 1000.0; dz /= 1000.0
 
 # Plot rho on the defocused image
-fsize=15
-fig2 = plt.figure(1,figsize=(8,8)); ax2 = fig2.gca()
-ax2.imshow(rho1img,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
-im2 = ax2.imshow(rhosmb.T,cmap='seismic',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
+fsize=16
+fig2 = plt.figure(1,figsize=(10,10)); ax2 = fig2.gca()
+ax2.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
+im2 = ax2.imshow(rhosmbw,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
 ax2.set_xlabel('X (km)',fontsize=fsize)
 ax2.set_ylabel('Z (km)',fontsize=fsize)
 ax2.tick_params(labelsize=fsize)
-ax2.set_title(r"Semblance",fontsize=fsize)
+#ax2.set_title(r"Semblance",fontsize=fsize)
 cbar_ax2 = fig2.add_axes([0.91,0.15,0.02,0.70])
 cbar2 = fig2.colorbar(im2,cbar_ax2,format='%.2f')
 cbar2.solids.set(alpha=1)
 cbar2.ax.tick_params(labelsize=fsize)
 cbar2.set_label(r'$\rho$',fontsize=fsize)
-plt.savefig('./fig/rhosembimg.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.savefig('./fig/videofigs/rhosembimg.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
-fig3 = plt.figure(2,figsize=(8,8)); ax3 = fig3.gca()
-ax3.imshow(rho1img,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
-im3 = ax3.imshow(rho,cmap='seismic',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
+fig3 = plt.figure(2,figsize=(10,10)); ax3 = fig3.gca()
+ax3.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
+im3 = ax3.imshow(rhow,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
 ax3.set_xlabel('X (km)',fontsize=fsize)
 ax3.set_ylabel('Z (km)',fontsize=fsize)
 ax3.tick_params(labelsize=fsize)
-ax3.set_title(r"Angle focusing",fontsize=fsize)
+#ax3.set_title(r"Angle focusing",fontsize=fsize)
 cbar_ax3 = fig3.add_axes([0.91,0.15,0.02,0.70])
 cbar3 = fig3.colorbar(im3,cbar_ax3,format='%.2f')
 cbar3.solids.set(alpha=1)
 cbar3.ax.tick_params(labelsize=fsize)
 cbar3.set_label(r'$\rho$',fontsize=fsize)
-plt.savefig('./fig/rhoangimg.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.savefig('./fig/videofigs/rhoangimg.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
 # Plot the refocused images
-fig4 = plt.figure(3,figsize=(8,8)); ax4 = fig4.gca()
-ax4.imshow(rfismb,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+fig4 = plt.figure(3,figsize=(10,10)); ax4 = fig4.gca()
+ax4.imshow(rfismbw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
 ax4.set_xlabel('X (km)',fontsize=fsize)
 ax4.set_ylabel('Z (km)',fontsize=fsize)
-ax4.set_title('Semblance',fontsize=fsize)
+#ax4.set_title('Semblance',fontsize=fsize)
 ax4.tick_params(labelsize=fsize)
-plt.savefig('./fig/rfisemb.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.savefig('./fig/videofigs/rfisemb.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
-fig5 = plt.figure(4,figsize=(8,8)); ax5 = fig5.gca()
-ax5.imshow(rficnn,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+fig5 = plt.figure(4,figsize=(10,10)); ax5 = fig5.gca()
+ax5.imshow(rficnnw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
 ax5.set_xlabel('X (km)',fontsize=fsize)
 ax5.set_ylabel('Z (km)',fontsize=fsize)
-ax5.set_title('Angle focus',fontsize=fsize)
+#ax5.set_title('Angle focus',fontsize=fsize)
 ax5.tick_params(labelsize=fsize)
-plt.savefig('./fig/rfiang.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.savefig('./fig/videofigs/rfiang.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
-fig6 = plt.figure(5,figsize=(8,8)); ax6 = fig6.gca()
-ax6.imshow(fog.T,cmap='gray',extent=[0.0,(nx)*dx/1000.0,nz*dz/1000.0,0.0],interpolation='sinc',vmin=-2.5,vmax=2.5)
+fig6 = plt.figure(5,figsize=(10,10)); ax6 = fig6.gca()
+ax6.imshow(fog.T,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
 ax6.set_xlabel('X (km)',fontsize=fsize)
 ax6.set_ylabel('Z (km)',fontsize=fsize)
-ax6.set_title('Well focused',fontsize=fsize)
+#ax6.set_title('Well focused',fontsize=fsize)
 ax6.tick_params(labelsize=fsize)
-plt.savefig('./fig/wellfoc.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.savefig('./fig/videofigs/wellfoc.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
+
+fig7 = plt.figure(6,figsize=(10,10)); ax7 = fig7.gca()
+ax7.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax7.set_xlabel('X (km)',fontsize=fsize)
+ax7.set_ylabel('Z (km)',fontsize=fsize)
+ax7.tick_params(labelsize=fsize)
+plt.savefig('./fig/videofigs/defocstk.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
 plt.show()
