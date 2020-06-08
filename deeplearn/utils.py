@@ -197,6 +197,7 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
+    ftype = kwargs.get('ftype','png')
     ax.set_aspect(kwargs.get('aratio',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
     cbar.remove()
@@ -216,10 +217,10 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   if(show):
     plt.show()
   if(fname):
-    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
     # Crop and pad the image so they are the same size
-    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype,opath=fname+"-img."+ftype)
 
 def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
   """
