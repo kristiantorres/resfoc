@@ -7,7 +7,7 @@ sep = seppy.sep()
 
 # Read in all data
 #aaxes,ang = sep.read_file('fltimgbigresangagcwrng.H')
-aaxes,ang = sep.read_file('../focdat/refocus/mltest/mltestdogang.H')
+aaxes,ang = sep.read_file('../focdat/dat/refocus/mltest/mltestdogang.H')
 ang = ang.reshape(aaxes.n,order='F')
 ang = np.ascontiguousarray(ang.T).astype('float32')
 
@@ -15,12 +15,12 @@ ang = np.ascontiguousarray(ang.T).astype('float32')
 
 # Read in all semblance
 #saxes,smb = sep.read_file("rhosemblancenormwrng.H")
-saxes,smb = sep.read_file("../focdat/refocus/mltest/mltestdogsmb.H")
+saxes,smb = sep.read_file("../focdat/dat/refocus/mltest/mltestdogsmb.H")
 smb = smb.reshape(saxes.n,order='F')
 smb = np.ascontiguousarray(smb.T).astype('float32')
 
 # Read in all picks
-paxes,pck = sep.read_file('../focdat/refocus/mltest/mltestdogrho.H')
+paxes,pck = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrho.H')
 pck = pck.reshape(paxes.n,order='F')
 pck = np.ascontiguousarray(pck.T).astype('float32')
 

@@ -152,7 +152,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=No
   # Plot the figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
-  ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),nx*dx,nz*dz,kwargs.get('zmin',0.0)],
+  ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',nx*dx),kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],
       vmin=vmin*kwargs.get('pclip',1.0),vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
