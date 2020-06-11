@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 sep = seppy.sep([])
 
-laxes,loss = sep.read_file(None,ifname='./dat/nnhistory/fltclasswgt5-gpu10ep_loss.H')
-vaxes,vlss = sep.read_file(None,ifname='./dat/nnhistory/fltclasswgt5-gpu10ep_vlss.H')
-aaxes,accu = sep.read_file(None,ifname='./dat/nnhistory/fltclasswgt5-gpu10ep_accu.H')
-caxes,vacu = sep.read_file(None,ifname='./dat/nnhistory/fltclasswgt5-gpu10ep_vacu.H')
+laxes,loss = sep.read_file('./dat/nnhistory/fltclasswgt5-gpu10ep_loss.H')
+vaxes,vlss = sep.read_file('./dat/nnhistory/fltclasswgt5-gpu10ep_vlss.H')
+aaxes,accu = sep.read_file('./dat/nnhistory/fltclasswgt5-gpu10ep_accu.H')
+caxes,vacu = sep.read_file('./dat/nnhistory/fltclasswgt5-gpu10ep_vacu.H')
 
 fig = plt.figure(1,figsize=(7,7)); ax = fig.gca()
 lin1 = plt.plot(loss/np.max(loss))

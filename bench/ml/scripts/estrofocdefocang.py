@@ -106,7 +106,7 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
 
 # Write out the estimated rho
-#sep.write_file('rhoangcnn.H',rho,ds=[dz,dz])
+sep.write_file('rhoangcnn3.H',rho,ds=[dz,dz])
 
 cuda.close()
 
@@ -120,26 +120,36 @@ rho1img = stkgt[21]
 rho1imgw = rho1img[fz:fz+nz,fx:fx+nx]
 
 # Read in rho
-raxes,rhosmb = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrho2.H')
+raxes,rhosmb = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrhomask2.H')
 rhosmb = rhosmb.reshape(raxes.n,order='F')
 rhosmb = np.ascontiguousarray(rhosmb).astype('float32')
 
+raxes2,rhosmb2 = sep.read_file('../focdat/dat/refocus/mltest/mltestdogrho.H')
+rhosmb2 = rhosmb2.reshape(raxes2.n,order='F')
+rhosmb2 = np.ascontiguousarray(rhosmb2).astype('float32')
+
 # Window the rhos
-rhosmbw = rhosmb[fz:fz+nz,fx:fx+nx]
-rhow    = rho[fz:fz+nz,fx:fx+nx]
+rhosmbw  = rhosmb[fz:fz+nz,fx:fx+nx]
+rhosmb2w = rhosmb2[fz:fz+nz,fx:fx+nx]
+rhow     = rho[fz:fz+nz,fx:fx+nx]
 
 ## Refocus the image with both
-rfismb = refocusimg(stkgt,rhosmb,dro)
-rficnn = refocusimg(stkgt,rho,dro)
+rfismb  = refocusimg(stkgt,rhosmb,dro)
+rfismb2 = refocusimg(stkgt,rhosmb2,dro)
+rficnn  = refocusimg(stkgt,rho,dro)
 
 # Window the images
-rfismbw = rfismb[fz:fz+nz,fx:fx+nx]
-rficnnw = rficnn[fz:fz+nz,fx:fx+nx]
+rfismbw  = rfismb[fz:fz+nz,fx:fx+nx]
+rfismb2w = rfismb2[fz:fz+nz,fx:fx+nx]
+rficnnw  = rficnn[fz:fz+nz,fx:fx+nx]
 
 faxes,fog = sep.read_file('../focdat/dat/focdefoc/mltestfog.H')
 fog = np.ascontiguousarray(fog.reshape(faxes.n,order='F').T)
 gfog = agc(fog.astype('float32'))
 fog = gfog[16,305:305+nx,fz:fz+nz]
+
+# Write out the focusing probabilities
+sep.write_file('focprb.H',fltfocs.T,os=[0.0,0.0,oro],ds=[dz,dx,dro])
 
 # Write out the refocused images
 sep.write_file('rfismbcomp2.H',rfismb,ds=[dx,dz])
@@ -153,12 +163,12 @@ dx /= 1000.0; dz /= 1000.0
 fsize=16
 fig2 = plt.figure(1,figsize=(10,10)); ax2 = fig2.gca()
 ax2.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
-im2 = ax2.imshow(rhosmbw,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
+im2 = ax2.imshow(rhosmbw,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.975,vmax=1.025,alpha=0.2)
 ax2.set_xlabel('X (km)',fontsize=fsize)
 ax2.set_ylabel('Z (km)',fontsize=fsize)
 ax2.tick_params(labelsize=fsize)
 #ax2.set_title(r"Semblance",fontsize=fsize)
-cbar_ax2 = fig2.add_axes([0.91,0.15,0.02,0.70])
+cbar_ax2 = fig2.add_axes([0.925,0.205,0.02,0.58])
 cbar2 = fig2.colorbar(im2,cbar_ax2,format='%.2f')
 cbar2.solids.set(alpha=1)
 cbar2.ax.tick_params(labelsize=fsize)
@@ -166,14 +176,29 @@ cbar2.set_label(r'$\rho$',fontsize=fsize)
 plt.savefig('./fig/videofigs/rhosembimg.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
+fig2 = plt.figure(1,figsize=(10,10)); ax2 = fig2.gca()
+ax2.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
+im2 = ax2.imshow(rhosmb2w,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.975,vmax=1.025,alpha=0.2)
+ax2.set_xlabel('X (km)',fontsize=fsize)
+ax2.set_ylabel('Z (km)',fontsize=fsize)
+ax2.tick_params(labelsize=fsize)
+#ax2.set_title(r"Semblance",fontsize=fsize)
+cbar_ax2 = fig2.add_axes([0.925,0.205,0.02,0.58])
+cbar2 = fig2.colorbar(im2,cbar_ax2,format='%.2f')
+cbar2.solids.set(alpha=1)
+cbar2.ax.tick_params(labelsize=fsize)
+cbar2.set_label(r'$\rho$',fontsize=fsize)
+plt.savefig('./fig/videofigs/rhosembimgfull.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
+
 fig3 = plt.figure(2,figsize=(10,10)); ax3 = fig3.gca()
 ax3.imshow(rho1imgw,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
-im3 = ax3.imshow(rhow,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.98,vmax=1.02,alpha=0.1)
+im3 = ax3.imshow(rhow,cmap='seismic',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='bilinear',vmin=0.975,vmax=1.025,alpha=0.2)
 ax3.set_xlabel('X (km)',fontsize=fsize)
 ax3.set_ylabel('Z (km)',fontsize=fsize)
 ax3.tick_params(labelsize=fsize)
 #ax3.set_title(r"Angle focusing",fontsize=fsize)
-cbar_ax3 = fig3.add_axes([0.91,0.15,0.02,0.70])
+cbar_ax3 = fig3.add_axes([0.925,0.205,0.02,0.58])
 cbar3 = fig3.colorbar(im3,cbar_ax3,format='%.2f')
 cbar3.solids.set(alpha=1)
 cbar3.ax.tick_params(labelsize=fsize)
@@ -189,6 +214,15 @@ ax4.set_ylabel('Z (km)',fontsize=fsize)
 #ax4.set_title('Semblance',fontsize=fsize)
 ax4.tick_params(labelsize=fsize)
 plt.savefig('./fig/videofigs/rfisemb.png',transparent=True,dpi=150,bbox_inches='tight')
+plt.close()
+
+fig4 = plt.figure(3,figsize=(10,10)); ax4 = fig4.gca()
+ax4.imshow(rfismb2w,cmap='gray',extent=[fxi*dx,(fxi+nx)*dx,(fzi+nz)*dz,fzi*dz],interpolation='sinc',vmin=-2.5,vmax=2.5)
+ax4.set_xlabel('X (km)',fontsize=fsize)
+ax4.set_ylabel('Z (km)',fontsize=fsize)
+#ax4.set_title('Semblance',fontsize=fsize)
+ax4.tick_params(labelsize=fsize)
+plt.savefig('./fig/videofigs/rfisembfull.png',transparent=True,dpi=150,bbox_inches='tight')
 plt.close()
 
 fig5 = plt.figure(4,figsize=(10,10)); ax5 = fig5.gca()
