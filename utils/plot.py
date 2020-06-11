@@ -408,7 +408,8 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',show=True,figname=None,ftype='png',**kwargs):
+def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',cnnpck=None,
+                  show=True,figname=None,ftype='png',**kwargs):
   """
   Plots the semblance picks on top of the computed semblance panel
   and the residually migrated angle gathers
@@ -422,6 +423,7 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',show=True
     oro   - The residual migration origin
     doagc - Apply agc to the gathers [False]
     mode  - Mode of how to plot ([sbs]/tb) side by side or top/bottom
+    cnnpck - Plot CNN picks in addition to semblance picks
     show  - Show the plots [True]
     fname - Output figure name [None]
   """
@@ -449,6 +451,8 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',show=True
                  extent=[oro,oro+(nro)*dro,kwargs.get('zmax',(nz-1)*dz),kwargs.get('zmin',0)],interpolation='sinc',
                  vmin=vmin*pclip,vmax=vmax*pclip)
     ax[0].plot(pck,z,linewidth=3,color='tab:cyan')
+    if(cnnpck is not None):
+      ax[0].plot(cnnpck,z,linewidth=3,color='tab:olive')
     ax[0].set_xlabel(r'$\rho$',fontsize=fntsize)
     ax[0].set_ylabel('Z (km)',fontsize=fntsize)
     ax[0].tick_params(labelsize=tcksize)
@@ -456,6 +460,8 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',show=True
     ax[1].imshow(smb.T,cmap='jet',aspect=kwargs.get('rhoaspect',0.02),
                  extent=[oro,oro+(nro)*dro,kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],interpolation='bilinear')
     ax[1].plot(pck,z,linewidth=3,color='k')
+    if(cnnpck is not None):
+      ax[1].plot(cnnpck,z,linewidth=3,color='gray')
     ax[1].set_xlabel(r'$\rho$',fontsize=fntsize)
     ax[1].set_ylabel(' ',fontsize=fntsize)
     ax[1].tick_params(labelsize=tcksize)

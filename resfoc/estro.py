@@ -213,6 +213,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   rhop = pe.extract(rho)
 
   # Output probabilities
+  focprdnrm = np.zeros(focprdptch.shape)
   per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
   focprdimg = np.zeros([nro,nz,nx])
   _ = per.extract(focprdimg)
@@ -224,10 +225,15 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
         # Find maximum probability and compute rho
         iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
         rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
+        # Normalize across rho within a patch for QC
+        if(np.max(focprdptch[izp,ixp,:,hlfz,hlfx]) == 0.0):
+          focprdnrm[izp,ixp,:,:,:] = 0.0
+        else:
+          focprdnrm[izp,ixp,:,:,:] = focprdptch[izp,ixp,:,:,:]/np.max(focprdptch[izp,ixp,:,hlfz,hlfx])
 
   # Reconstruct rho and probabiliites
   rho       = pe.reconstruct(rhop)
-  focprdimg = per.reconstruct(focprdptch.reshape([1,numpz,numpx,nro,nzp,nxp]))
+  focprdimg = per.reconstruct(focprdnrm.reshape([1,numpz,numpx,nro,nzp,nxp]))
 
   # Smooth and return rho, fault patches and fault probabilities
   rhosm = smooth(rho.astype('float32'),rect1=rectx,rect2=rectz)

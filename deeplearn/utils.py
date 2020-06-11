@@ -13,6 +13,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from utils.image import remove_colorbar
+from utils.ptyprint import progressbar
 
 def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
@@ -92,7 +93,7 @@ def resample(img,new_shape,kind='linear',ds=[]):
         res[i,j,:,:] = f(xnew,ynew)
   elif len(img.shape)==3:
     res = np.zeros([img.shape[0],new_shape[0],new_shape[1]],dtype='float32')
-    for i in range(img.shape[0]):
+    for i in progressbar(range(img.shape[0]),"nimg:"):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
   elif len(img.shape)==2:
