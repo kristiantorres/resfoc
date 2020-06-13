@@ -13,6 +13,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from utils.image import remove_colorbar
+from utils.ptyprint import progressbar
 
 def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
@@ -92,7 +93,7 @@ def resample(img,new_shape,kind='linear',ds=[]):
         res[i,j,:,:] = f(xnew,ynew)
   elif len(img.shape)==3:
     res = np.zeros([img.shape[0],new_shape[0],new_shape[1]],dtype='float32')
-    for i in range(img.shape[0]):
+    for i in progressbar(range(img.shape[0]),"nimg:"):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
   elif len(img.shape)==2:
@@ -197,6 +198,7 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
+    ftype = kwargs.get('ftype','png')
     ax.set_aspect(kwargs.get('aratio',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
     cbar.remove()
@@ -216,10 +218,10 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   if(show):
     plt.show()
   if(fname):
-    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
     # Crop and pad the image so they are the same size
-    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype,opath=fname+"-img."+ftype)
 
 def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
   """

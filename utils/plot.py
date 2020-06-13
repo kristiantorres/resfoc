@@ -152,7 +152,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=No
   # Plot the figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
-  ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),nx*dx,nz*dz,kwargs.get('zmin',0.0)],
+  ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',nx*dx),kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],
       vmin=vmin*kwargs.get('pclip',1.0),vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
@@ -199,11 +199,11 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   # Build the line
   izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
   lz = np.linspace(izmin*dz,izmax*dz,izmax-izmin)
-  lx = np.zeros(izmax-izmin) + xloc*dx
+  lx = np.zeros(izmax-izmin) + (xloc+kwargs.get('ox',0.0))*dx
   vmin1 = kwargs.get('vmini',None); vmax1 = kwargs.get('vmaxi',None)
   if(vmin1 is None or vmax1 is None):
     vmin1 = np.min(mig); vmax1 = np.max(mig)
-  ax1.imshow(mig[kwargs.get('xmin',0):kwargs.get('xmax',nx),kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
+  ax1.imshow(mig[kwargs.get('xminwnd',0):kwargs.get('xmaxwnd',nx),kwargs.get('zminwnd',0):kwargs.get('zmaxwnd',nz)].T,cmap='gray',
       interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
     kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
   ax1.plot(lx,lz,color='k',linewidth=2)
@@ -227,7 +227,7 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   vmin2 = np.min(oneang); vmax2 = np.max(oneang)
   fig2 = plt.figure(figsize=(kwargs.get('wboxg',14),kwargs.get('hboxg',7)))
   ax2 = fig2.gca()
-  ax2.imshow(oneang[:,kwargs.get('zmin',0):kwargs.get('zmax',nz)].T,cmap='gray',
+  ax2.imshow(oneang[:,kwargs.get('zminwnd',0):kwargs.get('zmaxwnd',nz)].T,cmap='gray',
       extent=[oro,oro+nro*dro,kwargs.get('zmax',nz)*dz,kwargs.get('zmin',0.0)*dz],
       vmin=vmin2*kwargs.get('pclip',1.0),vmax=vmax2*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'),
       aspect=kwargs.get('roaspect',0.01))
@@ -408,7 +408,8 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,figname=None,ftype='png',**kwargs):
+def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',cnnpck=None,
+                  show=True,figname=None,ftype='png',**kwargs):
   """
   Plots the semblance picks on top of the computed semblance panel
   and the residually migrated angle gathers
@@ -420,8 +421,9 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
     dz    - The depth sampling
     dro   - The residual migration sampling
     oro   - The residual migration origin
-    agc   - Apply agc to the gathers [False]
+    doagc - Apply agc to the gathers [False]
     mode  - Mode of how to plot ([sbs]/tb) side by side or top/bottom
+    cnnpck - Plot CNN picks in addition to semblance picks
     show  - Show the plots [True]
     fname - Output figure name [None]
   """
@@ -429,33 +431,41 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   nro = ang.shape[0]; na = ang.shape[1]; nz = ang.shape[2]
   angr = ang.reshape([na*nro,nz])
   # Gain the data
-  if(agc):
+  if(doagc):
     angrg = agc(angr)
   else:
-    angr  = angr
-  vmin = np.min(angr); vmax = np.max(angr)
+    angrg  = angr
+  vmin = kwargs.get('vmin',np.min(angrg)); vmax = kwargs.get('vmax',np.max(angrg))
   pclip = kwargs.get('pclip',1.0)
   # Compute z for rho picks
-  z = np.linspace(oz,oz+(nz-1)*dz,nz)
+  zmin = kwargs.get('zmin',oz); zmax = kwargs.get('zmax',oz+(nz-1)*dz)
+  z = np.linspace(zmin,zmax,nz)
   # Plot the rho picks
   wbox = kwargs.get('wbox',14); hbox = kwargs.get('hbox',7)
   fntsize = kwargs.get('fontsize',15); tcksize = kwargs.get('ticksize',15)
   if(mode == 'sbs'):
-    fig,ax = plt.subplots(1,2,figsize=(wbox,hbox))
+    widthang = kwargs.get('widthang',2); widthrho = kwargs.get('widthrho',1)
+    fig,ax = plt.subplots(1,2,figsize=(wbox,hbox),gridspec_kw={'width_ratios':[widthang,widthrho]})
     # Angle gather
-    ax[0].imshow(angr.T,cmap='gray',aspect=0.009,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='sinc',
-               vmin=vmin*pclip,vmax=vmax*pclip)
+    ax[0].imshow(angrg.T,cmap='gray',aspect=kwargs.get('angaspect',0.009),
+                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',(nz-1)*dz),kwargs.get('zmin',0)],interpolation='sinc',
+                 vmin=vmin*pclip,vmax=vmax*pclip)
     ax[0].plot(pck,z,linewidth=3,color='tab:cyan')
+    if(cnnpck is not None):
+      ax[0].plot(cnnpck,z,linewidth=3,color='tab:olive')
     ax[0].set_xlabel(r'$\rho$',fontsize=fntsize)
     ax[0].set_ylabel('Z (km)',fontsize=fntsize)
     ax[0].tick_params(labelsize=tcksize)
     # Semblance
-    ax[1].imshow(smb.T,cmap='jet',aspect=0.02,extent=[oro,oro+(nro)*dro,nz*dz,0.0],interpolation='bilinear')
+    ax[1].imshow(smb.T,cmap='jet',aspect=kwargs.get('rhoaspect',0.02),
+                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],interpolation='bilinear')
     ax[1].plot(pck,z,linewidth=3,color='k')
+    if(cnnpck is not None):
+      ax[1].plot(cnnpck,z,linewidth=3,color='gray')
     ax[1].set_xlabel(r'$\rho$',fontsize=fntsize)
     ax[1].set_ylabel(' ',fontsize=fntsize)
     ax[1].tick_params(labelsize=tcksize)
-    plt.subplots_adjust(wspace=-0.4)
+    plt.subplots_adjust(wspace=kwargs.get('wspace',-0.4))
   elif(mode == 'tb'):
     fig,ax = plt.subplots(2,1,figsize=(wbox,hbox))
     # Angle gather
@@ -477,7 +487,7 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,agc=False,mode='sbs',show=True,f
   if(show):
     plt.show()
 
-def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,verb=True,**kwargs):
+def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,figname=None,verb=True,**kwargs):
   """
   Makes an isometric plot of 3D data
 
@@ -504,17 +514,18 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
   x1 = np.linspace(o1, x1end, n1)
   x2 = np.linspace(o2, x2end, n2)
   x3 = np.linspace(o3, x3end, n3)
-  x1g, x3g = np.meshgrid(x1, x3)
-  x1g, x2g = np.meshgrid(x1, x2)
+  x1ga, x3ga = np.meshgrid(x1,x3)
+  x2ga, x3g  = np.meshgrid(x2, x3)
+  x1g , x2gb = np.meshgrid(x1, x2)
 
   nlevels = kwargs.get('nlevels',200)
 
   # Get locations for extracting planes
-  loc1 = kwargs.get('loc1',int(n1/2*d1+o1))
+  loc1 = kwargs.get('loc1',n1/2*d1+o1)
   i1 = int((loc1 - o1)/d1)
-  loc2 = kwargs.get('loc2',int(n2/2*d2+o2))
+  loc2 = kwargs.get('loc2',n2/2*d2+o2)
   i2 = int((loc2 - o2)/d2)
-  loc3 = kwargs.get('loc3',int(n3/2*d3+o3))
+  loc3 = kwargs.get('loc3',n3/2*d3+o3)
   i3 = int((loc3 - o3)/d3)
 
   # Get plotting range
@@ -546,11 +557,14 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   cset = [[],[],[]]
 
-  cset[0] = ax.contourf(x1g, x3g, slc2, zdir='z',offset=o1,levels=levels2,cmap='gray')
+  # Horizontal slice
+  cset[0] = ax.contourf(x1ga, x3ga, slc2, zdir='z',offset=o2,levels=levels2,cmap='gray')
 
-  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x1g), zdir='x', offset=x2end,levels=levels2,cmap='gray')
+  # Into the screen slice
+  cset[1] = ax.contourf(np.fliplr(slc1), x3g, np.flip(x2ga), zdir='x', offset=x1end,levels=levels2,cmap='gray')
 
-  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2g), zdir='y', offset=o3,levels=levels1,cmap='gray')
+  # Front slice
+  cset[2] = ax.contourf(x1g, np.flipud(slc3), np.flip(x2gb), zdir='y', offset=o3,levels=levels1,cmap='gray')
 
   ax.set(xlim=[o1,x1end],ylim=[o3,x3end],zlim=[x2end,o2])
 
@@ -565,7 +579,7 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
 
   pts = [[(0.32,0.0),(0.32,0.64)]]
   pts2 = [[(0.0,0.32),(0.64,0.32)]]
-  
+
   lines = LineCollection(pts,zorder=1000,color='k',lw=2)
   lines2 = LineCollection(pts2,zorder=1000,color='k',lw=2)
   #ax.add_collection3d(lines,zdir='y',zs=o2)
@@ -582,9 +596,12 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,v
     def zorder(self, value):
       pass
 
-    if(verb):
-      print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
+  if(verb):
+    print("Elevation: %.3f Azimuth: %.3f"%(ax.elev,ax.azim))
 
-  if(show):
+  if(figname is None and show):
     plt.show()
+
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
 
