@@ -203,7 +203,7 @@ for iro in range(nro):
                  extent=[fx*dx/1000.0,(fx+nx)*dx/1000.0,(fz+nz)*dz/1000.0,fz*dz/1000.0])
   im = ax.imshow(prb[iro,fxl:fxl+nx,fzl:fzl+nz].T,cmap='jet',interpolation='bilinear',alpha=0.2,vmin=np.min(prb),vmax=np.max(prb),
                  extent=[fx*dx/1000.0,(fx+nx)*dx/1000.0,(fz+nz)*dz/1000.0,fz*dz/1000.0])
-  ax.set_title(r'$\rho$=%.4f'%(rho),fontsize=fsize)
+  ax.set_title(r'$\rho$=%.5f'%(rho),fontsize=fsize)
   ax.set_xlabel('X (km)',fontsize=fsize)
   ax.set_ylabel('Z (km)',fontsize=fsize)
   ax.tick_params(labelsize=fsize)
