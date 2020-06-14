@@ -1,3 +1,11 @@
+"""
+Functions for performing residual stolt migration
+and time to depth conversion
+
+@author: Joseph Jennings
+@version: 2020.06.13
+"""
+
 import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.rstoltbig as rstoltbig
@@ -55,7 +63,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debu
   if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
   imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=True)
   # Compute samplings
-  dcs = cft.samplings(imgpft,ids)
+  dcs = cft.samplings(imgpft,ds)
 
   # Residual migration
   nzpc = imgpft.shape[2]; nmpc = imgpft.shape[1]; nhpc = imgpft.shape[0]
