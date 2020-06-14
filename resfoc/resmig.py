@@ -1,3 +1,11 @@
+"""
+Functions for performing residual stolt migration
+and time to depth conversion
+
+@author: Joseph Jennings
+@version: 2020.06.13
+"""
+
 import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.rstoltbig as rstoltbig
