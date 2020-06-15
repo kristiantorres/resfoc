@@ -2,7 +2,7 @@
 Functions for making predictions with keras models
 
 @author: Joseph Jennings
-@version: 2020.05.13
+@version: 2020.06.14
 """
 import numpy as np
 from deeplearn.utils import thresh, normalize, resizepow2

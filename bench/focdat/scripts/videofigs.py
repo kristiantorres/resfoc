@@ -146,28 +146,31 @@ fsize = 16
 #plt.close()
 
 # Windowing parameters
-#fx2 =  49; nx2 = 400
-#fz2 = 120; nz2 = 300
+fx2 =  49; nx2 = 400
+fz2 = 120; nz2 = 300
 
 # Plot all gathers for each rho
-#vmin = -2.5; vmax=2.5
-#for iro in range(nro):
+vmin = -2.5; vmax=2.5
+for iro in range(nro):
 #  rho = oro + iro*dro
 #  # Plot the angle gathers
 #  plot_allanggats(lngw[iro],dz,dx,jx=10,show=False,agc=True,vmin=vmin,vmax=vmax,
 #                  title=r'$\rho$=%.5f'%(rho),figname='./fig/videofigs/angro%d.png'%(iro),labelsize=16,xmin=fx*dx,xmax=(fx+nx)*dx,
 #                  zmin=(fz)*dz,zmax=(fz+nz)*dz)
+  plot_allanggats(lngw[iro],dz,dx,jx=10,show=False,agc=True,vmin=vmin,vmax=vmax,
+                  figname='./fig/videofigs/angro%d.png'%(iro),labelsize=16,xmin=fx*dx,xmax=(fx+nx)*dx,
+                  zmin=(fz)*dz,zmax=(fz+nz)*dz)
 #  # Plot the stack
-#  #fig = plt.figure(figsize=(8,8))
-#  #ax = fig.gca()
-#  #ax.imshow(agc(stk[iro,fx2:fx2+nx2,fz2:fz2+nz2]).T,cmap='gray',interpolation='sinc',vmin=vmin,vmax=vmax,
-#  #    extent=[fx*dx,(fx+nx)*dx,(fz+nz)*dz,fz*dz])
-#  #ax.set_xlabel('X (km)',fontsize=fsize)
-#  #ax.set_ylabel('Z (km)',fontsize=fsize)
+#  fig = plt.figure(figsize=(8,8))
+#  ax = fig.gca()
+#  ax.imshow(agc(stk[iro,fx2:fx2+nx2,fz2:fz2+nz2]).T,cmap='gray',interpolation='sinc',vmin=vmin,vmax=vmax,
+#      extent=[fx*dx,(fx+nx)*dx,(fz+nz)*dz,fz*dz])
+#  ax.set_xlabel('X (km)',fontsize=fsize)
+#  ax.set_ylabel('Z (km)',fontsize=fsize)
 #  #ax.set_title(r'$\rho$=%.5f'%(rho),fontsize=fsize)
-#  #ax.tick_params(labelsize=fsize)
-#  #plt.savefig('./fig/videofigs/stkrho%d.png'%(iro),transparent=True,bbox_inches='tight',dpi=150)
-#  #plt.close()
+#  ax.tick_params(labelsize=fsize)
+#  plt.savefig('./fig/videofigs/stkrho%d.png'%(iro),transparent=True,bbox_inches='tight',dpi=150)
+#  plt.close()
 
 # Defocused angle gathers
 #plot_allanggats(lngw[20],dz,dx,jx=10,show=False,agc=True,vmin=vmin,vmax=vmax,
@@ -178,15 +181,15 @@ fsize = 16
 
 # Plot every 10th image point
 #xs = [40,100,210,270,310,360]
-xs = [300]
-for ix in xs:
+#xs = [300]
+#for ix in xs:
 ##for ix in range(0,nxl,10):
-  tag = create_inttag(ix,10)
-  plot_rhopicks(lngw[:,ix,:,:],smbw[ix,:,:],pckw[ix],dro,dz,oro,show=True,doagc=False,vmin=-0.0025,vmax=0.0025,
-                wspace=0.15,zmin=fz*dz,zmax=(fz+nz)*dz,angaspect=0.01,rhoaspect=0.02,cnnpck=cnnw[ix],
-                figname='./fig/videofigs/smbpickscnnfull/smbpicks%s'%(tag))
-  plot_anggatrhos(lngw,ix,dz,dx,oro,dro,ox=fx,show=False,pclip=0.4,fontsize=fsize,ticksize=fsize,wboxi=10,hboxi=6,
-                  zmin=fz,zmax=fz+nz,xmin=fx,xmax=fx+nx,figname='./fig/videofigs/smbpickscnnfull/rhoang%s'%(tag))
+#  tag = create_inttag(ix,10)
+#  plot_rhopicks(lngw[:,ix,:,:],smbw[ix,:,:],pckw[ix],dro,dz,oro,show=True,doagc=False,vmin=-0.0025,vmax=0.0025,
+#                wspace=0.15,zmin=fz*dz,zmax=(fz+nz)*dz,angaspect=0.01,rhoaspect=0.02,cnnpck=cnnw[ix],
+#                figname='./fig/videofigs/smbpickscnnfull/smbpicks%s'%(tag))
+#  plot_anggatrhos(lngw,ix,dz,dx,oro,dro,ox=fx,show=False,pclip=0.4,fontsize=fsize,ticksize=fsize,wboxi=10,hboxi=6,
+#                  zmin=fz,zmax=fz+nz,xmin=fx,xmax=fx+nx,figname='./fig/videofigs/smbpickscnnfull/rhoang%s'%(tag))
 
 # Plot rho on the image
 #fig2 = plt.figure(figsize=(10,10))
