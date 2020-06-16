@@ -203,7 +203,7 @@ for iro in range(nro):
                  extent=[fx*dx/1000.0,(fx+nx)*dx/1000.0,(fz+nz)*dz/1000.0,fz*dz/1000.0])
   im = ax.imshow(prb[iro,fxl:fxl+nx,fzl:fzl+nz].T,cmap='jet',interpolation='bilinear',alpha=0.2,vmin=np.min(prb),vmax=np.max(prb),
                  extent=[fx*dx/1000.0,(fx+nx)*dx/1000.0,(fz+nz)*dz/1000.0,fz*dz/1000.0])
-  ax.set_title(r'$\rho$=%.5f'%(rho),fontsize=fsize)
+#  ax.set_title(r'$\rho$=%.5f'%(rho),fontsize=fsize)
   ax.set_xlabel('X (km)',fontsize=fsize)
   ax.set_ylabel('Z (km)',fontsize=fsize)
   ax.tick_params(labelsize=fsize)
@@ -214,7 +214,13 @@ for iro in range(nro):
   cbar2.set_label(r'Focus probability',fontsize=fsize)
   plt.savefig('./fig/videofigs/focprbs/focprb%d.png'%(iro),dpi=150,transparent=True,bbox_inches='tight')
   plt.close()
+#
+#  #plt.figure(); plt.imshow(rimg.T,cmap='seismic')
+#  #plt.show()
 
-  #plt.figure(); plt.imshow(rimg.T,cmap='seismic')
-  #plt.show()
+#oaxes,ro1 = sep.read_file("focprbrho1full.H")
+#ro1 = ro1.reshape(oaxes.n,order='F')
+#
+#plt.imshow(np.log(np.abs(ro1/np.max(ro1))),cmap='jet')
+#plt.show()
 

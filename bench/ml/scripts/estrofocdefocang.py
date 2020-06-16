@@ -15,6 +15,7 @@ from deeplearn.keraspredict import focdefocflt
 from resfoc.gain import agc
 from joblib import Parallel, delayed
 from resfoc.estro import estro_fltangfocdefoc, refocusimg
+from deeplearn.keraspredict import focdefocang
 from deeplearn.focuslabels import find_flt_patches
 from deeplearn.utils import plotsegprobs, plotseglabel, thresh
 from utils.image import remove_colorbar
@@ -104,6 +105,13 @@ tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Read in the fault detection network
 rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
+
+# Predict focusing on rho=1 image
+focangro1 = focdefocang(gimgt[20],focmdl)
+
+sep.write_file('focprbrho1full.H',focangro1,ds=[dz,dx])
+
+plt.imshow(focangro1,cmap='jet'); plt.show()
 
 # Write out the estimated rho
 sep.write_file('rhoangcnn3.H',rho,ds=[dz,dz])
