@@ -122,3 +122,51 @@ def focdefocflt(img,mdl,nzp=64,nxp=64,strdz=None,strdx=None,rectx=30,rectz=30,ve
 
   return smprb
 
+def focdefocang(img,mdl,nzp=64,nxp=64,strdz=None,strdx=None,rectx=30,rectz=30,verb=False):
+  """
+  Classifies an angle gather as focused or defocused
+
+  Parameters:
+    img   - the input extended image [na,nz,nx]
+    mdl   - the trained keras model
+    nzp   - z-dimension of the patch provided to the CNN [64]
+    nxp   - x-dimension of the patch provided to the CNN [64]
+    strdz - z-dimension of the patch stride (50% overlap) [npz/2]
+    strdx - x-dimension of the patch stride (50% overlap) [npx/2]
+    rectz - number of points to smooth in z direction [30]
+    rectx - number of points to smooth in x direction [30]
+
+  Returns a smooth probability map of focused/defocused faults
+  """
+
+  # Get image dimensions
+  na = img.shape[0]; nz = img.shape[1]; nx = img.shape[2]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Build the Patch Extractors
+  pea = PatchExtractor((na,nzp,nxp),stride=(na,strdz,strdx))
+  aptch = np.squeeze(pea.extract(img))
+  # Flatten patches and make a prediction on each
+  numpz = aptch.shape[0]; numpx = aptch.shape[1]
+  aptchf = np.expand_dims(normalize(aptch.reshape([numpz*numpx,na,nzp,nxp])),axis=-1)
+  focprd = mdl.predict(aptchf)
+
+  focprdptch = np.zeros([numpz*numpx,nzp,nxp])
+  for iptch in range(numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
+  focprdptch = focprdptch.reshape([numpz,numpx,nzp,nxp])
+
+  # Output probabilities
+  per = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  focprdimg = np.zeros([nz,nx])
+  _ = per.extract(focprdimg)
+
+  focprdimg = per.reconstruct(focprdptch.reshape([numpz,numpx,nzp,nxp]))
+
+  focprdimgsm = smooth(focprdimg.astype('float32'),rect1=rectx,rect2=rectz)
+
+  return focprdimgsm
+
+
