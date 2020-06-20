@@ -1,6 +1,9 @@
 import inpout.seppy as seppy
 import numpy as np
 from resfoc.pickscan import pick as pick
+from opt.linopt.cd import cd
+from opt.linopt.essops.weight import weight
+from scaas.trismooth import smoothop
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()
@@ -21,11 +24,26 @@ vel0 = 1.0
 
 pick(an,gate,norm,vel0,oro,dro,nz,nro,nx,smb,pck2,ampl,pcko)
 
-pckn = oro + pcko*dro
+pckn = oro + pck2*dro
 
 taxes,tpk = sep.read_file('tpick.H')
 tpk = tpk.reshape(taxes.n,order='F').T
 
-plt.figure(); plt.imshow(tpk.T,cmap='seismic')
-plt.figure(); plt.imshow(pckn.T,cmap='seismic')
+#plt.figure(); plt.imshow(tpk.T,cmap='seismic'); plt.colorbar()
+#plt.figure(); plt.imshow(pckn.T,cmap='seismic'); plt.colorbar()
+#plt.show()
+
+smop = smoothop([nx,nz],rect1=40,rect2=20)
+
+wop = weight(ampl)
+
+sm0 = np.zeros(ampl.shape,dtype='float32')
+
+smf = cd(wop,pcko,sm0,shpop=smop,niter=100)
+
+smf += vel0
+
+plt.figure(); plt.imshow(smf.T,cmap='seismic'); plt.colorbar()
+plt.figure(); plt.imshow(tpk.T,cmap='seismic'); plt.colorbar()
 plt.show()
+
