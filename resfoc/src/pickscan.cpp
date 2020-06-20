@@ -25,7 +25,6 @@ void normalize(int n1, int n2, float *scn) {
 void pick(float an, int gate, bool norm, float vel0, float o2, float d2,
           int n1, int n2, int n3, float *allscn, float *pck2, float *ampl, float *pcko) {
 
-  fprintf(stderr,"n1=%d n2=%d n3=%d\n",n1,n2,n3);
   /* Depth by midpoint (size of all outputs) */
   int nm = n1*n3;
 
@@ -57,12 +56,12 @@ void pick(float an, int gate, bool norm, float vel0, float o2, float d2,
 
     /* Do the picking */
     dp.find(i0, wgt);
-    dp.traj(pck2);
+    dp.traj(pck2 + i3*n1);
 
     /* Create ampl and pick for subsequent smoothing */
     for(int i1 = 0; i1 < n1; ++i1) {
       int i = i1 + i3*n1; // Index in the image space (nx,nz)
-      float ct = pck2[i1];
+      float ct = pck2[i3*n1 + i1];
       pcko[i] = ct;
       int it = floorf(ct);
       ct -= it;
