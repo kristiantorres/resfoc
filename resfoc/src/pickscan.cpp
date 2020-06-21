@@ -22,7 +22,7 @@ void normalize(int n1, int n2, float *scn) {
   }
 }
 
-void pick(float an, int gate, bool norm, float vel0, float o2, float d2,
+void pickscan(float an, int gate, bool norm, float vel0, float o2, float d2,
           int n1, int n2, int n3, float *allscn, float *pck2, float *ampl, float *pcko) {
 
   /* Depth by midpoint (size of all outputs) */
