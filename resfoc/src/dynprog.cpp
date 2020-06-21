@@ -1,6 +1,7 @@
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "dynprog.h"
 
 dynprog::dynprog(int nz, int nx, int gate, float an) {
