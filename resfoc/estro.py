@@ -8,7 +8,7 @@ from residual migration images
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize, thresh
-from deeplearn.focuslabels import find_flt_patches
+from deeplearn.focuslabels import find_flt_patches, varimax
 from resfoc.ssim import ssim
 from resfoc.rhoshifts import rhoshifts
 from scipy.ndimage import map_coordinates
@@ -244,6 +244,75 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
       focprdimgsm[iro] = smooth(focprdimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
     # Return images
     return rhosm,focprdimgsm
+  else:
+    return rhosm
+
+def estro_varimax(rimgs,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None,rectz=30,rectx=30,qcimgs=True):
+  """
+  Estimates rho by choosing the residually migrated patch that has
+  the highest image entropy computed via the varimax norm
+
+  Parameters
+    rimgs      - residually migrated images [nro,nz,nx]
+    dro        - residual migration sampling
+    oro        - residual migration origin
+    nzp        - size of patch in z dimension [64]
+    nxp        - size of patch in x dimension [64]
+    strdz      - size of stride in z dimension [nzp/2]
+    strdx      - size of stride in x dimension [nxp/2]
+    rectz      - length of smoother in z dimension [30]
+    rectx      - length of smoother in x dimension [30]
+    qcimgs     - flag for returning the smoothed varimax norm [nro,nz,nx]
+
+  Returns an estimate of rho(x,z)
+  """
+  # Get image dimensions
+  nro = rimgs.shape[0]; nz = rimgs.shape[1]; nx = rimgs.shape[2]
+
+  # Get strides
+  if(strdz is None): strdz = int(nzp/2)
+  if(strdx is None): strdx = int(nxp/2)
+
+  # Extract patches from residual migration image
+  per = PatchExtractor((nro,nzp,nxp),stride=(nro,strdz,strdx))
+  rptch = np.squeeze(per.extract(rimgs))
+  # Flatten patches and make a prediction on each
+  numpz = rptch.shape[0]; numpx = rptch.shape[1]
+  nptch  = nro*numpz*numpx
+  rptchf = rptch.reshape([nptch,nzp,nxp])
+  norm = np.zeros(rptchf.shape)
+  for iptch in range(nptch):
+    norm[iptch,:,:] = varimax(rptchf[iptch])
+
+  # Assign prediction to entire patch for QC
+  normptch = norm.reshape([numpz,numpx,nro,nzp,nxp])
+
+  # Output rho image
+  rho = np.zeros([nz,nx])
+  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+  rhop = pe.extract(rho)
+
+  # Using hasfault array, estimate rho from fault focus probabilities
+  hlfz = int(nzp/2); hlfx = int(nxp/2)
+  for izp in range(numpz):
+    for ixp in range(numpx):
+      # Find maximum entropy and compute rho
+      ient = normptch[izp,ixp,:,hlfz,hlfx]
+      rhop[izp,ixp,:,:] = np.argmax(ient)*dro + oro
+
+  # Reconstruct the rho, fault patches and fault probabiliites
+  rho     = pe.reconstruct(rhop)
+  normimg = per.reconstruct(normptch.reshape([1,numpz,numpx,nro,nzp,nxp]))
+
+  # Smooth and return rho, fault patches and fault probabilities
+  rhosm = smooth(rho.astype('float32'),rect1=rectx,rect2=rectz)
+  if(qcimgs):
+    normimgsm = np.zeros(normimg.shape)
+    # Smooth the fault focusing for each rho
+    for iro in range(nro):
+      normimgsm[iro] = smooth(normimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
+    # Return images
+    return rhosm,normimgsm
   else:
     return rhosm
 

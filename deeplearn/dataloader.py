@@ -64,7 +64,7 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
   if(clean):
     sp = subprocess.check_call('rm %s'%(fin),shell=True)
 
-def load_alldata(trfile,vafile,dsize):
+def load_alldata(trfile,vafile,dsize,begex=None,endex=None):
   """ Loads all data and labels into numpy arrays """
   # Get training number of examples
   hftr = h5py.File(trfile,'r')
@@ -80,15 +80,21 @@ def load_alldata(trfile,vafile,dsize):
   # Get shape of examples
   xshape = hftr[trkeys[0]].shape
   yshape = hftr[trkeys[0+ntr]].shape
+  # Get number of examples
+  if(begex is None or endex is None):
+    begex = 0; endex = ntr
+    nex = ntr
+  else:
+    nex = endex - begex
   # Allocate output arrays
   if(len(xshape) == 4):
-    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
+    allx = np.zeros([(nex+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
   elif(len(xshape) == 3):
-    allx = np.zeros([(ntr+nva)*dsize,xshape[1],xshape[2]],dtype='float32')
-  ally = np.zeros([(ntr+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
+    allx = np.zeros([(nex+nva)*dsize,xshape[1],xshape[2]],dtype='float32')
+  ally = np.zeros([(nex+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
   k = 0
   # Get all training examples
-  for itr in progressbar(range(ntr), "numtr:"):
+  for itr in progressbar(range(begex,endex), "numtr:"):
     for iex in range(dsize):
       allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
       if(len(yshape) == 3):

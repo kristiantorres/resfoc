@@ -12,7 +12,7 @@ from resfoc.pickscan import pickscan
 from opt.linopt.essops.weight import weight
 from opt.linopt.cd import cd
 
-def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
+def rho_semb(stormang,gagc=True,norm=True,rectz=10,rectro=3,nthreads=1):
   """
   Computes semblance from residually migrated angle gathers
 
@@ -28,10 +28,10 @@ def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
   nro,nx,na,nz = stormang.shape
   # Compute agc
   if(gagc):
-    angs = np.asarray(Parallel(n_jobs=nthreads)(delayed(agc)(stormang[iro]) for iro in range(onro)))
+    angs = np.asarray(Parallel(n_jobs=nthreads)(delayed(agc)(stormang[iro]) for iro in range(nro)))
   else:
     angs = stormang
-  
+
   # Compute semblance
   stackg  = np.sum(angs,axis=2)
   stacksq = stackg*stackg
@@ -40,9 +40,14 @@ def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
   sqstack = np.sum(angs*angs,axis=2)
   den = smooth(sqstack.astype('float32'),rect1=rectz,rect3=rectro)
 
-  semb = num/denom
+  semb = num/den
 
-  return np.transpose(semb,(1,0,2)) # [nro,nx,nz] -> [nx,nro,nz]
+  sembt = np.transpose(semb,(1,0,2)) # [nro,nx,nz] -> [nx,nro,nz]
+
+  if(norm):
+    sembt /= np.max(sembt)
+
+  return sembt
 
 def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,niter=100,verb=False):
   """
@@ -91,7 +96,7 @@ def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,nite
   sm0 = np.zeros(ampl.shape,dtype='float32')
 
   # Smooth the picks via smooth division
-  smf = cd(wop,pcko,sm0,shpop=smop,niter=niter,verb=False)
+  smf = cd(wop,pcko,sm0,shpop=smop,niter=niter,verb=verb)
 
   opicks = smf + vel0
 
