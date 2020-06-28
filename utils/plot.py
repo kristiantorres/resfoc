@@ -28,6 +28,7 @@ def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
     ax[0].plot(t,wav)
     ax[0].set_xlabel('Time (s)',fontsize=kwargs.get('labelsize',14))
     ax[0].tick_params(labelsize=kwargs.get('labelsize',14))
+    ax[0].set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
     maxval = np.max(wav)*1.5
     ax[0].set_ylim([-maxval,maxval])
     # Frequency domain
@@ -36,6 +37,7 @@ def plot_wavelet(wav,dt,spectrum=True,show=True,**kwargs):
     ax[1].set_xlabel('Frequency (Hz)',fontsize=kwargs.get('labelsize',14))
     ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
     ax[1].set_ylim([0,1.2])
+    plt.subplots_adjust(hspace=kwargs.get('hspace',0.0))
     if(show):
       plt.show()
   else:
@@ -293,6 +295,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname
       cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',15))
   ax.tick_params(labelsize=kwargs.get('labelsize',15))
   # Colorbar
   cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
