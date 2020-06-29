@@ -49,7 +49,7 @@ def rho_semb(stormang,gagc=True,norm=True,rectz=10,rectro=3,nthreads=1):
 
   return sembt
 
-def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,niter=100,verb=False):
+def pick(semb,opar,dpar,vel0=None,norm=False,rectz=40,rectx=20,an=1.0,gate=3,niter=100,verb=False):
   """
   Computes semblance picks for an input semblance panel
 
