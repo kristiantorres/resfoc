@@ -159,6 +159,7 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
         kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
   if(fname):
       ax.set_aspect(kwargs.get('aratio',1.0))
