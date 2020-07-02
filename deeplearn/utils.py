@@ -202,7 +202,7 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
     ftype = kwargs.get('ftype','png')
     ax.set_aspect(kwargs.get('aratio',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
-    cbar.remove()
+  cbar.remove()
   # Plot label
   imp = ax.imshow(mask,cmap='jet',
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
