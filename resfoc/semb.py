@@ -40,7 +40,7 @@ def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
   sqstack = np.sum(angs*angs,axis=2)
   den = smooth(sqstack.astype('float32'),rect1=rectz,rect3=rectro)
 
-  semb = num/denom
+  semb = num/den
 
   return np.transpose(semb,(1,0,2)) # [nro,nx,nz] -> [nx,nro,nz]
 
@@ -75,6 +75,9 @@ def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,nite
 
   # Find semblance picks
   pickscan(an,gate,norm,vel0,opar,dpar,nz,npar,nx,semb,pck2,ampl,pcko)
+  import matplotlib.pyplot as plt
+  plt.figure(); plt.imshow(ampl,cmap='seismic'); plt.colorbar()
+  plt.figure(); plt.imshow(pcko,cmap='seismic'); plt.colorbar(); plt.show()
 
   # Return pck2 if no smoothing
   if(rectz == 1 and rectx == 1):
@@ -91,7 +94,7 @@ def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,nite
   sm0 = np.zeros(ampl.shape,dtype='float32')
 
   # Smooth the picks via smooth division
-  smf = cd(wop,pcko,sm0,shpop=smop,niter=niter,verb=False)
+  smf = cd(wop,pcko,sm0,shpop=smop,niter=niter,verb=verb)
 
   opicks = smf + vel0
 

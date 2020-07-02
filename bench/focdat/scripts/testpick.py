@@ -8,12 +8,15 @@ import matplotlib.pyplot as plt
 
 sep = seppy.sep()
 
-saxes,smb = sep.read_file('mltestdogsmb.H')
+#saxes,smb = sep.read_file('mltestdogsmb.H')
+#saxes,smb = sep.read_file('smbnorm.H')
+saxes,smb = sep.read_file('sembtest.H')
 smb = np.ascontiguousarray(smb.reshape(saxes.n,order='F').T).astype('float32')
 
 [nz,nro,nx] = saxes.n; [dz,dro,dx] = saxes.d; [oz,oro,ox] = saxes.o
 
-rho = pick(smb,oro,dro,vel0=1.0)
+print(smb[20,20,20],oro,dro)
+rho = pick(smb,oro,dro,vel0=1.0,norm=False,verb=True)
 
 #
 #pck2 = np.zeros([nx,nz],dtype='float32')
@@ -29,8 +32,8 @@ rho = pick(smb,oro,dro,vel0=1.0)
 #
 #pckn = oro + pck2*dro
 #
-taxes,tpk = sep.read_file('tpick.H')
-tpk = tpk.reshape(taxes.n,order='F').T
+#taxes,tpk = sep.read_file('tpick.H')
+#tpk = tpk.reshape(taxes.n,order='F').T
 #
 ##plt.figure(); plt.imshow(tpk.T,cmap='seismic'); plt.colorbar()
 ##plt.figure(); plt.imshow(pckn.T,cmap='seismic'); plt.colorbar()
@@ -46,7 +49,7 @@ tpk = tpk.reshape(taxes.n,order='F').T
 #
 #smf += vel0
 #
-plt.figure(); plt.imshow(rho.T,cmap='seismic'); plt.colorbar()
-plt.figure(); plt.imshow(tpk.T,cmap='seismic'); plt.colorbar()
+#plt.figure(); plt.imshow(rho.T,cmap='seismic'); plt.colorbar()
+#plt.figure(); plt.imshow(tpk.T,cmap='seismic'); plt.colorbar()
 plt.show()
 

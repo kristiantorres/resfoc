@@ -2,6 +2,7 @@
 #include <cstring>
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "dynprog.h"
 
 void normalize(int n1, int n2, float *scn) {
