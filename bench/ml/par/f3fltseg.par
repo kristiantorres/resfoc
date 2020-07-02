@@ -7,13 +7,13 @@ ptchz=128
 strdx=64
 strdz=64
 # Neural network
-wgts=/scr1/joseph29/xwcnvmig-10ep-chkpnt.h5
-arch=./dat/networks/xwcnvmig-10.json
-#wgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
-#arch=./dat/networks/xwarch-gpu25.json
+#wgts=/scr1/joseph29/xwcnvmig-10ep-chkpnt.h5
+#arch=./dat/networks/xwcnvmig-10.json
+wgts=/net/fantastic/scr2/joseph29/xwarch-gpu25ep-chkpnt.h5
+arch=./dat/networks/xwarch-gpu25.json
 thresh=0.3
 # Other
 verb=y
 show=y
-gpus=2
+gpus=3
 

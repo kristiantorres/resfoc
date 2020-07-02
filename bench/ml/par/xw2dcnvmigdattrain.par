@@ -1,0 +1,23 @@
+[defaults]
+# Training inputs and outputs
+cnvtrdat=/scr1/joseph29/cnvseglbldata.h5
+cnvvadat=
+migtrdat=/scr1/joseph29/focseglbldata.h5
+migvadat=
+wgtout=./dat/networks/xwcnvmig-10ep.h5
+arcout=./dat/networks/xwcnvmig-10.json
+chkpnt=/scr1/joseph29/xwcnvmig-10ep-chkpnt.h5
+lssout=./dat/nnhistory/xwcnvmig-10ep_loss.H
+vlsout=./dat/nnhistory/xwcnvmig-10ep_vlss.H
+accout=./dat/nnhistory/xwcnvmig-10ep_accu.H
+vacout=./dat/nnhistory/xwcnvmig-10ep_vacu.H
+# For testing on a field dataset
+f3dat=/net/fantastic/scr2/joseph29/f3tstdat.h5
+f3prd=/net/fantastic/scr2/joseph29/f3preds/xwcnvmig
+f3fig=./fig/f3preds/xwcnvmig
+# Training parameters
+bsize=20
+nepochs=10
+# Other
+verb=y
+gpus=3
