@@ -12,7 +12,7 @@ from resfoc.pickscan import pickscan
 from opt.linopt.essops.weight import weight
 from opt.linopt.cd import cd
 
-def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
+def rho_semb(stormang,gagc=True,norm=True,rectz=10,rectro=3,nthreads=1):
   """
   Computes semblance from residually migrated angle gathers
 
@@ -28,10 +28,10 @@ def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
   nro,nx,na,nz = stormang.shape
   # Compute agc
   if(gagc):
-    angs = np.asarray(Parallel(n_jobs=nthreads)(delayed(agc)(stormang[iro]) for iro in range(onro)))
+    angs = np.asarray(Parallel(n_jobs=nthreads)(delayed(agc)(stormang[iro]) for iro in range(nro)))
   else:
     angs = stormang
-  
+
   # Compute semblance
   stackg  = np.sum(angs,axis=2)
   stacksq = stackg*stackg
@@ -42,9 +42,14 @@ def rho_semb(stormang,gagc=True,rectz=10,rectro=3,nthreads=1):
 
   semb = num/den
 
-  return np.transpose(semb,(1,0,2)) # [nro,nx,nz] -> [nx,nro,nz]
+  sembt = np.transpose(semb,(1,0,2)) # [nro,nx,nz] -> [nx,nro,nz]
 
-def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,niter=100,verb=False):
+  if(norm):
+    sembt /= np.max(sembt)
+
+  return sembt
+
+def pick(semb,opar,dpar,vel0=None,norm=False,rectz=40,rectx=20,an=1.0,gate=3,niter=100,verb=False):
   """
   Computes semblance picks for an input semblance panel
 
@@ -75,9 +80,6 @@ def pick(semb,opar,dpar,vel0=None,norm=True,rectz=40,rectx=20,an=1.0,gate=3,nite
 
   # Find semblance picks
   pickscan(an,gate,norm,vel0,opar,dpar,nz,npar,nx,semb,pck2,ampl,pcko)
-  import matplotlib.pyplot as plt
-  plt.figure(); plt.imshow(ampl,cmap='seismic'); plt.colorbar()
-  plt.figure(); plt.imshow(pcko,cmap='seismic'); plt.colorbar(); plt.show()
 
   # Return pck2 if no smoothing
   if(rectz == 1 and rectx == 1):
