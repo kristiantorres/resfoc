@@ -13,7 +13,6 @@ evntcre8::evntcre8(int nx, int ny, float dx, float dy, float dz) {
 
 void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, int nzot, int *lyrot, float *velot) {
 
-  //TODO: should check nzot with nzin and itop and ibot
   /* Assign the expanded model indices in lyrot */
   tbb::parallel_for(tbb::blocked_range<int>(0, _n3),
       [&](const tbb::blocked_range<int>& r) {
@@ -37,7 +36,6 @@ void evntcre8::expand(int itop, int ibot, int nzin, int *lyrin, float *velin, in
 
 }
 
-//TODO:  probably need to pass in the current event number
 void evntcre8::deposit(float vel,
     float band1, float band2, float band3,
     float layerT, float layer_rand, float dev_layer, float dev_pos,
@@ -630,8 +628,6 @@ void evntcre8::squish_shifts(int nz, float *shftin, int mode,
     for (int i2 = 0; i2 < _n2; i2++) {
 
       float beg = shiftrot[i3*_n2 + i2]; // Rotated shift to be applied
-
-      //TODO: will need to bring back distrot for cosine shifts
 
       for (int i1 = 0; i1 < nz; i1++) {
         shftz[i3*nz*_n2 + i2*nz + i1] = (i1*_d1 - beg)/_d1;

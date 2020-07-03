@@ -39,7 +39,6 @@ void rstoltbig::resmig(float *dat, float *img, int nthrd, bool verb) {
   for(int iro = 0; iro < _nro; ++iro) {
     /* Set up the parallel printing */
     int tidx = omp_get_thread_num();
-		//TODO: set two types of verbosity. depending on the number of threads used
     if(firstiter && verb) ridx[tidx] = iro;
 		if(verb) {
 			if(nthrd >= _nro) {
