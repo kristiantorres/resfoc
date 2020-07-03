@@ -86,7 +86,7 @@ img = np.ascontiguousarray(img.T).astype('float32') # [nro,nx,na,nz]
 stk = np.sum(img,axis=2)
 ## Apply AGC
 # Angle gathers
-[nz,na,nx,nro] = iaxes.n; [dz,da,dx,dro] = iaxes.d; [oz,da,ox,oro] = iaxes.o
+[nz,na,nx,nro] = iaxes.n; [dz,da,dx,dro] = iaxes.d; [oz,oa,ox,oro] = iaxes.o
 gimg =  np.asarray(Parallel(n_jobs=24)(delayed(agc)(img[iro]) for iro in range(nro)))
 gimgt = np.ascontiguousarray(np.transpose(gimg,(0,2,3,1))) # [nro,nx,na,nz] -> [nro,na,nz,nx]
 # Stack
@@ -110,8 +110,6 @@ rho,fltfocs = estro_fltangfocdefoc(gimgt,focmdl,dro,oro,rectz=40,rectx=40)
 focangro1 = focdefocang(gimgt[20],focmdl)
 
 sep.write_file('focprbrho1full.H',focangro1,ds=[dz,dx])
-
-plt.imshow(focangro1,cmap='jet'); plt.show()
 
 # Write out the estimated rho
 sep.write_file('rhoangcnn3.H',rho,ds=[dz,dz])

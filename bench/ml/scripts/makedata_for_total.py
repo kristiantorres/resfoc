@@ -10,13 +10,13 @@ from utils.ptyprint import create_inttag, progressbar
 sep = seppy.sep()
 
 # F3 dataset
-#iaxes,img = sep.read_file("./dat/f3cube.H")
-#img = img.reshape(iaxes.n,order='F')
-#img = np.ascontiguousarray(img.T).astype('float32')
+iaxes,img = sep.read_file("./dat/f3cube.H")
+img = img.reshape(iaxes.n,order='F')
+img = np.ascontiguousarray(img.T).astype('float32')
 
-#iline = resizepow2(img[11]).T
+iline = resizepow2(img[11]).T
 
-#np.save("f3iline.npy",iline)
+np.save("f3iline.npy",iline)
 
 # Angle gather focus training data
 # Load all data
@@ -72,4 +72,7 @@ for iex in progressbar(range(ntot), "nex:"):
 hf.close()
 
 # Angle mask
+maxes,msk = sep.read_file("../focdat/mask.H")
+msk = msk.reshape(maxes.n,order='F')
+np.save('./dat/mask.npy',msk)
 
