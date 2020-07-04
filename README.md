@@ -26,3 +26,16 @@ into your browser to run the notebooks.
 
 If you would prefer not to use docker, then the `Dockerfile` shows exactly all of the 
 steps and required software to install and run the notebooks.
+
+## Description of Jupyter notebooks
+* **SyntheticModelBuilding.ipynb**
+    - Builds pseudo-random geologic velocity models with their corresponding reflectivity and fault labels
+    
+ * **FocusedDefocusedTrainingImages.ipynb**
+    - Creates focused and defocused patches (with or without faults) for image focus classification
+    
+ * **FaultSegmentationAndFocusing**
+    - Trains a CNN for fault segmentation (using the data generated from `SyntheticModelBuilding.ipynb`) and a CNN for image focusing classification (using the data generated from `FocusedDefocusedTrainingImages.ipynb`). Note, requires that the training data be downloaded.
+    
+ * **SemblanceVsCNNRefocus.ipynb**
+    - Compares image refocusing with semblance and with the trained image focusing CNN
