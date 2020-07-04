@@ -503,3 +503,26 @@ def corrsim(img,tgt):
   # Similarity metric
   return xcor/np.sqrt(icor*tcor)
 
+def varimax(img):
+  """
+  Computes the varimax norm on the input image. If the
+  image is 2D, assumes that the input is the stack.
+  If 3D, then sums over the middle axis
+
+  Note that the order of the spatial axes does not matter
+
+  Parameters:
+    img - the input image (stacked or prestack) [nx,nz]/[nx,na,nz]
+
+  Returns the varimax image entropy norm
+  """
+  if(len(img.shape) == 3):
+    stk = np.sum(img,axis=1)
+  else:
+    stk = img
+  nx = stk.shape[0]; nz = stk.shape[1]
+  num = nz*nx*np.sum(stk**4)
+  den = np.sum(stk**2)**2
+
+  return num/den
+
