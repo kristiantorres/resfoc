@@ -7,14 +7,15 @@ please look at the Jupyter notebooks found within the `notebooks`
 directory.
 
 If you would like to run the notebooks or the code, I would recommend building
-a Docker image using the `Dockerfile`. This will first require the installation of docker
+a Docker image using the `Dockerfile` within the `docker` directory. 
+This will first require the installation of docker
 and then [nvidia-docker](https://github.com/NVIDIA/nvidia-docker).
 
 With docker and nvidia-docker installed, you can build a docker image with the command:
 
 `docker build -t "resfoc:total" .`,
 
-assuming that you are in the same directory as `Dockerfile`.
+assuming that you are in the `docker` directory.
 
 You can then run the docker image with:
 
