@@ -27,14 +27,14 @@ ENV PATH /opt/ispc-v1.13.0-linux/bin:$PATH
 
 ## Download git repositories
 RUN mkdir /opt/scaas && \ 
-          git clone -b total https://github.com/ke0m/scaas.git  /opt/scaas && \
+          git clone https://github.com/ke0m/scaas.git  /opt/scaas && \
           cd /opt/scaas/scaas/src && \
           make
 
 ENV CPLUS_INCLUDE_PATH $CPLUS_INCLUDE_PATH:/opt/scaas/scaas/src
 
 RUN mkdir /opt/resfoc && \ 
-          git clone -b total --recurse-submodules https://github.com/ke0m/resfoc.git  /opt/resfoc && \
+          git clone --recurse-submodules https://github.com/ke0m/resfoc.git  /opt/resfoc && \
           cd /opt/resfoc/resfoc/src && \
           make && \
           cd /opt/resfoc/velocity/src && \
