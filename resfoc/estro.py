@@ -292,7 +292,6 @@ def estro_varimax(rimgs,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None,rectz=30,rec
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
   rhop = pe.extract(rho)
 
-  # Using hasfault array, estimate rho from fault focus probabilities
   hlfz = int(nzp/2); hlfx = int(nxp/2)
   for izp in range(numpz):
     for ixp in range(numpx):
