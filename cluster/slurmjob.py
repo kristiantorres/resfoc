@@ -1,3 +1,12 @@
+"""
+Abstract class for a SLURM job
+
+Knows its current state and how to be submitted to a SLURM cluster
+
+@author: Joseph Jennings
+@version: 2020.07.15
+"""
+
 import random, string
 import time
 import subprocess
