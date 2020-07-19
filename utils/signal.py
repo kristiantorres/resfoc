@@ -19,6 +19,9 @@ def ampspec1d(sig,dt):
   Parameters:
     sig - the input signal (numpy array)
     dt  - the sampling rate of the signal
+
+  Returns:
+    amplitude spectrum [nw] and array of frequencies
   """
   nt = sig.shape[0]
   spec = np.abs(np.fft.fftshift(np.fft.fft(np.pad(sig,(0,nt),mode='constant'))))[nt:]
@@ -65,21 +68,25 @@ def butter_bandpass(locut, hicut, fs, order=5):
   b, a = butter(order, [lo, hi], btype='band')
   return b, a
 
-def butter_bandpass_filter(data, locut, hicut, fs, order=5):
+def butter_bandpass_filter(data, locut, hicut, fs, order=5, zrophz=True):
   """
   Convolves the input signal with a butterworth bandpass filter
 
   Parameters
-    locut - the low frequency beyond which to not pass
-    hicut - the hight frequency beyond which to not pass
-    fs    - the sampling frequency
-    order - the order (number of terms in the LCCDE) to use for the filter
+    locut  - the low frequency beyond which to not pass
+    hicut  - the high frequency beyond which to not pass
+    fs     - the sampling frequency
+    order  - the order (number of terms in the LCCDE) to use for the filter
+    zrophz - whether to apply a zero or minimum phase filter
 
   @source: SO: how-to-implement-band-pass-butterworth-filter-with-scipy-signal-butter
   @author: Warren Weckesser
   """
   b, a = butter_bandpass(locut, hicut, fs, order=order)
-  y = filtfilt(b, a, data)
+  if(zrophz):
+    y = filtfilt(b, a, data)
+  else:
+    y = lfilter(b, a, data)
   return y
 
 def butter2d_lp(shape, f, n, pxd=1):
