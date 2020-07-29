@@ -97,8 +97,9 @@ def resample(img,new_shape,kind='linear',ds=[]):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
   elif len(img.shape)==2:
+    res = np.zeros([new_shape[0],new_shape[1]],dtype='float32')
     f=interpolate.interp2d(x,y,img,kind=kind)
-    res=f(xnew,ynew)
+    res[:] = f(xnew,ynew)
 
   if(len(ds) == 0):
     return res

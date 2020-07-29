@@ -1,0 +1,17 @@
+
+threeD.H:  ./dat/allmidpts.HH
+	Window3d < ./dat/allmidpts.HH j3=2 >a.H
+	Window3d < ./dat/allmidpts.HH j3=2 >b.H f3=1
+	echo o2=.331 >>b.H
+	Create3d < a.H >a.3.H keyname1=offset keyname2=cmp_x
+	Create3d < b.H >b.3.H keyname1=offset keyname2=cmp_x
+	Scat3d a.3.H b.3.H >$@ axis=2
+
+math.H: threeD.H
+	Headermath < threeD.H >$@ key1=s_x eqn1="cmp_x-offset/2" key2=g_x eqn2="cmp_x+offset/2" type1="scalar_float" type2="scalar_float"
+
+sort.H: math.H
+	Sort3d < math.H >$@ nkeys=2 key1=offset key2=s_x ng1=48 og1=.264 dg1=.067  ng2=173 og2=5.36 dg2=.067 verb=1 verbose=1
+
+stack.H: sort.H
+	Infill3d < sort.H >stack.H
