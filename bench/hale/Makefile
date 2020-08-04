@@ -127,3 +127,4 @@ hale_shotflatbob.H: shots.H ./scripts/bobflat.py
 
 burn:
 	Rm *.H
+

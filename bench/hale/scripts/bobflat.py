@@ -38,8 +38,8 @@ recx = recx.reshape([ntrw])
 stackwmut = stackwmut.reshape([ntrw,nt])
 
 # Write out
-sep.write_file("hale_shotflatbob2.H",stackwmut.T,ds=[dt,1.0])
-sep.write_file("hale_srcxflatbob2.H",srcxw)
-sep.write_file("hale_recxflatbob2.H",recx)
-sep.write_file("hale_nrecbob2.H",nrec)
+sep.write_file("hale_shotflatbob.H",stackwmut.T,ds=[dt,1.0])
+sep.write_file("hale_srcxflatbob.H",srcxw)
+sep.write_file("hale_recxflatbob.H",recx)
+sep.write_file("hale_nrecbob.H",nrec)
 

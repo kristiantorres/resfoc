@@ -1,8 +1,9 @@
 import inpout.seppy as seppy
 import numpy as np
-import oway.coordgeom as geom
+import oway.coordgeomnode as geom
 import matplotlib.pyplot as plt
 from utils.movie import viewimgframeskey
+from dask.distributed import SSHCluster, LocalCluster, Client
 
 # IO
 sep = seppy.sep()
@@ -11,6 +12,9 @@ sep = seppy.sep()
 daxes,dat = sep.read_file("hale_shotflatbob.H")
 dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
+
+nr = 48; nw = 148
+datw = dat[0:nr*nw,:]
 
 # Read in the velocity model
 vaxes,vel = sep.read_file("vintzcomb.H")
@@ -26,21 +30,36 @@ raxes,recx = sep.read_file("hale_recxflatbob.H")
 _,nrec= sep.read_file("hale_nrecbob.H")
 nrec = nrec.astype('int')
 
+srcxw = srcx[0:nw]
+recxw = recx[0:nr*nw]
+nrecw = nrec[0:nw]
+
 nxi = int(2*nvx); dxi = dvx/2; oxi = ovx
 
-wei = geom.coordgeom(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrec,srcxs=srcx,recxs=recx)
+# Create dask cluster
+cluster = SSHCluster(
+                     ["localhost", "fantastic", "thing", "jarvis", "torch"],
+                     connect_options={"known_hosts": None},
+                     worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9},
+                     scheduler_options={"port": 0, "dashboard_address": ":8797"}
+                    )
+
+client = Client(cluster)
+#client = Client(processes=False)
+
+wei = geom.coordgeomnode(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrecw,srcx=srcxw,recx=recxw)
 
 velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
 
-#datreg = wei.make_sht_cube(dat)
-#drx= recx[1] - recx[0]; dsx = srcx[1] - srcx[0]; osx = srcx[0]
-#orx = recx[0] - srcx[0]
-#sep.write_file("datregbob2.H",datreg.T,ds=[dt,drx,dsx],os=[ot,orx,osx])
+img = wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=20,nrmax=10,
+                     nthrds=40,client=client)
+print(" ")
 
-img = wei.image_data(dat,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=20,nrmax=10,nthrds=40)
+#img = wei.image_data(dat,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=0,nrmax=10,
+#                     nthrds=40,nchnks=2,client=None)
 
 # Zero-offset image
-#sep.write_file("spimgbobfull.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
+#sep.write_file("spimgbobwin.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
 
 # Subsurface offset
 imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
