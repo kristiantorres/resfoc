@@ -1,9 +1,10 @@
 import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeomnode as geom
+from oway.coordgeomnode import create_outer_chunks
 import matplotlib.pyplot as plt
 from utils.movie import viewimgframeskey
-from dask.distributed import SSHCluster, LocalCluster, Client
+from dask.distributed import SSHCluster, Client
 
 # IO
 sep = seppy.sep()
@@ -12,9 +13,6 @@ sep = seppy.sep()
 daxes,dat = sep.read_file("hale_shotflatbob.H")
 dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
-
-nr = 48; nw = 148
-datw = dat[0:nr*nw,:]
 
 # Read in the velocity model
 vaxes,vel = sep.read_file("vintzcomb.H")
@@ -30,45 +28,34 @@ raxes,recx = sep.read_file("hale_recxflatbob.H")
 _,nrec= sep.read_file("hale_nrecbob.H")
 nrec = nrec.astype('int')
 
-srcxw = srcx[0:nw]
-recxw = recx[0:nr*nw]
-nrecw = nrec[0:nw]
+nochnks = 4
+ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
 nxi = int(2*nvx); dxi = dvx/2; oxi = ovx
 
 # Create dask cluster
 cluster = SSHCluster(
-                     ["localhost", "fantastic", "thing", "jarvis", "torch"],
+                     ["localhost", "fantastic", "thing", "jarvis", "storm"],
                      connect_options={"known_hosts": None},
                      worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9},
                      scheduler_options={"port": 0, "dashboard_address": ":8797"}
                     )
 
 client = Client(cluster)
-#client = Client(processes=False)
 
-wei = geom.coordgeomnode(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrecw,srcx=srcxw,recx=recxw)
-
-velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
-
-img = wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=20,nrmax=10,
-                     nthrds=40,client=client)
-print(" ")
-
-#img = wei.image_data(dat,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=0,nrmax=10,
-#                     nthrds=40,nchnks=2,client=None)
+img = np.zeros([nz,ny,nxi],dtype='float32')
+for k in range(nochnks):
+  # Get data for outer chunk
+  datw  = ochunks[k]['dat' ]; nrecw = ochunks[k]['nrec']
+  srcxw = ochunks[k]['srcx']; recxw = ochunks[k]['recx']
+  # Build geometry object
+  wei = geom.coordgeomnode(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrecw,srcx=srcxw,recx=recxw)
+  if(k == 0):
+    velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
+  # Distributed imaging
+  img += wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nrmax=10,
+                        nthrds=40,client=client)
 
 # Zero-offset image
-#sep.write_file("spimgbobwin.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
-
-# Subsurface offset
-imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
-nhx,ohx,dhx = wei.get_off_axis()
-sep.write_file("spimgbobfullext.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
-
-# Angle
-#ang = wei.to_angle(img,verb=True,nthrds=40)
-#na,oa,da = wei.get_ang_axis()
-
-#sep.write_file("spimgang.H",ang.T,os=[0,oa,ovx],ds=[dz,da,dvx])
+sep.write_file("spimgbob.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
 

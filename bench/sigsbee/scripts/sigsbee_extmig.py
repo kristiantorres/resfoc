@@ -1,8 +1,10 @@
 import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeomnode as geom
+from oway.coordgeomnode import create_outer_chunks
 import matplotlib.pyplot as plt
 from dask.distributed import SSHCluster, LocalCluster, Client
+from cluster.daskutils import shutdown_sshcluster
 
 sep = seppy.sep()
 
@@ -10,9 +12,6 @@ sep = seppy.sep()
 daxes,dat = sep.read_file("sigsbee_shotflat.H")
 dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
-
-nr = 348; nw = 100
-datw = dat[0:nr*nw,:]
 
 # Read in velocity model
 vaxes,vel = sep.read_file("sigsbee_vel.H")
@@ -28,14 +27,13 @@ raxes,recx = sep.read_file("sigsbee_recxflat.H")
 _,nrec = sep.read_file("sigsbee_nrec.H")
 nrec = nrec.astype('int')
 
-srcxw = srcx[0:nw]
-recxw = recx[0:nr*nw]
-nrecw = nrec[0:nw]
+nochnks = 5
+ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
 cluster = SSHCluster(
-                     ["localhost", "fantastic", "thing", "torch", "jarvis"],
+                     ["localhost", "fantastic", "thing", "storm", "jarvis", "vision"],
                      connect_options={"known_hosts": None},
-                     worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9},
+                     worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9, "worker_port": '33149:33150'},
                      scheduler_options={"port": 0, "dashboard_address": ":8797"}
                     )
 
@@ -45,14 +43,24 @@ client = Client(cluster)
 nxi = saxes.n[0]; oxi = srcx[0]; dxi = srcx[1] - srcx[0]
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nxi,oxi,dxi))
 
-wei = geom.coordgeomnode(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrecw,srcx=srcxw,recx=recxw)
-
-velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
-
-img = wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=20,nrmax=20,
-                     nthrds=40,client=client)
+nhx = 20; nhy = 0
+img = np.zeros([2*nhy+1,2*nhx+1,nz,ny,nxi],dtype='float32')
+for k in range(nochnks):
+  # Get data for outer chunk
+  datw  = ochunks[k]['dat' ]; nrecw = ochunks[k]['nrec']
+  srcxw = ochunks[k]['srcx']; recxw = ochunks[k]['recx']
+  # Build geometry object
+  wei = geom.coordgeomnode(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrecw,srcx=srcxw,recx=recxw)
+  if(k == 0):
+    velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
+  # Distributed imaging
+  img += wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=nhx,nrmax=20,
+                            nthrds=40,client=client)
 
 imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
 nhx,ohx,dhx = wei.get_off_axis()
 sep.write_file("mysigextimg.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
 
+# Shutdown dask
+client.shutdown()
+shutdown_sshcluster(hosts)
