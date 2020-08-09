@@ -70,7 +70,7 @@ def progressbar(it, prefix="", size=40, file=sys.stdout, verb=True):
     x = int(size*j/count)
     file.write("%s[%s%s] %i/%i\r" % (prefix+" ", "#"*x, "."*(size-x), j, count))
     file.flush()
-  show(0)
+  if(verb): show(0)
   for i, item in enumerate(it):
     yield item
     if(verb): show(i+1)
