@@ -6,7 +6,7 @@ from scaas.off2ang import off2ang, get_ang_axis
 sep = seppy.sep()
 
 # Read in the defocused image
-iaxes,img = sep.read_file("spimgbobfullext.H")
+iaxes,img = sep.read_file("spimgbobext.H")
 img  = img.reshape(iaxes.n,order='F')
 imgt = np.ascontiguousarray(img.T).astype('float32')
 imgtw = imgt[:,0,:,:]
@@ -15,8 +15,8 @@ imgtw = imgt[:,0,:,:]
 [nz,nx,ny,nhx] = iaxes.n; [oz,ox,oy,ohx] = iaxes.o; [dz,dx,dy,dhx] = iaxes.d
 
 # Depth Residual migration
-inro = 21; idro = 0.00125
-rmig = preresmig(imgtw,[dhx,dx,dz],nps=[65,1025,1025],nro=inro,dro=idro,time=False,nthreads=18,verb=True)
+inro = 41; idro = 0.00250
+rmig = preresmig(imgtw,[dhx,dx,dz],nps=[128,1025,1025],nro=inro,dro=idro,time=False,nthreads=18,verb=True)
 onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 
 # Convert to time
@@ -29,7 +29,7 @@ rmigt = convert2time(rmig,dz,dt=dtd,dro=odro,verb=True)
 #na,oa,da = get_ang_axis()
 
 # Write to file
-sep.write_file("haleres.H",rmig.T,ds=[dz,dx,dhx,odro],os=[0,0,ohx,ooro])
-sep.write_file("halerest.H",rmigt.T,ds=[dz,dx,dhx,odro],os=[0,0,ohx,ooro])
+sep.write_file("haleres2.H",rmig.T,ds=[dz,dx,dhx,odro],os=[oz,ox,ohx,ooro])
+sep.write_file("halerest2.H",rmigt.T,ds=[dz,dx,dhx,odro],os=[ox,ox,ohx,ooro])
 #sep.write_file("haleresang.H",stormang.T,ds=[dz,da,dx,odro],os=[0,oa,0,ooro])
 

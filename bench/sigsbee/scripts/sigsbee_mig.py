@@ -29,10 +29,12 @@ nrec = nrec.astype('int')
 nochnks = 5
 ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
+hosts = ["localhost", "fantastic", "thing", "torch", "storm", "jarvis"]
 cluster = SSHCluster(
-                     ["localhost", "fantastic", "thing", "torch", "storm", "jarvis"],
+                     hosts,
                      connect_options={"known_hosts": None},
-                     worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9, "worker_port": '33149:33150'},
+                     worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9,
+                                     "worker_port": '33149:33150'},
                      scheduler_options={"port": 0, "dashboard_address": ":8797"}
                     )
 
@@ -56,4 +58,8 @@ for k in range(nochnks):
                         nthrds=40,client=client)
 
 sep.write_file("mysigimg.H",img,ds=[dz,dy,dxi],os=[oz,0.0,oxi])
+
+# Shutdown dask
+client.shutdown()
+shutdown_sshcluster(hosts)
 

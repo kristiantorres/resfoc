@@ -14,7 +14,7 @@ dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
 
 # Read in velocity model
-vaxes,vel = sep.read_file("sigsbee_vel.H")
+vaxes,vel = sep.read_file("sigsbee_veloverw2.H")
 vel = vel.reshape(vaxes.n,order='F')
 [nz,nvx] = vaxes.n; [dz,dvx] = vaxes.d; [oz,ovx] = vaxes.o
 ny = 1; dy = 1.0
@@ -30,8 +30,9 @@ nrec = nrec.astype('int')
 nochnks = 5
 ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
+hosts = ["localhost", "fantastic", "thing", "torch", "storm", "jarvis"]
 cluster = SSHCluster(
-                     ["localhost", "fantastic", "thing", "storm", "jarvis", "vision"],
+                     hosts,
                      connect_options={"known_hosts": None},
                      worker_options={"nthreads": 1, "nprocs": 1, "memory_limit": 20e9, "worker_port": '33149:33150'},
                      scheduler_options={"port": 0, "dashboard_address": ":8797"}
@@ -59,8 +60,9 @@ for k in range(nochnks):
 
 imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
 nhx,ohx,dhx = wei.get_off_axis()
-sep.write_file("mysigextimg.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
+sep.write_file("sigoverw2.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
 
 # Shutdown dask
 client.shutdown()
 shutdown_sshcluster(hosts)
+

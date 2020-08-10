@@ -48,8 +48,8 @@ nhx,ohx,dhx = wei.get_off_axis()
 sep.write_file("spimgbobfullext.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
 
 # Angle
-#ang = wei.to_angle(img,verb=True,nthrds=40)
-#na,oa,da = wei.get_ang_axis()
+ang = wei.to_angle(img,verb=True,nthrds=40)
+na,oa,da = wei.get_ang_axis()
 
 #sep.write_file("spimgang.H",ang.T,os=[0,oa,ovx],ds=[dz,da,dvx])
 
