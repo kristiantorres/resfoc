@@ -102,5 +102,9 @@ def agc(dat,rect1=125,transp=False):
   # Divide by the smoothed amplitude
   idx = databssm <= 0
   databssm[idx] = 1
-  return dat/databssm
+  if(transp):
+    return (dat/databssm).T
+  else:
+    return dat/databssm
+
 

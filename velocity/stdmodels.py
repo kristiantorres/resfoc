@@ -139,7 +139,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
   velt = np.ascontiguousarray(velr.T).astype('float32')
   reft = np.ascontiguousarray(refr.T).astype('float32')
   imgt = np.ascontiguousarray(img.T).astype('float32')
-  lblt = np.ascontiguousarray(lbl.T).astype('float32')
+  lblt = np.ascontiguousarray(lblr.T).astype('float32')
 
   return velt,reft,imgt,lblt
 
