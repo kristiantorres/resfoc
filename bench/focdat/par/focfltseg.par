@@ -1,0 +1,25 @@
+[defaults]
+# IO
+datdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefres_rnd/
+cprefix=cnv-
+mprefix=fog-
+lprefix=lbl-
+migout=./dat/focseglbldata.h5
+cnvout=./dat/cnvseglbldata.h5
+# Patching
+ptchx=128
+ptchz=128
+strdz=64
+strdx=64
+# Labeling
+norm=y
+rectx=1
+rectz=1
+# Windowing
+fx=256
+nxw=512
+fz=256
+nzw=512
+# Other
+verb=y
+qcplot=n

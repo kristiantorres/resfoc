@@ -1,0 +1,7 @@
+[defaults]
+# IO
+defoclblprefix=./dat/defocanglbl/defocanglbl-
+defoclblout=./dat/defocanglbl/alldefocangs.h5
+# Other
+verb=y
+nqc=0

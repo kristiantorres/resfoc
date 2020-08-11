@@ -1,0 +1,22 @@
+[defaults]
+# IO
+moddir=/data/biondo/joseph29/projects/resfoc/bench/dat/velflts
+outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/migflts
+imgpf=fltimg
+datapath=/scratch/joseph29/migflts
+begvel=310
+# Other
+verb=y
+# Cluster arguments
+tjobs=1000
+ajobs=100
+nprocs=48
+nsubmit=5
+logpath=./log/migflts
+parpath=./par/migflts
+jobprefix=migflt-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+

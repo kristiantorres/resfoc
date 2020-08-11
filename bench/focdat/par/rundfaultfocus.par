@@ -1,0 +1,13 @@
+[defaults]
+vel=velund.H
+ptb=ptbund.H
+ref=refund.H
+lbl=lblund.H
+fimgo=fimgound2.H
+fimga=fimgaund2.H
+dimgo=dimgound2.H
+dimga=dimgaund2.H
+# Windowing
+fx=0
+nxw=1300
+na=64

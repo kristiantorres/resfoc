@@ -1,0 +1,25 @@
+[defaults]
+# IO
+datdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefoc
+fprefix=fog-
+dprefix=defocpatch
+lprefix=lbl-
+filebeg=0
+fileend=1000
+out=./dat/focdefocpatch.h5
+# Patching parameters
+ptchz=64
+ptchx=64
+strdz=32
+strdx=32
+# Label parameters
+norm=y
+pthresh=30
+# Window parameters
+fx=0
+nxw=1300
+fz=0
+nzw=512
+# Other parameters
+verb=y
+qcplot=n

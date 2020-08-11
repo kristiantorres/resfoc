@@ -1,0 +1,23 @@
+[defaults]
+# IO
+outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefoc
+dpath=/scratch/joseph29/focdefoc
+prefix=
+beg=1022
+# Window arguments
+fx=120
+nxw=1024
+na=64
+# Cluster arguments
+tjobs=1000
+ajobs=100
+nprocs=48
+nsubmit=5
+logpath=./log/focdefoc
+parpath=./par/focdefoc
+jobprefix=focdefoc-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+

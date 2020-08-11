@@ -1,0 +1,13 @@
+[defaults]
+# IO
+velin=/data/biondo/joseph29/projects/resfoc/bench/dat/velflts/velfltmod0000.H
+refin=/data/biondo/joseph29/projects/resfoc/bench/dat/velflts/velfltref0000.H
+outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/resmigflts
+dpath=/scratch/joseph29
+ptbpf=resfltptb
+imgpf=resfltimg
+velidx=0
+# Misc
+nthreads=24
+verb=y
+

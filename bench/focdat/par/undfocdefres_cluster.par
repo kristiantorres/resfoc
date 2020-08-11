@@ -1,0 +1,25 @@
+[defaults]
+# IO
+outdir=/data/biondo/joseph29/projects/resfoc/bench/dat/focdefres_und
+dpath=/scratch/joseph29/focdefres_und
+prefix=
+beg=0
+# Window arguments
+na=64
+nro=21
+oro=1.0
+dro=0.00125
+offset=6
+# Cluster arguments
+tjobs=5000
+ajobs=100
+nprocs=48
+nsubmit=5
+logpath=./log/focdefres_und
+parpath=./par/focdefres_und
+jobprefix=fdrund-
+nleft=2
+klean=y
+delay=5.0
+blacklist=
+

@@ -1,0 +1,13 @@
+[defaults]
+# IO
+vel=veltest.H
+ref=reftest.H
+ptb=ptbtest.H
+lbl=lbltest.H
+res=restest.H
+stk=stktest.H
+smb=smbtest.H
+dpath=/scratch/joseph29/refoc
+# Windowing
+fx=373
+nxw=512
