@@ -10,11 +10,11 @@ Current models are:
 import numpy as np
 import velocity.mdlbuild as mdlbuild
 from scaas.wavelet import ricker
-from utils.ptyprint import progressbar, create_inttag
-import utils.rand as rndut
+from genutils.ptyprint import progressbar, create_inttag
+import genutils.rand as rndut
 import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
-from utils.signal import bandpass
+from genutils.signal import bandpass
 
 def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,maxvel=5000,rect=0.5,**kwargs):
   """
@@ -134,7 +134,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
   img = dlut.normalize(np.array([np.convolve(refr[ix,:],wav) for ix in range(nx)])[:,ns:nz+ns])
   # Create noise
   nze = dlut.normalize(bandpass(np.random.rand(nx,nz)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
-  img += img + nze
+  img += nze
 
   velt = np.ascontiguousarray(velr.T).astype('float32')
   reft = np.ascontiguousarray(refr.T).astype('float32')

@@ -1,11 +1,11 @@
 import numpy as np
 import velocity.evntcre8 as evntcre8
-from utils.ptyprint import progressbar,printprogress
+from genutils.ptyprint import progressbar,printprogress
 import scaas.noise_generator as noise_generator
 from scaas.gradtaper import build_taper_ds
 from scipy.ndimage import gaussian_filter, map_coordinates
 from scaas.trismooth import smooth
-from utils.rand import randfloat
+from genutils.rand import randfloat
 
 class mdlbuild:
   """

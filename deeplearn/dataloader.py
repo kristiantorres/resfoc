@@ -9,7 +9,7 @@ import h5py
 import numpy as np
 import random
 import subprocess
-from utils.ptyprint import progressbar
+from genutils.ptyprint import progressbar
 
 class resmig_generator_h5(Sequence):
 
