@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 
 # Read in the defocused image
-iaxes,img = sep.read_file("spimgbobext.H")
+#iaxes,img = sep.read_file("spimgbobext.H")
+iaxes,img = sep.read_file("spimgextbobdistr.H")
 img  = img.reshape(iaxes.n,order='F')
 imgt = np.ascontiguousarray(img.T).astype('float32')
 imgtw = imgt[:,0,20:580,:]
@@ -45,6 +46,6 @@ rangst = off2angkzx(rmigt,ohx,dhx,dz,na=na,nthrds=20,transp=True,rverb=True)
 na,oa,da = get_angkzx_axis(na=na)
 
 # Write to file
-sep.write_file("haleres.H",rangs.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
-sep.write_file("halerest.H",rangst.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
+sep.write_file("haleresdistr.H",rangs.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
+sep.write_file("haleresdistrt.H",rangst.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
 

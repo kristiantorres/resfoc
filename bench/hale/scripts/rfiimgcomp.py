@@ -5,12 +5,12 @@ from genutils.movie import viewimgframeskey
 sep = seppy.sep()
 
 # Defocused stack
-saxes,stk = sep.read_file("halestk.H")
+saxes,stk = sep.read_file("halerfi.H")
 [nz,nx] = saxes.n; [dz,dx] = saxes.d; [oz,ox] = saxes.o
 stk = stk.reshape(saxes.n,order='F')
 
 # Refocused image
-raxes,rfi = sep.read_file("halerfi.H")
+raxes,rfi = sep.read_file("halerfidistr.H")
 rfi = rfi.reshape(raxes.n,order='F')
 
 comb = np.zeros([2,nz,nx],dtype='float32')
