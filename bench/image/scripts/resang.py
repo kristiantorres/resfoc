@@ -3,8 +3,8 @@ import numpy as np
 from scaas.off2ang import off2ang,get_ang_axis
 from resfoc.resmig import preresmig,get_rho_axis
 from resfoc.gain import tpow
-from utils.movie import viewimgframeskey
-from utils.plot import plot_imgpang, plot_allanggats, plot_anggatrhos
+from genutils.movie import viewimgframeskey
+from genutils.plot import plot_imgpang, plot_allanggats, plot_anggatrhos
 
 sep = seppy.sep()
 

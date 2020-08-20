@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 from deeplearn.focuslabels import semblance_power
 from scaas.trismooth import smooth
-from utils.plot import plot_cubeiso
+from genutils.plot import plot_cubeiso
 import matplotlib.pyplot as plt
 
 hff = h5py.File('/net/fantastic/scr2/joseph29/angfaultfocptch.h5')

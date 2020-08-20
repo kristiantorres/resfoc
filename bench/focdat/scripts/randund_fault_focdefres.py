@@ -21,7 +21,7 @@ from scaas.wavelet import ricker
 from resfoc.resmig import preresmig,convert2time,get_rho_axis
 from scaas.off2ang import off2ang
 import matplotlib.pyplot as plt
-from utils.plot import plot_imgvelptb
+from genutils.plot import plot_imgvelptb
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

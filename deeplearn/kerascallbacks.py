@@ -11,7 +11,7 @@ from deeplearn.dataloader import load_allflddata
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import thresh, plotseglabel
 from resfoc.estro import estro_tgt, onehot2rho
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -10,14 +10,14 @@ import numpy as np
 import inpout.seppy as seppy
 from velocity.stdmodels import undulatingrandfaults2d
 from scaas.velocity import create_randomptbs_loc
-from utils.rand import randfloat
+from genutils.rand import randfloat
 from scaas.trismooth import smooth
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
 import matplotlib.pyplot as plt
-from utils.plot import plot_imgvelptb
-from utils.signal import ampspec2d
-from utils.movie import viewimgframeskey
+from genutils.plot import plot_imgvelptb
+from genutils.signal import ampspec2d
+from genutils.movie import viewimgframeskey
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

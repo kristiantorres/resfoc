@@ -9,7 +9,7 @@ from deeplearn.keraspredict import segmentfaults
 from deeplearn.utils import plotsegprobs
 from deeplearn.dataloader import load_all_unlabeled_data,load_labeled_flat_data
 import matplotlib.pyplot as plt
-from utils.plot import plot_cubeiso
+from genutils.plot import plot_cubeiso
 from numba import cuda
 
 sep = seppy.sep()

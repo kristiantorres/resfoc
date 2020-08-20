@@ -8,7 +8,7 @@ import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import h5py
 import numpy as np
-from utils.ptyprint import create_inttag, progressbar
+from genutils.ptyprint import create_inttag, progressbar
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import plotseglabel, plotsegprobs, thresh, normalize, resample
 from tensorflow.keras.models import model_from_json

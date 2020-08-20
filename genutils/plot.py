@@ -1,11 +1,11 @@
 """
 Useful functions for plotting. No interactive plots.
-See utils.movie for interactive plotting
+See genutils.movie for interactive plotting
 @author: Joseph Jennings
-@version: 2020.04.28
+@version: 2020.08.20
 """
 import numpy as np
-from utils.signal import ampspec1d
+from genutils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -160,7 +160,7 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=No
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('labelsize',14))
-  if(figname is not None and show): plt.show()
+  if(figname is None and show): plt.show()
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
@@ -206,8 +206,9 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
   if(vmin1 is None or vmax1 is None):
     vmin1 = np.min(mig); vmax1 = np.max(mig)
   ax1.imshow(mig[kwargs.get('xminwnd',0):kwargs.get('xmaxwnd',nx),kwargs.get('zminwnd',0):kwargs.get('zmaxwnd',nz)].T,cmap='gray',
-      interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
-    kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0))
+             interpolation=kwargs.get('interp','sinc'),extent=[kwargs.get('xmin',0)*dx,
+             kwargs.get('xmax',nx)*dx,izmax*dz,izmin*dz],vmin=vmin1*kwargs.get('pclip',1.0),vmax=vmax1*kwargs.get('pclip',1.0),
+             aspect=kwargs.get('imgaspect',1.0))
   ax1.plot(lx,lz,color='k',linewidth=2)
   ax1.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax1.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
@@ -241,7 +242,7 @@ def plot_anggatrhos(aimg,xloc,dz,dx,oro,dro,transp=False,figname=None,ftype='png
     plt.savefig(figname+'.'+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
 
-def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname=None,**kwargs):
+def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,figname=None,**kwargs):
   """
   Plots a velocity perturbation on top of an image
 
@@ -268,7 +269,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname
   izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
   zmin = izmin*dz; zmax = izmax*dz
   # Get amplitude range
-  ivmin = np.min(img);    ivmax = np.max(img)
+  ivmin = kwargs.get('imin',np.min(img)); ivmax = kwargs.get('imax',np.max(img))
   pvmin = kwargs.get('velmin',np.min(velptb)); pvmax = kwargs.get('velmax',np.max(velptb))
   pclip = kwargs.get('pclip',1.0)
   # Plot the perturbation to get the true colorbar
@@ -281,7 +282,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname
   # Plot perturbation on the image
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
-  if(agc):
+  if(aagc):
     gimg = agc(img.astype('float32').T).T
   else:
     gimg = img
@@ -306,7 +307,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,agc=True,alpha=0.3,show=False,figname
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
   if(show):
     plt.show()
-  plt.close()
+  #plt.close()
 
 def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   """

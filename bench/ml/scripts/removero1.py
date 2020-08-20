@@ -1,8 +1,8 @@
 from deeplearn.dataloader import load_allssimdata
 import numpy as np
 import h5py
-from utils.ptyprint import create_inttag, progressbar
-from utils.movie import viewimgframeskey
+from genutils.ptyprint import create_inttag, progressbar
+from genutils.movie import viewimgframeskey
 
 allx,ally = load_allssimdata("/scr1/joseph29/ssimresdat64.h5",None,465)
 

@@ -8,7 +8,7 @@ from scaas.gradtaper import build_taper
 from scaas.velocity import create_randomptb,create_randomptb_loc
 from resfoc.tpow import tpow
 import matplotlib.pyplot as plt
-from utils.signal import ampspec1d
+from genutils.signal import ampspec1d
 
 # Set up IO
 sep = seppy.sep([])

@@ -1,9 +1,9 @@
 import inpout.seppy as seppy
 import numpy as np
 from resfoc.gain import agc
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 import matplotlib.pyplot as plt
-from utils.plot import plot_imgvelptb, plot_cubeiso, plot_allanggats, plot_rhopicks, plot_anggatrhos
+from genutils.plot import plot_imgvelptb, plot_cubeiso, plot_allanggats, plot_rhopicks, plot_anggatrhos
 
 sep = seppy.sep()
 

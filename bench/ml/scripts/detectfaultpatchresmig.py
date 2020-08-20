@@ -14,7 +14,7 @@ from deeplearn.utils import normalize
 import tensorflow as tf
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

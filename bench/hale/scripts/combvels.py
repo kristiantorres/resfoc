@@ -4,7 +4,7 @@ from scaas.trismooth import smooth
 from oway.mute import mute
 from resfoc.semb import pick
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 sep = seppy.sep()
 

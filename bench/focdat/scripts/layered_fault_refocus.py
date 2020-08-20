@@ -26,7 +26,7 @@ from resfoc.gain import agc
 from joblib import Parallel, delayed
 import subprocess
 from resfoc.estro import refocusimg
-from utils.plot import plot_imgvelptb
+from genutils.plot import plot_imgvelptb
 import matplotlib.pyplot as plt
 
 # Parse the config file

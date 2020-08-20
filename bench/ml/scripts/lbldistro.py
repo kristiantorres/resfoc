@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 from resfoc.estro import onehot2rho
 
 #hf = h5py.File('/scr2/joseph29/ssimresdat.h5')

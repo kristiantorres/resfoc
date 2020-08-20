@@ -1,6 +1,6 @@
 import numpy as np
 import h5py
-from utils.plot import plot_cubeiso
+from genutils.plot import plot_cubeiso
 import matplotlib.pyplot as plt
 
 #hf = h5py.File('/net/fantastic/scr2/joseph29/angfaultfocptch.h5')

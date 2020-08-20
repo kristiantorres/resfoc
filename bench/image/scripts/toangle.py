@@ -3,7 +3,7 @@ import inpout.seppy as seppy
 from scaas.off2ang import off2ang, get_ang_axis
 from resfoc.resmig import preresmig,get_rho_axis
 from resfoc import tpow
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 sep = seppy.sep([])
 

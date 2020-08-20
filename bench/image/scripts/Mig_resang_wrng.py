@@ -14,7 +14,7 @@ from scaas.velocity import create_randomptb_loc, create_randomptbs_loc
 from scaas.wavelet import ricker
 from resfoc.gain import agc,tpow
 from resfoc.resmig import preresmig,get_rho_axis
-from utils.plot import plot_wavelet
+from genutils.plot import plot_wavelet
 import matplotlib.pyplot as plt
 
 # Parse the config file

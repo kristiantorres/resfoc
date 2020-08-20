@@ -13,8 +13,8 @@ import resfoc.cosft as cft
 import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
 from deeplearn.utils import next_power_of_2
-from utils.ptyprint import printprogress
-from utils.movie import viewcube3d
+from genutils.ptyprint import printprogress
+from genutils.movie import viewcube3d
 
 def pad_cft(n):
   """ Computes the size necessary to pad the image to next power of 2"""

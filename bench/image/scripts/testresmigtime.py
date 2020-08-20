@@ -2,8 +2,8 @@ import inpout.seppy as seppy
 import numpy as np
 from resfoc.resmig import preresmig, convert2time
 import matplotlib.pyplot as plt
-from utils.movie import viewframeskey
-from utils.signal import butter_bandpass_filter
+from genutils.movie import viewframeskey
+from genutils.signal import butter_bandpass_filter
 
 ## Create point scatterer model
 nz  = 256; oz  =  0.0;  dz  = 20.0

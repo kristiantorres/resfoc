@@ -1,7 +1,7 @@
 import inpout.seppy as seppy
 import numpy as np
-from utils.plot import plot_rhopicks, plot_anggatrhos
-from utils.ptyprint import create_inttag
+from genutils.plot import plot_rhopicks, plot_anggatrhos
+from genutils.ptyprint import create_inttag
 
 sep = seppy.sep()
 

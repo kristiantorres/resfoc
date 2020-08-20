@@ -11,11 +11,11 @@ import numpy as np
 import velocity.mdlbuild as mdlbuild
 from scaas.wavelet import ricker
 from scaas.trismooth import smooth
-from utils.ptyprint import progressbar, create_inttag
-import utils.rand as rndut
+from genutils.ptyprint import progressbar, create_inttag
+import genutils.rand as rndut
 import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
-from utils.signal import bandpass
+from genutils.signal import bandpass
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

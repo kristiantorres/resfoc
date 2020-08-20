@@ -4,6 +4,7 @@ import oway.coordgeomnode as geom
 from oway.coordgeomnode import create_outer_chunks
 import matplotlib.pyplot as plt
 from dask.distributed import SSHCluster, LocalCluster, Client
+from cluster.daskutils import shutdown_sshcluster
 
 sep = seppy.sep()
 
@@ -13,7 +14,7 @@ dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
 
 # Read in velocity model
-vaxes,vel = sep.read_file("sigsbee_vel.H")
+vaxes,vel = sep.read_file("sigsbee_veloverw2.H")
 vel = vel.reshape(vaxes.n,order='F')
 [nz,nvx] = vaxes.n; [dz,dvx] = vaxes.d; [oz,ovx] = vaxes.o
 ny = 1; dy = 1.0
@@ -29,7 +30,7 @@ nrec = nrec.astype('int')
 nochnks = 5
 ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
-hosts = ["localhost", "fantastic", "thing", "torch", "storm", "jarvis"]
+hosts = ["localhost", "fantastic", "thing", "storm", "jarvis"]
 cluster = SSHCluster(
                      hosts,
                      connect_options={"known_hosts": None},
@@ -57,7 +58,7 @@ for k in range(nochnks):
   img += wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=0,nrmax=20,
                         nthrds=40,client=client)
 
-sep.write_file("mysigimg.H",img,ds=[dz,dy,dxi],os=[oz,0.0,oxi])
+sep.write_file("sigimgw2.H",img,ds=[dz,dy,dxi],os=[oz,0.0,oxi])
 
 # Shutdown dask
 client.shutdown()

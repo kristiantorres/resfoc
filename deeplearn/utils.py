@@ -12,8 +12,8 @@ from scipy import interpolate
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
-from utils.image import remove_colorbar
-from utils.ptyprint import progressbar
+from genutils.image import remove_colorbar
+from genutils.ptyprint import progressbar
 
 def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """

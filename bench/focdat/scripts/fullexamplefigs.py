@@ -3,8 +3,8 @@ import numpy as np
 from resfoc.gain import agc
 from resfoc.estro import refocusimg
 import matplotlib.pyplot as plt
-from utils.plot import plot_imgvelptb, plot_allanggats, plot_rhopicks, plot_anggatrhos
-from utils.ptyprint import create_inttag
+from genutils.plot import plot_imgvelptb, plot_allanggats, plot_rhopicks, plot_anggatrhos
+from genutils.ptyprint import create_inttag
 
 sep = seppy.sep()
 

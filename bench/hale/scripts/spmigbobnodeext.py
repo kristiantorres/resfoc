@@ -3,7 +3,7 @@ import numpy as np
 import oway.coordgeomnode as geom
 from oway.coordgeomnode import create_outer_chunks
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 from dask.distributed import SSHCluster, Client
 from cluster.daskutils import shutdown_sshcluster
 
@@ -16,7 +16,7 @@ dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
 
 # Read in the velocity model
-vaxes,vel = sep.read_file("vintzcomb.H")
+vaxes,vel = sep.read_file("vintzcombsm.H")
 vel = vel.reshape(vaxes.n,order='F')
 [nz,nvx] = vaxes.n; [dz,dvx] = vaxes.d; [oz,ovx] = vaxes.o
 ny = 1; dy = 1.0
@@ -34,8 +34,8 @@ ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
 nxi = int(2*nvx); dxi = dvx/2; oxi = ovx
 
-## Create dask cluster
-hosts = ["localhost", "jarvis", "thing", "fantastic", "torch", "storm"]
+# Create dask cluster
+hosts = ["localhost", "jarvis", "fantastic"]
 cluster = SSHCluster(
                      hosts,
                      connect_options={"known_hosts": None},
@@ -61,7 +61,7 @@ for k in range(nochnks):
 
 imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
 nhx,ohx,dhx = wei.get_off_axis()
-sep.write_file("spimgbobext.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
+sep.write_file("spimgbobextw.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
 
 # Shutdown dask
 client.shutdown()

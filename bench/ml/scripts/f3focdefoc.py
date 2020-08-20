@@ -16,8 +16,8 @@ from resfoc.estro import estro_fltfocdefoc, refocusimg
 from deeplearn.focuslabels import find_flt_patches
 from deeplearn.utils import plotsegprobs, plotseglabel, normalize
 from deeplearn.keraspredict import focdefocflt
-from utils.image import remove_colorbar
-from utils.movie import viewimgframeskey
+from genutils.image import remove_colorbar
+from genutils.movie import viewimgframeskey
 from numba import cuda
 import matplotlib.pyplot as plt
 

@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeom as geom
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 # IO
 sep = seppy.sep()

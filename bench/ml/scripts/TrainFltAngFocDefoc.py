@@ -15,9 +15,9 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 from sklearn.utils import shuffle
 import random
-from utils.ptyprint import progressbar
+from genutils.ptyprint import progressbar
 import matplotlib.pyplot as plt
-from utils.plot import plot_cubeiso
+from genutils.plot import plot_cubeiso
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

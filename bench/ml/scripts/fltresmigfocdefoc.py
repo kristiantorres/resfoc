@@ -14,7 +14,7 @@ from tensorflow.keras.models import model_from_json
 from deeplearn.keraspredict import focdefocflt
 from resfoc.gain import agc
 from resfoc.estro import estro_fltfocdefoc
-from utils.image import remove_colorbar
+from genutils.image import remove_colorbar
 import matplotlib.pyplot as plt
 
 # Parse the config file

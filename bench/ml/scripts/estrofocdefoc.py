@@ -16,7 +16,7 @@ from resfoc.gain import agc
 from resfoc.estro import estro_fltfocdefoc, refocusimg
 from deeplearn.focuslabels import find_flt_patches
 from deeplearn.utils import plotsegprobs, plotseglabel, thresh
-from utils.image import remove_colorbar
+from genutils.image import remove_colorbar
 from numba import cuda
 import matplotlib.pyplot as plt
 

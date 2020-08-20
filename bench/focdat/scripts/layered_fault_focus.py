@@ -11,7 +11,7 @@ import inpout.seppy as seppy
 from scaas.trismooth import smooth
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
-from utils.plot import plot_imgvelptb
+from genutils.plot import plot_imgvelptb
 import matplotlib.pyplot as plt
 
 # Parse the config file

@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 from resfoc.resmig import preresmig,convert2time,get_rho_axis
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 # Read in the processed fault image
 sep = seppy.sep()

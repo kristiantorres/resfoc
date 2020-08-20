@@ -9,7 +9,7 @@ import numpy as np
 import inpout.seppy as seppy
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
-from utils.image import remove_colorbar
+from genutils.image import remove_colorbar
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

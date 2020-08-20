@@ -2,6 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeomnode as geom
 from oway.coordgeomnode import create_outer_chunks
+from scaas.velocity import salt_mask
 import matplotlib.pyplot as plt
 from dask.distributed import SSHCluster, LocalCluster, Client
 from cluster.daskutils import shutdown_sshcluster
@@ -14,7 +15,7 @@ dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
 [nt,ntr] = daxes.n; [ot,_] = daxes.o; [dt,_] = daxes.d
 
 # Read in velocity model
-vaxes,vel = sep.read_file("sigsbee_veloverw2.H")
+vaxes,vel = sep.read_file("sigsbee_veloverw5.H")
 vel = vel.reshape(vaxes.n,order='F')
 [nz,nvx] = vaxes.n; [dz,dvx] = vaxes.d; [oz,ovx] = vaxes.o
 ny = 1; dy = 1.0
@@ -30,7 +31,7 @@ nrec = nrec.astype('int')
 nochnks = 5
 ochunks = create_outer_chunks(nochnks,dat,nrec,srcx=srcx,recx=recx)
 
-hosts = ["localhost", "fantastic", "thing", "torch", "storm", "jarvis"]
+hosts = ["localhost", "jarvis", "storm", "torch", "thing", "fantastic"]
 cluster = SSHCluster(
                      hosts,
                      connect_options={"known_hosts": None},
@@ -46,7 +47,8 @@ print("Image grid: nxi=%d oxi=%f dxi=%f"%(nxi,oxi,dxi))
 
 nhx = 20; nhy = 0
 img = np.zeros([2*nhy+1,2*nhx+1,nz,ny,nxi],dtype='float32')
-for k in range(nochnks):
+#for k in range(nochnks):
+for k in range(3):
   # Get data for outer chunk
   datw  = ochunks[k]['dat' ]; nrecw = ochunks[k]['nrec']
   srcxw = ochunks[k]['srcx']; recxw = ochunks[k]['recx']
@@ -58,9 +60,13 @@ for k in range(nochnks):
   img += wei.image_data(datw,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=nhx,nrmax=20,
                             nthrds=40,client=client)
 
-imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
+msk,imgm = salt_mask(img,velint,saltvel=4.3)
+imgt  = np.transpose(img, (2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
+imgmt = np.transpose(imgm,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
 nhx,ohx,dhx = wei.get_off_axis()
-sep.write_file("sigoverw2.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
+sep.write_file("sigoverw5.H",imgt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
+sep.write_file("sigoverw5_velint.H",velint,os=[oz,0.0,oxi],ds=[dz,dy,dxi])
+sep.write_file("sigoverw5msk.H",imgmt,os=[oz,oxi,0,ohx,0],ds=[dz,dxi,dy,dhx,1.0])
 
 # Shutdown dask
 client.shutdown()

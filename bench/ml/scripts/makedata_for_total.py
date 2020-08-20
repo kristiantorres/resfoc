@@ -5,7 +5,7 @@ from deeplearn.utils import resizepow2
 from deeplearn.dataloader import load_all_unlabeled_data, load_labeled_flat_data
 from sklearn.utils import shuffle
 import random
-from utils.ptyprint import create_inttag, progressbar
+from genutils.ptyprint import create_inttag, progressbar
 
 sep = seppy.sep()
 

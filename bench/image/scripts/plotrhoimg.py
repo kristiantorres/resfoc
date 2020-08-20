@@ -3,7 +3,7 @@ import numpy as np
 from scaas.trismooth import smooth
 from resfoc.estro import estro_tgt
 from resfoc.gain import agc
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()

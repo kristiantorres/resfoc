@@ -3,7 +3,7 @@ import numpy as np
 import oway.coordgeomnode as geom
 from oway.coordgeomnode import create_outer_chunks
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 from dask.distributed import SSHCluster, Client
 
 # IO

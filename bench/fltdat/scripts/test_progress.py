@@ -1,4 +1,4 @@
-from utils.pprint import update_progress, progressbar
+from genutils.ptyprint import update_progress, progressbar
 import time
 
 # First one

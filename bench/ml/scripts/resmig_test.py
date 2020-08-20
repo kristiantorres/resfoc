@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras.models import model_from_json
 from deeplearn.keraspredict import segmentfaults
 from resfoc.gain import agc
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 ## Read in the well-focused subsurface offset image

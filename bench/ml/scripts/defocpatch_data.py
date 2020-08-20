@@ -7,7 +7,7 @@ Selects defocused patches from non-stationary defocused images
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from resfoc.gain import agc
 from deeplearn.dataloader import load_all_unlabeled_data,load_unlabeled_flat_data

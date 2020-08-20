@@ -1,5 +1,5 @@
 import inpout.seppy as seppy
-from utils.movie import makemovie_mpl
+from genutils.movie import makemovie_mpl
 
 sep = seppy.sep([])
 

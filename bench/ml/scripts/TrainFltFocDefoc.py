@@ -14,7 +14,7 @@ from deeplearn.kerasnets import vgg3
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 import random
-from utils.ptyprint import progressbar
+from genutils.ptyprint import progressbar
 import matplotlib.pyplot as plt
 
 # Parse the config file

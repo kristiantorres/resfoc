@@ -6,8 +6,8 @@ import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
 from resfoc.gain import tpow
 import matplotlib.pyplot as plt
-from utils.plot import plot_wavelet
-from utils.movie import viewimgframeskey
+from genutils.plot import plot_wavelet
+from genutils.movie import viewimgframeskey
 
 # Set up IO
 sep = seppy.sep()

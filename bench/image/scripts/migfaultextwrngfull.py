@@ -7,8 +7,8 @@ from scaas.wavelet import ricker
 from scaas.velocity import create_randomptb_loc
 from resfoc.tpow import tpow
 from resfoc.resmig import preresmig, get_rho_axis
-from utils.plot import plot_wavelet
-from utils.movie import viewimgframeskey
+from genutils.plot import plot_wavelet
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 # Set up IO

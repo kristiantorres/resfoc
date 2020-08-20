@@ -7,7 +7,7 @@ Generates fault probabilities on migrated image patches
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from deeplearn.utils import plotseglabel, plotsegprobs, normalize
 from deeplearn.dataloader import load_all_unlabeled_data,load_unlabeled_flat_data

@@ -8,7 +8,7 @@ import numpy as np
 import inpout.seppy as seppy
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
-from utils.movie import makemovie_mpl, viewimgframeskey, makemovietb_mpl, makemoviesbs_mpl
+from genutils.movie import makemovie_mpl, viewimgframeskey, makemovietb_mpl, makemoviesbs_mpl
 
 sep = seppy.sep()
 

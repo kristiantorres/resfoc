@@ -8,7 +8,7 @@ of each image in the cube
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import numpy as np
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import plotseglabel, plotsegprobs, thresh, normalize, resample
 from tensorflow.keras.models import model_from_json

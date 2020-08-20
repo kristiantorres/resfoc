@@ -13,7 +13,7 @@ import h5py
 from deeplearn.dataloader import load_allflddata
 from deeplearn.utils import thresh, plotseglabel
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from utils.ptyprint import create_inttag, progressbar
+from genutils.ptyprint import create_inttag, progressbar
 import matplotlib.pyplot as plt
 
 # Parse the config file

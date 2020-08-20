@@ -1,7 +1,7 @@
 import h5py
 import glob
 import numpy as np
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 
 dpath = '/scr2/joseph29/data/train/seis/'
 lpath = '/scr2/joseph29/data/train/fault/'

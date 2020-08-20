@@ -1,6 +1,6 @@
 import velocity.mdlbuild as mdlbuild
 from velocity.structure import vel_structure
-from utils.pprint import progressbar,create_inttag
+from genutils.ptyprint import progressbar,create_inttag
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -14,8 +14,8 @@ from deeplearn.keraspredict import focdefocflt
 from resfoc.gain import agc
 from deeplearn.utils import plotsegprobs, plotseglabel, normalize
 from deeplearn.keraspredict import segmentfaults
-from utils.image import remove_colorbar
-from utils.movie import viewimgframeskey
+from genutils.image import remove_colorbar
+from genutils.movie import viewimgframeskey
 from numba import cuda
 import matplotlib.pyplot as plt
 

@@ -7,8 +7,8 @@ from scaas.wavelet import ricker
 from resfoc.gain import agc,tpow
 from resfoc.resmig import preresmig, get_rho_axis
 import matplotlib.pyplot as plt
-from utils.plot import plot_wavelet
-from utils.movie import viewimgframeskey
+from genutils.plot import plot_wavelet
+from genutils.movie import viewimgframeskey
 
 # Create SEP IO object
 sep = seppy.sep()

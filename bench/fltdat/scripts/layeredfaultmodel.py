@@ -2,11 +2,11 @@ import numpy as np
 import inpout.seppy as seppy
 import velocity.mdlbuild as mdlbuild
 from scaas.wavelet import ricker
-from utils.ptyprint import progressbar
+from genutils.ptyprint import progressbar
 from scaas.trismooth import smooth
 import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
-from utils.signal import bandpass
+from genutils.signal import bandpass
 import matplotlib.pyplot as plt
 from matplotlib import colors
 

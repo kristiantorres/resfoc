@@ -4,7 +4,7 @@ from resfoc.gain import agc
 from resfoc.estro import estro_varimax, refocusimg
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.focuslabels import varimax
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()

@@ -2,8 +2,8 @@ import numpy as np
 import inpout.seppy as seppy
 from resfoc.estro import estro_tgt,onehot2rho
 from scaas.trismooth import smooth
-from utils.movie import viewimgframeskey
-from utils.plot import plot_anggatrhos
+from genutils.movie import viewimgframeskey
+from genutils.plot import plot_anggatrhos
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()

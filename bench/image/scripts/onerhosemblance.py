@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 from scaas.trismooth import smooth
 from scaas.gradtaper import build_taper
-from utils.movie import resangframes, viewimgframeskey
+from genutils.movie import resangframes, viewimgframeskey
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()

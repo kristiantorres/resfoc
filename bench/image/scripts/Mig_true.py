@@ -13,8 +13,8 @@ import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
 from resfoc.gain import agc,tpow
 from resfoc.resmig import preresmig,get_rho_axis
-from utils.plot import plot_wavelet
-from utils.movie import viewimgframeskey
+from genutils.plot import plot_wavelet
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 # Parse the config file

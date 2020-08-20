@@ -7,7 +7,7 @@ Generates fault probabilities on extended migrated image patches
 import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from deeplearn.utils import plotseglabel, plotsegprobs, normalize
 from deeplearn.dataloader import load_all_unlabeled_data,load_unlabeled_flat_data
@@ -15,7 +15,7 @@ from deeplearn.focuslabels import corrsim, semblance_power
 import tensorflow as tf
 from tensorflow.keras.models import model_from_json
 import random
-from utils.plot import plot_cubeiso
+from genutils.plot import plot_cubeiso
 import matplotlib.pyplot as plt
 
 # Parse the config file

@@ -23,8 +23,8 @@ scnmute.H: myscn.H
 		datapath=${XPATH}
 
 velrms.H: scnmute.H
-	sfpick rect1=40 rect2=15 < $< > $@
-	datapath=${XPATH}
+	sfpick rect1=40 rect2=15 < $< > $@ \
+		datapath=${XPATH}
 
 # NMO and stack
 nmo.H: velrms.H midmute.H
@@ -127,4 +127,16 @@ hale_shotflatbob.H: shots.H ./scripts/bobflat.py
 
 burn:
 	Rm *.H
+
+###==========================
+### Sergey's vel to Vint(z)
+###==========================
+
+pikintt.H: bei-pik.rsf
+	sfdix rect1=10 rect2=1 < $< > $@ \
+		datapath=${XPATH}
+
+pikintz.H: pikintt.H
+	sftime2depth velocity=$< intime=y nz=900 z0=0 \
+		dz=0.005 < $< > $@ datapath=${XPATH}
 

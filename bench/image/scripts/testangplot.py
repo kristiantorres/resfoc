@@ -1,7 +1,7 @@
 import numpy as np
 import inpout.seppy as seppy
 import matplotlib.pyplot as plt
-from utils.plot import plot_allanggats, plot_anggatrhos
+from genutils.plot import plot_allanggats, plot_anggatrhos
 
 sep = seppy.sep()
 

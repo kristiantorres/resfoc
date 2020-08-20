@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 from resfoc import tpow
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 sep = seppy.sep()
 

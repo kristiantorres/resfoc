@@ -2,7 +2,7 @@ import inpout.seppy as seppy
 import numpy as np
 from scaas.trismooth import smooth
 from resfoc.gain import agc
-from utils.movie import resangframes, viewimgframeskey
+from genutils.movie import resangframes, viewimgframeskey
 from joblib import Parallel, delayed
 import matplotlib.pyplot as plt
 
