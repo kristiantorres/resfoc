@@ -1,0 +1,1955 @@
+  1879	9:32	view bench/scripts/figfocus.py
+  1880	9:33	view bench/scripts/figsetup.py
+  1881	11:05	view scaas2d.cpp
+  1882	11:17	l scripts1/
+  1883	11:17	l scripts2/
+  1884	11:20	python scripts/migfault.py
+  1885	11:21	view progressbar.cpp
+  1886	11:22	./progressbar.x
+  1887	11:24	vi scaas2d.cpp
+  1888	12:53	echo $CPLUS_INCLUDE_PATH/
+  1889	13:29	view bench/scripts/migfaultext
+  1890	13:29	view bench/scripts/migfaultext.py
+  1891	13:43	view ../scaas/defaultgeom.py
+  1892	10:44	view scripts2/imaging.py
+  1893	10:58	sudo renice +20 stuart
+  1894	10:59	sudo renice -u stuart +20
+  1895	10:59	sudo renice -u stuart +19
+  1896	11:00	sudo renice -u stuart -n +20
+  1897	11:02	sudo renice -n 20 -p 107575
+  1898	14:28	kill -9 122006
+  1899	14:36	kill -9 122663
+  1900	14:36	kill -9 122701
+  1901	14:37	kill resang.py
+  1902	14:37	kill -9 122724
+  1903	15:18	cd projects/resfoc/resfoc/
+  1904	15:22	top -c -d 0.1
+  1905	16:15	vi tpow.py
+  1906	16:37	sudo renice -n00 -u stuart
+  1907	19:22	git diff defaultgeom.py
+  1908	22:08	vi cosft.py
+  1909	22:11	vi resmig.py
+  1910	1:42	vi ../scaas/off2ang.py
+  1911	1:42	vi ../scaas/defaultgeom.py
+  1912	9:22	sudo renice -p 44092 -n 20
+  1913	9:22	sudo renice -n 20 -p 44092
+  1914	9:31	sudo renice -n 20 -u stuart
+  1915	9:32	w | grep stuart
+  1916	9:51	sudo renice -n 0 -u stuart
+  1917	20:49	sudo usermod -g sep ariellel
+  1918	20:49	cd ~ariellel/
+  1919	20:51	du -sh jasonpc
+  1920	20:51	du -sh jasonpc *
+  1921	20:51	cd FORTIES_ACTIVE/
+  1922	20:52	groups jasonpc
+  1923	20:52	sudo mkdir ariellel
+  1924	20:52	sudo chown ariellel ariellel
+  1925	20:52	sudo chgrp ariellel sep
+  1926	20:53	sudo chgrp sep ariellel
+  1927	20:53	cd /mnt/bigdisk/
+  1928	20:56	l | less
+  1929	20:57	l | more
+  1930	20:58	find /scratch/ ! -newermt 2017-11-30 -exec rm -f {} \;
+  1931	20:59	find . ! -newermt 2017-11-30 -exec rm -f {} \;
+  1932	20:59	find . ! -newermt 2017-11-30
+  1933	20:59	find . ! -newermt 2017-11-30 -exec l {} \;
+  1934	20:59	find . ! -newermt 2017-11-30 -exec ls -lrt {} \;
+  1935	20:59	find . ! -newermt 2017-01-01 -exec rm -f {} \;
+  1936	20:59	find . ! -newermt 2017-01-01 -exec ls -lrt {} \;
+  1937	21:00	du -sh gcalves/
+  1938	21:00	cd SEM/
+  1939	21:00	rmdir SEM
+  1940	21:00	cd gcalves/
+  1941	21:00	rm -rf *
+  1942	21:00	du -sh * | less
+  1943	19:39	tar -xvf forMilad.tar.gz
+  1944	19:39	cd forMilad
+  1945	19:39	l /opt/SEP/SEP7.0/
+  1946	19:39	./test.x < missing.H > data.H
+  1947	19:40	In data.H
+  1948	19:40	Rm data.H
+  1949	19:40	mv missing.H dat.H
+  1950	19:40	Dots < dat.H | Tube &
+  1951	19:40	In dat.H
+  1952	19:41	make test.x
+  1953	19:41	./test.x < dat.H > dat2.H
+  1954	19:41	In
+  1955	19:41	In dat2.H
+  1956	19:41	Rm dat2.H
+  1957	19:41	rm test.x
+  1958	19:41	rm test.o
+  1959	19:41	rm forMilad.tar.gz
+  1960	19:42	mv forMilad/ simplelink
+  1961	19:49	vi test.cpp
+  1962	19:49	vi makefile
+  1963	22:19	mv simplelink/ fors/
+  1964	10:02	glances -t 1
+  1965	9:07	elink/
+  1966	13:10	cd /homes/sep/bob/
+  1967	13:11	cd pefex/
+  1968	13:12	In /net/server/book/gee/Data/gomshot.H
+  1969	13:13	Grey < /book/book/gee2/gee/Data/gomshot.H | Tube &
+  1970	13:14	cd /homes/sep/prof/gee/mda/pefex
+  1971	13:14	Grey < /book/book/gee2/gee/Data/gomshot.H | Tube -geometry 600x500 pixmaps=y
+  1972	13:17	In /book/book/gee2/gee/Data/gomshot.H
+  1973	13:19	Spectra < /book/book/gee2/gee/Data/gomshot.H | Cgr | Tube &
+  1974	13:19	Spectra < /net/server2//book/book/gee2/gee/Data/gomshot.H | Cgr | Tube &
+  1975	13:22	cp /net/server2//book/book/gee2/gee/Data/gomshot.H .
+  1976	13:23	In gomshot.H
+  1977	13:23	vi gomshot.H
+  1978	13:24	Window < gomshot.H > gomshotcpy.H
+  1979	16:50	view projects/resfoc/resfoc/gain.py
+  1980	19:18	ps -aux | grep ariellel
+  1981	20:49	vi src/progressbar.h
+  1982	20:54	kill 31711
+  1983	9:59	cd /web/html/data/pages/sep
+  1984	9:59	su /web/html/data/pages/sep
+  1985	10:13	rm resmig.py
+  1986	10:13	rm shotgather.npy
+  1987	10:13	l gomshotcpy.H
+  1988	10:13	In gomshotcpy.H
+  1989	10:14	Rm gomshotcpy.H
+  1990	10:14	cd projects/rmopick/
+  1991	10:14	cd rmostuff/
+  1992	10:14	cd Src/
+  1993	10:14	vi CreateRealEventTest.py
+  1994	11:06	cd book/
+  1995	11:06	locate
+  1996	11:06	locate Mask.x
+  1997	11:06	locate Mask.x | grep mda
+  1998	11:06	locate mda
+  1999	11:06	cd ../prof/
+  2000	11:06	cd gee
+  2001	11:07	cd mda/
+  2002	11:07	cd hole90/
+  2003	11:07	locate Hole.f90
+  2004	11:07	view /book/gee2/gee/mda/Geostat/Hole.f90
+  2005	12:01	cd prof/
+  2006	12:02	locate courses
+  2007	12:02	cd /web/html/data/media/sep/courses/
+  2008	12:02	cd courses/
+  2009	12:02	cd labs280/
+  2010	12:10	ssh zapad.stanford.edu
+  2011	12:12	more /etc/passwd
+  2012	12:12	finger rahul
+  2013	12:12	whois rahul
+  2014	12:12	who
+  2015	12:12	who rahul
+  2016	12:13	ssh rahul@zapad.stanford.edu
+  2017	12:14	ssh rep@zapad.stanford.edu
+  2018	12:15	vi .ssh/known_hosts
+  2019	12:16	sudo vi ~rahul/.ssh/known_hosts
+  2020	12:16	vi ~rahul/.ssh/known_hosts
+  2021	12:22	ssh zapad
+  2022	12:42	groups rahul
+  2023	12:49	sudo -s
+  2024	13:36	cd /web/html/data/media/public/sep/prof/
+  2025	15:10	kill -9 5917
+  2026	18:51	cd resfoc/resfoc/src/
+  2027	18:51	vi rstoltbig.cpp
+  2028	18:51	make rstoltbig
+  2029	20:55	lscpu
+  2030	21:41	sudo systemctl stop ssh
+  2031	21:41	sudo systemctl status
+  2032	21:41	sudo systemctl
+  2033	21:45	sudo systemctl start sshd
+  2034	21:45	sudo systemctl stop sshd
+  2035	21:46	sudo journalctl -u sshd
+  2036	21:50	sudo tail -f /var/log/messages
+  2037	10:34	vi ~/.ssh/authorized_keys
+  2038	12:05	l fig/migtrue-
+  2039	12:13	watch -n 0.5 gpustat
+  2040	12:14	watch -n 1 gpustat
+  2041	12:50	eog fig/migtrue*.png
+  2042	7:25	quota -vus
+  2043	10:14	eog *.png
+  2044	19:00	useradd -d /homes/class/zhuwq zhuwq
+  2045	19:00	sudo useradd -d /homes/class/zhuwq zhuwq
+  2046	19:01	sudo chmod 755 /homes/class/zhuwq
+  2047	19:01	sudo usermod -a -G class zhuwq
+  2048	19:01	sudo usermod -g class username
+  2049	19:01	sudo usermod -g class zhuwq
+  2050	19:03	sudo quota -vsu nurbek/
+  2051	19:09	segyread tape=00016224.sgy | surange
+  2052	19:09	segyread tape=00016224.sgy | segyclean | surange
+  2053	19:10	cd ~robcie
+  2054	19:10	view gpdesig.f90
+  2055	19:10	cd c_practice/
+  2056	19:10	cd classes/
+  2057	19:11	vi h
+  2058	19:11	cd sep135/
+  2059	19:11	view book.tex
+  2060	19:11	view abs.tex
+  2061	19:12	view intro.tex
+  2062	19:12	view ack.tex
+  2063	19:12	cd xto_emma
+  2064	19:27	sudo quota -vsu nurbek
+  2065	19:29	sudo repquota /dev/sdb1 | grep +
+  2066	19:33	cd brodrick/
+  2067	19:41	more util/stdquota
+  2068	19:53	I df -h
+  2069	19:53	cd ~robcie/
+  2070	19:53	rm -rf xto_emma/
+  2071	19:53	sudo rm -rf xto_emma/
+  2072	19:54	rm -rf xto_emma_temp/
+  2073	19:54	sudo rm -rf xto_emma_temp/
+  2074	19:55	sudo quota -vsu zylang/
+  2075	19:55	sudo quota -vsu zylang
+  2076	19:55	sudo quota -vsu xinyus
+  2077	19:55	sudo quota -vsu paphop
+  2078	19:55	sudo quota -vsu gp210
+  2079	19:55	cd gp210/
+  2080	19:56	cd robcie/
+  2081	19:56	rm -rf sep135/
+  2082	19:56	sudo rm -rf sep135/
+  2083	19:56	sudo du -sh * | sort -hr
+  2084	20:04	cd ywdong/
+  2085	20:11	sudo quota -vsu zhuwq/
+  2086	20:13	sudo quota -vsu zhuwq
+  2087	20:13	sudo edquota zhuwq
+  2088	20:16	l ~/util/
+  2089	20:17	vi ~/util/classquota
+  2090	11:25	locate gomshot.H
+  2091	11:26	In /book/gee/Data/gomshot.H
+  2092	11:26	vi /book/gee/Data/gomshot.H
+  2093	12:42	date +%s | sha256sum | base64 | head -c 32 ; echo
+  2094	12:42	date +%s | sha256sum | base64 | head -c 5 ; echo
+  2095	12:42	date +%s | sha256sum | base64 | head -c 7 ; echo
+  2096	12:42	date +%s | sha256sum | base64 | head -c 8 ; echo
+  2097	12:42	date +%s | sha256sum | base64 | head -c 8 ; echo > pass
+  2098	12:44	su zhuwq
+  2099	12:50	sudo du -sh krath/
+  2100	12:50	cd krath/
+  2101	12:50	sudo cd krath/
+  2102	13:06	vi ~/util/createuser
+  2103	13:49	view .cshrc
+  2104	13:50	view .bashrc
+  2105	14:58	more lessp
+  2106	14:58	more lesspipe.sh
+  2107	14:58	which lesspipe.sh
+  2108	14:58	view /usr/bin/lesspipe.sh
+  2109	15:00	useradd -d /homes/sep/haru haru
+  2110	15:00	sudo useradd -d /homes/sep/haru haru
+  2111	15:00	sudo chmod 755 /homes/sep/haru
+  2112	15:00	sudo usermod -a -G sep haru
+  2113	15:00	sudo usermod -g sep haru
+  2114	15:01	date +%s | sha256sum | base64 | head -c 8 > pass
+  2115	15:02	vi .bashrc
+  2116	15:14	sudo useradd -d /homes/class/noir noir
+  2117	15:14	groups zhuwq
+  2118	15:14	sudo usermod -a -G class noir
+  2119	15:14	sudo usermod -g class noir
+  2120	15:15	sudo chmod 755 /homes/class/noir
+  2121	15:15	date +%s | sha256sum | base64 | head -c 16 > pass
+  2122	15:15	vi pass
+  2123	15:16	more pass
+  2124	15:27	sudo quota -vsu noir
+  2125	15:27	rm pass
+  2126	15:28	view ~/.datapath
+  2127	15:40	l /homes/sep/minjun/class/
+  2128	15:41	l /sep/
+  2129	15:46	l /homes/sep/minjun/Anaconda3/bin
+  2130	16:58	l /homes/sep/minjun/
+  2131	16:58	l /homes/sep/minjun/anaconda3/
+  2132	17:14	more ~jon/HUBBERT
+  2133	17:15	vi hubbert
+  2134	17:15	mkdir hubbert
+  2135	17:15	cd hubbert
+  2136	17:15	cp ~jon/HUBBERT .
+  2137	17:15	vi HUBBERT
+  2138	17:15	cd ~jo
+  2139	17:15	cd ~jon/
+  2140	17:16	cd fn
+  2141	17:16	cd dfns/
+  2142	17:16	vi go
+  2143	17:16	cd jo
+  2144	17:17	cp ../projects/lwi_pf/SConstruct .
+  2145	17:17	cp HUBBERT paper.tex
+  2146	17:17	chmod a-x paper.tex
+  2147	17:17	scons paper.tex
+  2148	17:18	scos
+  2149	17:19	pdflatex paper.ltx
+  2150	17:42	vmstat
+  2151	17:49	vi paper.l
+  2152	17:50	vi paper.ltx
+  2153	17:52	vi paper.tex
+  2154	17:52	evince paper.pdf
+  2155	18:01	w | grep zhuwq
+  2156	18:17	l ~jo
+  2157	18:25	cd ~noir/
+  2158	18:27	more ~noir/pass
+  2159	18:27	cd ~minjun/
+  2160	18:36	sudo quota -vsu gbarner
+  2161	18:36	sudo quota -vsu gbarnier
+  2162	18:40	ssh root@bricky
+  2163	18:41	sudo quota -vsu ariellel
+  2164	18:42	vi ~/util/quotas
+  2165	19:07	ps
+  2166	19:12	sudo kill -9 13129
+  2167	19:18	mdadm
+  2168	19:18	mdadm -D /dev/md0
+  2169	19:18	sudo mdadm -D /dev/md0
+  2170	19:53	cd ../jo
+  2171	19:53	cd ../jon/
+  2172	19:54	cd hubbert/
+  2173	19:58	view /etc/fstab
+  2174	19:59	sudo showmount
+  2175	20:51	uname -r
+  2176	20:51	uname -a
+  2177	22:06	ssh glances
+  2178	22:07	watch -n 0.5 vmstat
+  2179	22:08	top u stuart -c
+  2180	22:09	top u ettore -c
+  2181	22:11	/usr/bin/Xvnc :8 -alwaysshared -desktop sandbox -geometry 2000x1200 -localhost -auth /homes/sep/joseph29/.Xauthority -fp catalogue:/etc/X11/fontpath.d -pn -rfbauth /homes/sep/josep29/.vnc/passwd -rfbport 5908 -rfbwait 30000
+  2182	22:14	/usr/bin/Xvnc :12 -alwaysshared -desktop sandbox -geometry 2000x1200 -localhost -auth /homes/sep/joseph29/.Xauthority -fp catalogue:/etc/X11/fontpath.d -pn -rfbauth /homes/sep/josep29/.vnc/passwd -rfbport 5908 -rfbwait 30000
+  2183	22:15	kill -9 23361
+  2184	22:20	kill -9 22332
+  2185	22:32	vncconfig
+  2186	22:37	ifconfig | grep inet
+  2187	22:41	vi /etc/sysconfig/vncservers
+  2188	22:45	man vncserver
+  2189	22:51	vncserver -list
+  2190	22:59	Spike n1=5 k1=2 | Dots | Tube &
+  2191	22:59	qexit
+  2192	23:00	l ~jon/pers/
+  2193	23:01	vi .esd_auth
+  2194	23:01	cd .gconf
+  2195	23:01	cd apps/
+  2196	23:01	rm -rf .gconf
+  2197	23:03	rm gnome-initial-setup-done
+  2198	23:03	rm Trolltech.conf
+  2199	23:03	rm -rf yelp/
+  2200	23:06	vi .ICEauthority
+  2201	23:06	l ~syyuan/
+  2202	23:06	l -a ~syyuan/
+  2203	23:07	l -a ~yinbin/.cache/
+  2204	23:07	l .cache/
+  2205	23:08	cd evince/
+  2206	23:09	gnome-session-quit
+  2207	23:10	gnome-session-quit --force
+  2208	23:12	kill -9 24841
+  2209	23:14	kill 79637
+  2210	23:16	sudo kill -9 29603
+  2211	23:16	sudo kill -9 29604
+  2212	23:23	vi ~/.vnc/xstartup
+  2213	23:26	top u root -c
+  2214	23:47	ps -aux | grep haru
+  2215	23:47	ps -aux | grep Xvnc
+  2216	23:48	ps -aux | grep Xnvc | grep haru
+  2217	23:49	rm -rf Templates/
+  2218	23:49	rm -rf Public/
+  2219	23:49	rm -rf Downloads/
+  2220	23:49	rm -rf Desktop/
+  2221	23:50	kill -9 33953
+  2222	23:51	rm -rf Documents/
+  2223	23:51	rm -rf Music/
+  2224	23:51	rm -rf Videos/
+  2225	23:51	rm -rf Pictures/
+  2226	23:52	rm -rf gnome-software/
+  2227	23:52	rm -rf libgweather/
+  2228	23:52	rm -rf gnome-shell/
+  2229	23:52	rm -rf media-art/
+  2230	23:52	rm event-sound-cache.tdb.52bce872d31c416ba59685aef7cb9b7f.x86_64-redhat-linux-gnu
+  2231	23:52	rm -rf gstreamer-1.0/
+  2232	23:52	l abrt/
+  2233	23:52	rm -rf abrt/
+  2234	23:52	cd tracker/
+  2235	23:53	more no-need-mtime-check.txt
+  2236	23:53	rm -rf tracker/
+  2237	23:53	rm -rf nautilus/
+  2238	23:53	rm -rf imsettings/
+  2239	23:53	rm-rf evolution/
+  2240	23:53	rm -rf evolution/
+  2241	23:53	cd dconf/
+  2242	23:53	more user
+  2243	23:53	sudo l ~yinbin/.config/
+  2244	23:53	sudo sl ~yinbin/.config/
+  2245	23:53	sudo ls ~yinbin/.config/
+  2246	23:54	rm -rf .dconf
+  2247	23:54	rm -rf pulse/
+  2248	23:54	rm -rf gtk-3.0/
+  2249	23:54	lrm -rf dconf/
+  2250	23:54	rm -rf dconf/
+  2251	23:54	rm user-dirs.dirs
+  2252	23:54	rm user-dirs.locale
+  2253	23:54	rm -rf gnome-session/
+  2254	23:54	rm -rf goa-1.0/
+  2255	23:55	rm .esd_auth
+  2256	9:05	sudo yum install epel-release -y
+  2257	9:05	yum groupinstall "Server with GUI" -y
+  2258	9:05	sudo yum groupinstall "Server with GUI" -y
+  2259	9:06	sudo yum groupinstall -y "Xfce"
+  2260	9:11	l -a | less
+  2261	9:11	l -a | more
+  2262	9:11	vi .vnc/xstartup
+  2263	9:14	vi /etc/X11/xinit/xinitrc
+  2264	9:17	vi /etc/X11/xinit/xinitrc-common
+  2265	9:23	which xrdb
+  2266	9:23	man xrdb
+  2267	9:26	cd .vnc/
+  2268	9:26	vi passwd
+  2269	9:36	mv xstartup xstartup_old
+  2270	9:36	vi xstartup
+  2271	9:36	chmod a+x xstartup
+  2272	9:40	view ~/.vnc/xstartup
+  2273	9:46	kill -9 62524
+  2274	9:47	kill -9 62501
+  2275	9:47	kill -9 62468
+  2276	9:47	vi scripts/removevnc.sh
+  2277	9:49	chmod a+x ./scripts/removevnc.sh
+  2278	9:51	top u nmbader -c
+  2279	9:51	top u yinbin -c
+  2280	9:53	./scripts/removevnc.sh
+  2281	9:53	l ~/.cache/
+  2282	9:53	cd .gnupg/
+  2283	9:54	cd .cache/
+  2284	9:57	ps -aux | grep gnome-session
+  2285	10:00	cd .con
+  2286	10:00	cd .config/
+  2287	10:00	~/scripts/removevnc.sh
+  2288	10:03	mv scripts/removevnc.sh scripts/removevnc-xfce.sh
+  2289	10:45	l ~jon/
+  2290	10:46	view ~zhuwq/
+  2291	10:46	view ~zhuwq/.bashrc
+  2292	10:47	l -a ~zhuwq/.bashrc
+  2293	10:47	cd ~haru/
+  2294	10:47	vi ~haru/.bashrc
+  2295	10:50	cd /scr1
+  2296	10:52	view ~juliojof/.bashrc
+  2297	10:52	view ~juliojof/.cshrc
+  2298	10:56	ssh brick7
+  2299	10:59	ssh root@bric6
+  2300	11:10	l -h ptscatdata2.h5
+  2301	11:10	rm -rf storm*.H@
+  2302	11:10	rm adjwfldgrd.H@
+  2303	11:10	rm dat_2500-4999.H@
+  2304	11:11	rm bmarm15100rmov.H@
+  2305	11:11	rm bmarm1550rmov.H@
+  2306	11:11	rm smmvzxgrd8.H@
+  2307	11:11	rm -rf izx*
+  2308	11:11	rm nmmvzxgrd8.H@
+  2309	11:11	rm rmvdbzxgrd8.H@
+  2310	11:11	rm lwidippfdmov.H@
+  2311	11:11	rm lwibsyninddat.H@
+  2312	11:12	rm lwisynrmov.H@
+  2313	11:12	rm wfldcomp.H@
+  2314	11:12	rm -f vel-pars0*
+  2315	11:12	l allex1208/
+  2316	11:12	rm -rf allex1*
+  2317	11:13	rm -f pvwfld.H@
+  2318	11:13	rm -f lwi*
+  2319	11:13	cd ../scr2/
+  2320	11:14	du -sh * | sort -hr | grep T
+  2321	11:14	cd SEP168/
+  2322	11:14	cd sep172/
+  2323	11:14	cd sep171/
+  2324	11:14	cd thesis/
+  2325	11:17	du -sh SEP168/
+  2326	11:17	rm -rf SEP168/
+  2327	11:17	sudo rm -rf SEP168/
+  2328	11:17	grep -r 'SEP168'
+  2329	11:17	grep -r 'SEP168' *
+  2330	11:18	grep -r 'MOERE' *
+  2331	11:18	view DEFmakefile
+  2332	11:19	grep -r 'scr' *
+  2333	11:19	view COPYmakefile
+  2334	11:19	l Par/
+  2335	11:19	view Par/*
+  2336	11:20	grep -r 'construct_chunk'
+  2337	11:20	view TIMEmakefile
+  2338	11:21	grep -r 'storm'
+  2339	11:21	grep -r 'storm' *
+  2340	11:21	grep -r 'data' *
+  2341	11:21	grep -r 'data' * | less
+  2342	11:21	grep -r 'data' *akefile | less
+  2343	11:21	grep -r 'sr' *akefile | less
+  2344	11:21	grep -r 'Src' *akefile | less
+  2345	11:22	grep -r 'Src' | less
+  2346	11:22	grep -r 'Dat' | less
+  2347	11:22	view chap4/DEFmakefile
+  2348	11:22	cd jasonpc/
+  2349	11:23	cd FORTIES/
+  2350	11:23	cd FORTIES_THESIS/
+  2351	11:23	cd FORTIES_PASSIVE/
+  2352	11:23	cd /report/sep171/
+  2353	11:23	cd reproducibility/
+  2354	11:23	grep -r 'FORTIES'
+  2355	11:23	cd /scr1/jasonpc/
+  2356	11:24	rm -rf FORTIES/
+  2357	11:24	sudo rm -rf FORTIES/
+  2358	11:24	mkdir julio
+  2359	11:24	groups julio
+  2360	11:25	sudo mv julio juliojof
+  2361	11:32	showmount
+  2362	11:33	cd huyle/
+  2363	11:33	cd fantine/
+  2364	11:33	cd earthquake-detection/
+  2365	11:34	l / | grep scr1
+  2366	11:34	l / | grep scr2
+  2367	11:35	sudo mkdir julio
+  2368	11:35	rmdir julio
+  2369	11:35	sudo rmdir juliojof
+  2370	11:35	sudo rmdir julio
+  2371	11:35	sudo chgrp zhuwq class
+  2372	11:37	vi ~rali8/.datapath
+  2373	11:37	sudo vi ~rali8/.datapath
+  2374	11:38	cp ~rali8/.datapath .
+  2375	11:38	sudo cp ~rali8/.datapath .
+  2376	11:38	l ~rali8/
+  2377	11:38	cd ~rali8/
+  2378	11:38	cd /homes/cls
+  2379	11:39	cd /homes/class/
+  2380	11:39	shdo chgrp axelwang/ class
+  2381	11:39	sudo chgrp axelwang/ class
+  2382	11:39	sudo chgrp class axelwang
+  2383	11:40	sudo chown 755 axelwang/
+  2384	11:40	sudo chown axelwang axelwang
+  2385	11:40	sudo chmod 755 axelwang
+  2386	11:40	cd axelwang/
+  2387	11:40	sudo chmod 755 rali8
+  2388	11:40	sudo chgrp class rali8
+  2389	11:41	sudo chgrp class zj8628
+  2390	11:41	sudo chgrp class ejdawson
+  2391	11:41	sudo chmod 755 ejdawson
+  2392	11:42	sudo chmod 755 zj8628
+  2393	11:42	sudo chmod 755 rshultz
+  2394	11:42	sudo chgrp class yanglei
+  2395	11:42	sudo chgrp class sagar18
+  2396	11:42	sudo chgrp class pradhan1
+  2397	11:42	cd pradhan1/
+  2398	11:43	sudo chmod 755 pradhan1
+  2399	11:43	sudo chmod 755 yanglei
+  2400	11:43	sudo chmod 755 sagar18/
+  2401	11:43	cd zhuwq/
+  2402	11:43	cd scr1/
+  2403	11:44	mkdir minjun
+  2404	11:44	mkdir juliojof
+  2405	11:46	vi .datapath
+  2406	11:48	mkdir zhuwq
+  2407	11:48	sudo mkdir zhuwq
+  2408	11:48	sudo mkdir minjun
+  2409	11:49	sudo mkdir juliojof
+  2410	11:49	sudo chown zhuwq zhuwq
+  2411	11:49	sudo chown minjun minjun
+  2412	11:49	sudo chgrp class zhuwq
+  2413	11:49	sudo chgrp sep minjun
+  2414	11:52	l /net/thing/scr2/zhuwq/
+  2415	11:52	l /net/storm/scr1/zhuwq/
+  2416	11:52	l /net/fantastic/scr2/zhuwq/
+  2417	11:52	l /net/torch/scr1/zhuwq/
+  2418	11:52	l /net/torch/scr1/minjun//
+  2419	11:57	view ~juliojof/.datapath
+  2420	11:57	l /net/storm/scr1/juliojof/
+  2421	12:05	du -sh ~juliojof/
+  2422	12:15	l ~minjun/
+  2423	12:15	du -sh ~minjun
+  2424	12:34	Spike n1=10 k1=5 > spike.H
+  2425	12:35	In spike.H
+  2426	12:43	Dots < spike.H | Tube &
+  2427	12:59	Rm spike.H
+  2428	13:00	cd resfoc/bench/image/
+  2429	13:01	vi par/resmigwrng.par
+  2430	13:02	cd projects/scaas
+  2431	13:02	vi velocity.py
+  2432	13:36	si
+  2433	14:22	ssh root@brick5
+  2434	15:01	vi ~minjun/.bashrc
+  2435	15:01	more ~haru/pass
+  2436	15:07	sudo kill -9 18777
+  2437	15:19	cd /var/
+  2438	15:19	cd yp/
+  2439	15:53	vi ~/.bashrc
+  2440	22:46	git add velocity.py
+  2441	22:46	git commit -m 'Velocity anomaly generator gives nice random smooth anomalies'
+  2442	22:47	git checkout master
+  2443	22:47	git checkout bench-sep trismooth.py
+  2444	22:47	vi trismooth.py
+  2445	22:47	git checkout velocity.py
+  2446	22:48	git checkout master velocity.py
+  2447	22:48	git checkout bench-sep velocity.py
+  2448	23:13	git commit -m 'Merging changes from bench-sep'
+  2449	14:50	git pull
+  2450	14:51	git checkout bench-rojas
+  2451	14:52	git checkout master ../inpout/seppy.py
+  2452	14:52	git commit -m 'Merging changes from master'
+  2453	14:52	git push
+  2454	11:06	free -hf
+  2455	11:06	free -gh
+  2456	18:52	cd scripts/
+  2457	18:53	cd projects/resfoc/bench/ml
+  2458	19:20	cdfdfddfdfdfdfd
+  2459	19:21	ls -a
+  2460	20:01	dfdfdfddfdfdexit
+  2461	20:48	eog fig/resimgs/
+  2462	19:52	sudo mkdir /net/scr1/vision
+  2463	19:53	sudo mkdir /net/vision/scr1/juliojof
+  2464	19:53	l /net/vision/scr1/juliojof
+  2465	19:53	l /net/vision/
+  2466	19:53	l /net/vision/scr1/
+  2467	19:54	l /scr1/juliojof/
+  2468	19:54	cd /scr1/
+  2469	19:54	sudo chown juliojof juliojof
+  2470	19:54	sudo chgrp sep juliojof
+  2471	19:59	vi ~.cshrc
+  2472	19:59	vi ~juliojof/.cshrc
+  2473	21:48	vi scripts/ssim2.py
+  2474	21:48	vi scripts/patchcwssim.py
+  2475	0:15	vi scripts/make_rho_map.py
+  2476	0:18	cp scripts/make_rho_map.py scripts/rho_ang_comp.py
+  2477	10:18	cp /net/server2/homes/sep/juliojof/Classes/01-3DSeismicImaging/GP280_lab1/Bstk.H .
+  2478	10:18	In Bstk.H
+  2479	10:21	locate qt_cube
+  2480	10:23	which Sep_cube
+  2481	10:23	view /opt/SEP/SEP7.0/bin/Sep_cube
+  2482	10:24	/opt/SEP/SEP7.0/bin/qt_cube labelg_8=' ' type0='SEP' dg_8='1' basic_sep_io='0' labelg_3='cmp_y' data0='Bstk.H' labelg_4=' ' labelg_5=' ' labelg_6=' ' labelg_7=' ' labelg_1='time' labelg_2='cmp_x' store0='IN_BYTE' dg_6='1' dg_7='1' dg_4='1' dg_5='1' dg_2='200.000000' dg_3='200.000000' dg_1='0.002000' og_7='0' og_6='0' og_5='0' og_4='0' og_3='0.000000' og_2='0.000000' og_1='0.000000' og_8='0' ndata='1' ng_8='1' ng_4='1' ng_5='1' ng_6='1' ng_7='1' ng_1='1000' ng_2='30' ng_3='30'
+  2483	10:24	cp /opt/SEP/SEP7.0/bin/Sep_cube .
+  2484	10:25	Sep_cube Bstk.H
+  2485	10:30	echo $QTCUBE
+  2486	10:30	sudo vi /opt/SEP/SEP7.0/bin/Sep_cube
+  2487	10:30	./Sep_cube Bstk.H
+  2488	10:31	vi Sep_cube
+  2489	10:31	rm Sep_cube
+  2490	10:31	vi Bstk.H
+  2491	10:31	rm Bstk.H
+  2492	19:29	vi scripts/lbldistro.py
+  2493	20:22	cd projects/resfoc/bench/ml/
+  2494	20:22	view par/xw2ddattrain.par
+  2495	20:57	l /net/fantastic/scr2/
+  2496	20:57	l -h /net/fantastic/scr2/joseph29/
+  2497	21:07	mv resfind-gpu10ep.h5 /scr1/joseph29/
+  2498	21:07	du -sh joseph
+  2499	21:09	l /scr1/joseph29
+  2500	21:09	vi ~/.datapath
+  2501	21:10	l /scr1/joseph29/
+  2502	21:10	mv /scr1/joseph29* /scr1/joseph29
+  2503	21:10	mkdir /scr1/joseph29/networks
+  2504	21:23	vi kerascallbacks.py
+  2505	21:54	l bench/focdat/
+  2506	21:58	cd proj
+  2507	21:58	cd ml
+  2508	21:58	l sc
+  2509	21:58	l ml/
+  2510	21:58	l ml/scripts/
+  2511	21:58	vi ml/scripts/TrainResFind.py
+  2512	21:59	vi deeplearn/kerascallbacks.py
+  2513	21:59	vi deeplearn/kerasnets.py
+  2514	8:15	vi scripts/rho_ang_comp.py
+  2515	11:32	xit
+  2516	11:42	vi kerasnets.py
+  2517	12:26	view par/resfindtrain.par
+  2518	12:29	vi par/resfindtrain.par
+  2519	12:40	ql
+  2520	12:41	vi ../../deeplearn/kerascallbacks.py
+  2521	12:42	vi par/resfindtrainwind.par
+  2522	23:11	l /net/fantastic/scr2/joseph29
+  2523	23:13	go
+  2524	23:13	view par/segmentmig2.par
+  2525	23:15	view scripts/segmentfaults.py
+  2526	0:19	cp par/focimgmetrics.par par/resfocimgmetrics.par
+  2527	0:27	view ../../resfoc/estro.py
+  2528	0:43	python scripts/ResImgMetrics.py -c ./par/resfocimgmetrics.par
+  2529	0:45	In ../focdat/zangresfltimg-00760.H
+  2530	0:48	l /net/fantastic/scr2/joseph29/
+  2531	1:38	vi ../../resfoc/estro.py
+  2532	2:17	vi par/resfocimgmetrics.par
+  2533	9:17	l be
+  2534	9:17	git add ../../resfoc/estro.py
+  2535	9:17	git commit -m 'A quick fix for the refocusing over patches'
+  2536	9:17	git checkout bench-sep
+  2537	9:18	vi par/xw2ddattrain.par
+  2538	9:18	vi ../../deeplearn/kerasnets.py
+  2539	9:23	vi scripts/make760h5.py
+  2540	12:05	kill -9 24119
+  2541	23:39	vncserver
+  2542	23:56	In zofltimg-00760.H
+  2543	0:06	vncserver -kill 3
+  2544	0:07	vi ~/util/killvnc
+  2545	0:07	vncserver -geometry 1280x1024
+  2546	0:10	vncserver -kill :3
+  2547	0:11	vncserver -geometry 1920x1080
+  2548	0:11	cd bench/focdat/
+  2549	0:11	In zoresfltimg-00760.H
+  2550	0:12	cd projects/resfoc/bench/focdat/
+  2551	0:12	Agc < zofltimg-00760.H | Grey | Tube &
+  2552	0:15	Agc < zoresfltimg-00760.H | Grey gainpanel=a | Tube &
+  2553	0:24	xfce4-power-manager -q
+  2554	0:26	kill -0 1861
+  2555	0:27	kill -9 1861
+  2556	0:27	ps -aux | grep pulse
+  2557	0:27	ps -aux | grep gnome
+  2558	0:27	ps -aux | grep gnome-session-binary
+  2559	0:27	ps -aux | grep xfce4
+  2560	0:27	ps -aux | grep xfce4-session
+  2561	0:30	more ~/util/killvnc
+  2562	0:33	vi ~/util/vnc
+  2563	0:34	sudo yum install htop
+  2564	1:05	ps -aux | grep firefox
+  2565	1:07	vi test.text
+  2566	1:07	rm test.text
+  2567	1:07	cd dep
+  2568	1:08	view dataloader.py
+  2569	1:09	cd projects/proj
+  2570	1:17	vi dataloader.py
+  2571	1:18	vi test
+  2572	1:40	top -u joseph29 -c
+  2573	1:59	vi ~/.config/xfce4/terminal/accels.scm
+  2574	2:00	ll
+  2575	10:45	cd /opt
+  2576	10:45	cd xfce4/
+  2577	10:46	cd panel
+  2578	10:46	cd plugins/
+  2579	12:24	locate SData.H
+  2580	12:24	cd ~juliojof/
+  2581	12:24	cd Classes/
+  2582	12:24	cd 01-3DSeismicImaging/
+  2583	12:24	cd GP280_lab1/
+  2584	12:24	In SData.H
+  2585	12:24	l /scr1/
+  2586	12:24	vi ~juliojof/.datapath
+  2587	12:25	l /scratch1/
+  2588	12:25	cd /scratch1/
+  2589	12:25	cd joe/
+  2590	12:26	l ../
+  2591	12:27	cp ~juliojof/Classes/01-3DSeismicImaging/GP280_lab1/SData.H* .
+  2592	12:28	Headermath key8=cmp_x eqn8=2*s_x type8=scalar_float key9=cmp_y eqn9=2*s_y type9=scalar_float < SData.H > output.H
+  2593	12:28	In3d SData.H
+  2594	12:30	Headermath key1=cmp_x eqn1=2*s_x type1=scalar_float key2=cmp_y eqn2=2*s_y type2=scalar_float < SData.H > output.H
+  2595	12:31	Headermath key8='cmp_x' eqn1='2*s_x' type1=scalar_float key2='cmp_y' eqn2='2*s_y' type2=scalar_float < SData.H > output.H
+  2596	12:33	Headermath key1='cmp_x' eqn1='2*s_x' type1=scalar_float key2='cmp_y' eqn2='2*s_y' type2=scalar_float < SData.H > output.H
+  2597	12:33	Dis3dhead < output.H
+  2598	12:34	Dis3dhead key_list='s_x:cmp_x' < output.H | less
+  2599	12:35	Dis3dhead key_list='s_x:cmp_x' < output.H | more
+  2600	12:35	Dis3dhead key_list='s_x:cmp_x' < output.H 2 > out.txt
+  2601	12:35	Dis3dhead key_list='s_x:cmp_x' < output.H 2 & > out.txt
+  2602	12:35	Dis3dhead key_list='s_x:cmp_x' < output.H 2 > & 1 out.txt
+  2603	12:35	vi o
+  2604	12:35	Dis3dhead key_list='s_x:cmp_x' < output.H 2 > & out.txt
+  2605	12:37	Dis3dhead key_list='s_x:cmp_x' < output.H > & out.txt
+  2606	12:37	vi out.txt
+  2607	12:50	rm 1 y
+  2608	12:50	rm 1
+  2609	12:50	rm out
+  2610	12:50	rm out.txt
+  2611	12:50	rm SData.H*
+  2612	12:50	In output.H
+  2613	12:50	rm output.H
+  2614	12:50	rm output.H@@
+  2615	13:07	groups ariellel
+  2616	13:08	du -sh ~ariellel
+  2617	13:08	sudo du -sh ~ariellel
+  2618	15:55	xeyes
+  2619	15:56	xeyes &
+  2620	15:56	fg
+  2621	15:56	Spike n1=10 k1=5 | Dots | Tube &
+  2622	16:47	texit
+  2623	22:03	vi test.txt
+  2624	22:04	gnome-terminal
+  2625	22:07	glances --disable-bg
+  2626	22:07	top u minjun
+  2627	22:15	vi scripts/migptscat.py
+  2628	13:17	cd scaas/
+  2629	13:17	vi defaultgeom.py
+  2630	13:38	ssh jarvis
+  2631	14:53	glances
+  2632	9:11	cd usclutter/l
+  2633	9:11	cd usclutter/
+  2634	9:11	view PGNmakefile
+  2635	9:12	grep -r 'phantom' *
+  2636	9:12	view TOTmakefile
+  2637	9:12	In ./Dat/phantom/speckle_no_abd_focused_sliceno_1.H
+  2638	0:13	cd /usr/share/
+  2639	0:13	cd app
+  2640	0:13	cd applications/
+  2641	0:14	sudo updatedb
+  2642	9:05	locate xfce4-appfinder.desktop
+  2643	9:06	view xfce4-appfinder.desktop
+  2644	9:06	locate edit-find
+  2645	9:07	cd /usr/share/icons/gnome/
+  2646	9:08	find . -iname 'xfce' *
+  2647	9:08	find . -iname 'xfce'
+  2648	9:08	find . -iname 'xfce*'
+  2649	9:08	display ./gnome/48x48/devices/xfce4-mouse.png
+  2650	9:09	display ./hicolor/128x128/apps/xfce4-session.png
+  2651	20:26	ssh rcf
+  2652	18:32	cd ~syyuan/projects/DAS2/Src/TLE_smartcity/DCImage_inv.py
+  2653	18:32	view ~syyuan/projects/DAS2/Src/TLE_smartcity/DCImage_inv.py
+  2654	21:28	pip install --upgrade glances
+  2655	21:30	which glances
+  2656	12:26	cd image/
+  2657	12:26	Cgr gainpanel=a < rhosemblancewrng2.H | Tube &
+  2658	12:27	sfpick vel0=1 rect1=17 rect2=17 < rhosemblance2.H > rhowrngfit2.H
+  2659	12:28	sfpick vel0=1 rect1=17 rect2=17 smooth=n < rhosemblance2.H > rhowrngfit2.H
+  2660	12:28	Cgr < rhowrngfit2.H | Tube &
+  2661	12:29	Scale scale_to=1 < rhosemblancewrng2.H > rhosemblancewrng2norm.H
+  2662	12:30	Cgr gainpanel=a < rhosemblance2.H | Tube &
+  2663	12:30	Scale scale_to=1 < rhosemblance2.H > rhosemblance2norm.H
+  2664	12:31	Cgr gainpanel=a < rhosemblance2norm.H | Tube &
+  2665	12:31	sfpick vel0=1 rect1=17 rect2=17 smooth=n < rhosemblance2norm.H > rhowrngfit2.H
+  2666	12:31	Smooth rect1=25 rect2=25 < rhowrngfit2.H | Cgr | Tube &
+  2667	12:33	Smooth rect1=25 rect2=25 < rhowrngfit2.H | Attr
+  2668	12:34	sfpick vel0=1 rect1=17 rect2=17 smooth=n < rhosemblance2norm.H > rhofit2.H
+  2669	12:34	sfpick vel0=1 rect1=17 rect2=17 smooth=n < rhosemblancewrng2norm.H > rhowrngfit2.H
+  2670	12:34	Smooth rect1=17 rect2=17 < rhowrngfit2.H | Cgr | Tube &
+  2671	12:43	In fltimgbigresangwrng.H
+  2672	12:48	In fltimgbigresangagcwrng.H
+  2673	13:48	sfpick vel0=1.0 smooth=n < x500semb.H > x500pick.H
+  2674	13:48	Graph < x500pick.H | Tube &
+  2675	15:09	sfpick vel0=1.0 rect1=25 < x500sembwrng.H > x500pickwrng.H
+  2676	15:11	sfpick vel0=1.0 rect1=1 < x500sembwrng.H > x500pickwrng.H
+  2677	15:11	sfpick vel0=1.0 smooth=n < x500sembwrng.H > x500pickwrng.H
+  2678	15:12	sfpick vel0=1.0 rect1=30 < x500sembwrng.H > x500pickwrng.H
+  2679	15:16	view ~/projects/scaas/scaas/gradtaper.py
+  2680	15:36	sfpick vel0=1.0 rect1=30 < x500semb.H > x500pick.H
+  2681	15:39	sfpick vel0=1.0 rect1=40 < x500semb.H > x500pick.H
+  2682	15:43	sfpick vel0=1.0 rect1=20 < x400sembwrng.H > x400pickwrng.H
+  2683	15:47	sfpick vel0=1.0 rect1=40 < x400sembwrng.H > x400pickwrng.H
+  2684	15:50	sfpick vel0=1.0 rect1=40 < x600sembwrng.H > x600pickwrng.H
+  2685	16:06	sudo pip install --upgrade glances
+  2686	16:07	sudo pip install --upgrade pip
+  2687	16:10	Scale scale_to=1 < x500sembwrng.H > x500sembnormwrng.H
+  2688	16:10	sfpick vel0=1.0 rect1=40 < x500sembnormwrng.H > x500picknormwrng.H
+  2689	16:11	kill -0 33162
+  2690	16:11	kill -9 33162
+  2691	16:12	sfpick vel0=1.0 rect1=40 < x500sembwrng.H > x500pickwrng.H
+  2692	16:16	Scale scale_to=1 < x400sembwrng.H > x400sembnormwrng.H
+  2693	16:16	sfpick vel0=1.0 rect1=40 < x400sembnormwrng.H > x400picknormwrng.H
+  2694	16:19	Scale scale_to=1 < x600sembwrng.H > x600sembnormwrng.H
+  2695	16:19	sfpick vel0=1.0 rect1=40 < x600sembnormwrng.H > x600picknormwrng.H
+  2696	16:19	kill -9 33499
+  2697	17:51	sfpick
+  2698	19:50	Scale scale_to=1 < rhosemblance.H > rhosemblancewrng.H
+  2699	19:52	glances --theme
+  2700	19:56	Scale scale_to=1 < rhosemblancewrng.H > rhosemblancenormwrng.H
+  2701	19:57	Window n3=1 f3=500 <
+  2702	19:58	Window n3=1 f3=500 < rhosemblancenormwrng.H > x500sembnormwrng2.H
+  2703	19:58	Cgr < x500sembnormwrng2.H | Tube &
+  2704	20:01	sfpick vel0=1.0 rect1=40 < x500sembnormwrng2.H > x600picknormwrng2.H
+  2705	20:01	In x600picknormwrng2.H
+  2706	20:03	sfpick vel0=1.0 rect1=40 < x500sembnormwrng2.H > x500picknormwrng2.H
+  2707	20:03	Rm x600picknormwrng2.H
+  2708	20:12	Window n3=1 f3=600 < rhosemblancenormwrng.H > x600sembnormwrng2.H
+  2709	20:12	sfpick vel0=1.0 rect1=40 < x600sembnormwrng2.H > x600picknormwrng2.H
+  2710	20:14	Window n3=1 f3=400 < rhosemblancenormwrng.H > x400sembnormwrng2.H
+  2711	20:14	sfpick vel0=1.0 rect1=40 < x400sembnormwrng2.H > x400picknormwrng2.H
+  2712	20:18	Grey color=F wantscalebar=y < rhofitnormwrng.H | Tube &
+  2713	20:33	Smooth rect2=20 < rhofitnormwrng.H | Grey color=F newclip=1 wantscalebar=y | Tube &
+  2714	20:34	sfpick vel0=1.0 rect1=40 rect2=40 < rhosemblancenormwrng.H > rhofitnormwrng.H
+  2715	20:38	sfpick vel0=1.0 rect1=40 < rhosemblancenormwrng.H > rhofitnormwrng.H
+  2716	20:38	Grey color=F wantscalebar=y newclip=1 < rhofitnormwrng.H | Tube &
+  2717	20:48	xfs_quota -x -c 'report -h' /homes | grep user
+  2718	20:48	sudo xfs_quota -x -c 'report -h' /homes | grep user
+  2719	20:48	sudo xfs_quota -x -c 'report -h' /homes/sep | grep user
+  2720	21:47	kill -9 46909
+  2721	8:02	eog fig/rhopicks/
+  2722	8:03	eog fig/rhopicks/smb-0*.png
+  2723	8:15	eog fig/rhopicks/img*-img.png
+  2724	8:18	eog fig/rhopicks/smb*.png
+  2725	8:21	sfpick vel0=1.0 rect1=40 rect2=20 < rhosemblancenormwrng.H > rhofitnormwrng.H
+  2726	8:21	Cgr < rhofitnormwrng.H | Tube &
+  2727	8:21	Grey color=F newclip=1 < rhofitnormwrng.H | Tube &
+  2728	8:21	Grey color=F newclip=1 wantscalebar=y < rhofitnormwrng.H | Tube &
+  2729	8:26	l fig/rhopicks/
+  2730	15:15	vi resfoc/gain.py
+  2731	18:40	sudo xfs_quota -x -c 'report -h' /homes/sep
+  2732	18:41	sudo xfs_quota -x -c 'report -h' /homes | grep minjun
+  2733	19:53	top u minjun -c
+  2734	19:54	htop
+  2735	19:56	top u huyle
+  2736	19:56	top u huyle -c
+  2737	19:56	which MLM
+  2738	19:56	more ~/util/getstarttime
+  2739	19:56	ps -eo pid,lstart,cmd
+  2740	19:56	ps -eo pid,lstart,cmd | grep MLM
+  2741	19:58	systemct
+  2742	20:00	sudo view /var/log/messages
+  2743	7:48	sudo du -sh minjun
+  2744	15:36	ssh -Y root@brick7
+  2745	15:37	cd ../minjun/
+  2746	15:37	du -sh anaconda3
+  2747	15:37	du -sh devito
+  2748	15:37	du -sh notebooks
+  2749	15:37	du -sh download
+  2750	15:37	du -sh project#1_syn_vel/
+  2751	15:38	du -sh class/
+  2752	17:49	l /usr/bin/python3-config
+  2753	17:51	python
+  2754	17:51	python3
+  2755	17:53	which python3
+  2756	17:53	python3 --version
+  2757	17:54	sudo pip install pybind11
+  2758	17:54	sudo pip3 install pybind11
+  2759	17:54	which pip3
+  2760	17:54	pip --version
+  2761	17:54	which pip
+  2762	17:54	sudo /usr/bin/pip3.6 install pybind11
+  2763	17:55	ssh storm
+  2764	17:55	cd fors/
+  2765	17:55	cd simplepybind/
+  2766	17:56	sudo pip3.6 pybind11
+  2767	17:56	pip3.6 pybind11 --user
+  2768	17:56	pip3.6 install pybind11 --user
+  2769	17:57	sudo pip3.6 install pybind11
+  2770	17:58	sudo pip3.6 install python-config
+  2771	17:58	l /usr/bin/python-config
+  2772	17:58	sudo ln -s /usr/bin/python3-config /usr/bin/python3.6-config
+  2773	17:59	sudo ln -s /usr/bin/python3.6-config /usr/bin/python3-config
+  2774	17:59	l /usr/bin/
+  2775	17:59	rm add
+  2776	17:59	python testadd.py
+  2777	17:59	python3.6 testadd.py
+  2778	17:59	cd fors/simple
+  2779	17:59	cd fors/simplepybind/
+  2780	17:59	remake add
+  2781	18:00	vi README
+  2782	18:00	make add
+  2783	18:00	python3 testadd.py
+  2784	18:01	vi testadd.py
+  2785	18:01	vi add.cp
+  2786	18:01	vi add.cpp
+  2787	18:02	make clean
+  2788	18:07	cd simplelink/
+  2789	18:07	view test.cpp
+  2790	18:07	view makefile
+  2791	18:53	vi addpy.cpp
+  2792	10:59	cd projects/resfoc/bench/image/
+  2793	11:00	view rhofitnormwrng.H
+  2794	11:00	In rhosemblancenormwrng.H
+  2795	11:00	sfpick rect1=40 rect2=40 vel0=1 < rhosemblancenormwrng.H > rhofitnormwrng2.H
+  2796	11:02	sfpick rect1=40 rect2=20 vel0=1 < rhosemblancenormwrng.H > rhofitnormwrng2.H
+  2797	11:02	Cat axis=3 rhofitnormwrng2.H rhofitnormwrng.H | Grey newclip=1 color=F wantscalebar=y | Tube &
+  2798	11:02	Add scale=1,-1 rhofitnormwrng2.H rhofitnormwrng.H | Attr
+  2799	11:02	vi scripts/autopick.sh
+  2800	11:03	git add scripts/autopick.sh
+  2801	11:33	source .bashrc
+  2802	11:34	source ~/.cshrc
+  2803	11:34	which Rho
+  2804	11:35	vi ~/.bash_aliases
+  2805	14:06	cd /scr2/
+  2806	14:06	l *.h5
+  2807	14:26	cd /net/jarvis/scr1
+  2808	14:26	l stuart/
+  2809	14:36	l joseph29/
+  2810	14:38	mv ssimresdat64.h5 /net/jarvis/scr1/
+  2811	10:39	ssh cees-tool-6
+  2812	10:40	tool-6
+  2813	10:49	cf
+  2814	11:16	cd ~/.ssh/
+  2815	11:17	view mazama_rsa.pub
+  2816	11:17	grep -r 'DMM'
+  2817	11:18	rm mazama_rsa*
+  2818	17:27	ssh cees-mazama-gpu
+  2819	17:29	ssh cees-tool-8
+  2820	17:30	vi ~/.ssh/config
+  2821	17:30	ssh tool-8
+  2822	19:02	ssh mazama-gpu
+  2823	19:39	ssh cees-tool-7
+  2824	20:24	ssh -Y mazama-gpu
+  2825	23:10	locate libtbb
+  2826	23:10	locate libtbb | less
+  2827	0:34	bahs
+  2828	1:06	sudo kill -9 105393
+  2829	1:06	sudo kill -9 105390
+  2830	1:06	sudo kill -9 105394
+  2831	1:06	sudo kill -9 105385
+  2832	1:06	sudo kill -9 105389
+  2833	1:06	sudo kill -9 105391
+  2834	1:06	sudo kill -9 105392
+  2835	1:06	sudo kill -9 105384
+  2836	1:07	sudo kill -9 105383
+  2837	1:07	sudo kill -9 105807
+  2838	1:07	sudo kill -9 100807
+  2839	1:07	sudo kill -9 100782
+  2840	1:07	sudo kill -9 100794
+  2841	1:07	sudo kill -9 100805
+  2842	1:07	sudo kill -9 100806
+  2843	1:07	sudo kill -9 100779
+  2844	1:07	sudo kill -9 100780
+  2845	1:07	sudo kill -9 100781
+  2846	1:07	sudo kill -9 100784
+  2847	1:07	sudo kill -9 100785
+  2848	1:07	sudo kill -9 100786
+  2849	1:08	sudo kill -9 100787
+  2850	1:08	sudo kill -9 100789
+  2851	1:08	sudo kill -9 100788
+  2852	1:08	sudo kill -9 100790
+  2853	1:08	sudo kill -9 100791
+  2854	1:08	sudo kill -9 100792
+  2855	1:08	sudo kill -9 100793
+  2856	1:08	sudo kill -9 100795
+  2857	1:08	sudo kill -9 100798
+  2858	1:08	sudo kill -9 100799
+  2859	1:08	sudo kill -9 100800
+  2860	1:08	sudo kill -9 100801
+  2861	1:08	sudo kill -9 100802
+  2862	1:08	sudo kill -9 100803
+  2863	1:08	sudo kill -9 100804
+  2864	1:08	sudo kill -9 100808
+  2865	1:08	sudo kill -9 100783
+  2866	1:09	sudo kill -9 100753
+  2867	1:09	sudo kill -9 100755
+  2868	1:09	sudo kill -9 100796
+  2869	1:09	sudo kill -9 100797
+  2870	1:09	sudo kill -9 100754
+  2871	1:10	sudo kill -9 100756
+  2872	1:10	sudo kill -9 100752
+  2873	1:10	sudo kill -9 100757
+  2874	1:10	sudo kill -9 100758
+  2875	1:10	sudo kill -9 96098
+  2876	1:10	sudo kill -9 96100
+  2877	1:10	sudo kill -9 96108
+  2878	1:10	sudo kill -9 96099
+  2879	1:10	sudo kill -9 96097
+  2880	1:10	sudo kill -9 96101
+  2881	1:10	sudo kill -9 96102
+  2882	1:11	sudo kill -9 96103
+  2883	1:11	sudo kill -9 96104
+  2884	1:11	sudo kill -9 96084
+  2885	1:11	sudo kill -9 96083
+  2886	1:11	sudo kill -9 96093
+  2887	1:11	sudo kill -9 96090
+  2888	1:11	sudo kill -9 96094
+  2889	1:11	sudo kill -9 96096
+  2890	1:11	sudo kill -9 96095
+  2891	1:11	sudo kill -9 96091
+  2892	1:11	sudo kill -9 96087
+  2893	1:11	sudo kill -9 96089
+  2894	1:11	sudo kill -9 96088
+  2895	1:11	sudo kill -9 96074
+  2896	1:11	sudo kill -9 96076
+  2897	1:11	sudo kill -9 96086
+  2898	1:11	sudo kill -9 96082
+  2899	1:12	sudo kill -9 96085
+  2900	15:00	sudo kill -9 96092
+  2901	22:52	ssh mazama
+  2902	1:13	gash
+  2903	1:15	cd projects/resfoc/utils/
+  2904	1:15	vi utils/p
+  2905	1:15	vi utils/plot.py
+  2906	2:12	cd resfoc/bench/focdat/
+  2907	2:15	eog fig/fantdefocangs2.png
+  2908	2:15	eog fig/fantdefocangs3.png
+  2909	2:21	eog fig/fantdefocangs*
+  2910	2:30	eog fig/fantdefocangs0.png
+  2911	2:31	eog fig/fantdefocangs1.png
+  2912	2:32	eog fig/fantfocangs.png
+  2913	2:33	eog fig/fantdefocangs.png
+  2914	2:33	eog fig/fantdefocimg1.png
+  2915	2:33	eog fig/fantdefocimg2.png
+  2916	2:33	eog fig/fantdefocimg3.png
+  2917	2:33	eog fig/fantdefocimg4.png
+  2918	2:39	eog fig/fantdefocimg*.png
+  2919	2:40	eog fig/fantdefocangs*.png
+  2920	2:56	l fant/
+  2921	2:56	In fant/angagcfant3.H
+  2922	2:59	eog fig/fant3smb-0000.png
+  2923	3:00	eog fig/fant3img-0060-img.png
+  2924	3:01	eog fig/fant3smb-0020.png
+  2925	3:03	eog fig/fant3img-0000-img.png
+  2926	3:04	eog fig/fant3img-0002-img.png
+  2927	3:04	eog fig/fant3img-0040.png
+  2928	3:04	eog fig/fant3img-0040-img.png
+  2929	3:05	l fig/fant3smb-0100.png
+  2930	3:05	eog fig/fant3smb-0100.png
+  2931	3:05	eog fig/fant3smb-0140.png
+  2932	3:06	eog fig/fant3smb-0160.png
+  2933	3:06	eog fig/fant3smb-0180.png
+  2934	3:07	eog fig/fant3smb-0240.png
+  2935	3:08	eog fig/fant3smb-0280.png
+  2936	3:08	eog fig/fant3smb-0300.png
+  2937	3:09	eog fig/fant3smb-0340.png
+  2938	3:09	eog fig/fant3smb-0380.png
+  2939	3:11	eog fig/fant3smb-0400.png
+  2940	3:19	Agc < ./fant/stkfant3.H | Grey | Tube &
+  2941	3:21	eog fig/fantdefocimg0.png
+  2942	3:22	eog fig/fant3img-0180-img.png
+  2943	3:24	eog fig/fantdefocimg16.png
+  2944	3:53	eog fig/fantrhoimg.png
+  2945	3:53	eog fig/fantrho.png
+  2946	14:55	cd /usr/local/
+  2947	14:55	cd Wolfram/
+  2948	14:55	cd Math
+  2949	14:55	cd MathLM/
+  2950	14:55	./mathlm
+  2951	14:56	mathematica
+  2952	11:23	locate padElasticFileG
+  2953	14:05	jupyter-notebook
+  2954	14:05	conda activate tf-gpu
+  2955	14:07	ssh -L 8081:localhost:8081 -N jarvis
+  2956	19:09	sudo xfs_quota -x -c 'report -h' /homes |
+  2957	19:13	sudo quota -vsu joseph29
+  2958	19:13	cd minjun/
+  2959	19:14	sudo du -su *
+  2960	19:14	sudo du -sh *
+  2961	19:14	l /sep/minjun/
+  2962	19:15	view ~/util/quotas
+  2963	19:15	sudo edquota minjun
+  2964	19:15	cd Documents/
+  2965	19:15	cd util/
+  2966	19:15	more stdquota
+  2967	19:15	view stdquota
+  2968	19:18	cd /sep
+  2969	19:24	cd /homes/
+  2970	20:28	cp .bashrc .bashrc_old
+  2971	20:29	mv .bashrc .bashrc_old
+  2972	20:29	cp ~minjun/.bashrc .
+  2973	20:33	vi /sep/joseph29/anaconda3/bin/conda
+  2974	20:40	cd /sep/minjun/anaconda3/bin/
+  2975	20:40	view con
+  2976	20:41	view conda
+  2977	20:43	/sep/minjun/anaconda3/bin/python3
+  2978	20:47	view .bashrc_
+  2979	20:47	view .bashrc_old
+  2980	20:47	cp .bashrc_mjp .bashrc
+  2981	20:49	l pkgs/
+  2982	20:49	l pkgs/conda-4.5.11-py37_0
+  2983	20:49	l pkgs/conda-4.5.11-py37_0/lib/
+  2984	20:49	l pkgs/conda-4.5.11-py37_0/lib/python3.7/
+  2985	20:49	l pkgs/conda-4.5.11-py37_0/lib/python3.7/site-packages/
+  2986	20:49	l pkgs/conda-4.5.11-py37_0/lib/python3.7/site-packages/conda
+  2987	20:49	l /sep/minjun/anaconda/pkgs/conda-4.5.11-py37_0/lib/python3.7/site-packages/conda
+  2988	20:50	l /sep/minjun/anaconda3/pkgs/conda-4.5.11-py37_0/lib/python3.7/site-packages/conda
+  2989	14:52	du -sh minjun
+  2990	14:52	l minjun/
+  2991	14:53	cd /net/fantastic/scr2/joseph29
+  2992	14:53	cd /net/fantastic/scr1/joseph29
+  2993	14:55	cd Downloads/
+  2994	15:26	cd /scr1/joseph29/
+  2995	15:26	mv *.zip ../../scr2/joseph29/
+  2996	15:29	cd scr2/joseph29/
+  2997	16:43	rm -rf Penobscot/
+  2998	19:25	[Dsudo xfs_quota -x -c 'report -h' /homes
+  2999	19:26	sudo du -sh * | sort -h | grep G
+  3000	22:46	cd Penobscot
+  3001	22:46	cd Seismics/
+  3002	23:17	sudo quota -vsu haru
+  3003	23:47	chmod a+x OpendTect_Installer_lux64.sh
+  3004	23:47	mkdir OpendTect
+  3005	23:47	./OpendTect_Installer_lux64.sh
+  3006	23:49	mkdir data
+  3007	23:50	cd /net/fantastic/
+  3008	23:50	cd scr2/
+  3009	23:52	cd /net/fantastic/scr2
+  3010	23:52	cd /net/fantastic/scr2/
+  3011	23:52	cd /net/torch/scr1
+  3012	23:53	cd /net/torch/scr2
+  3013	23:55	cd /sep/jo
+  3014	23:55	cd OpendTect
+  3015	13:55	mv Penobscot.zip data/
+  3016	13:55	unzip Penobscot.zip
+  3017	13:59	rm Penobscot.zip
+  3018	14:18	sudo du -sh
+  3019	14:19	sudo visudo
+  3020	13:08	ssh tool-7
+  3021	13:10	ssh -Y tool-7
+  3022	17:10	ssh -Y mazama
+  3023	9:46	view ~/.cshrc
+  3024	19:21	cd..
+  3025	21:17	Window n3=1 f3=16 < dog-0935.H > zodog-0935.H
+  3026	21:17	Window n3=1 f3=16 < fog-0935.H > zofog-0935.H
+  3027	21:17	Agc < zodog-0935.H | Grey | Tube &
+  3028	21:18	sfdepth2time < zodog-0935.H > zodogt-0935.H
+  3029	21:18	In zodog-0935.H
+  3030	21:18	In vel-0935.H
+  3031	21:19	Window n2=120 n2=1024 < vel-0935.H > velw-0935.H
+  3032	21:19	sfdepth2time velocity=velw-0935.H < zodog-0935.H > zodogt-0935.H
+  3033	21:19	sfdepth2time velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3034	21:19	In zodogt-0935.H
+  3035	21:20	sfdepth2time d1=0.004 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3036	21:20	sfdepth2time d1=0.04 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3037	21:21	sfdepth2time d1=0.004 nt=1000 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3038	21:21	sfdepth2time
+  3039	21:21	sfdepth2time d1=0.004 nt=100000 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3040	21:21	sfdepth2time d1=0.004 nt=10000 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3041	21:21	sfdepth2time d1=0.00004 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3042	21:21	sfdepth2time d1=1000.0 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3043	21:23	Grey < zofog-0935.H | Tube &
+  3044	21:23	sfdepth2time d1=0.0112 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3045	21:23	In zofogt-0935.H
+  3046	21:23	sfdepth2time dt=0.004 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3047	21:23	Grey < zofogt-0935.H | Tube &
+  3048	21:24	Grey < zodogt-0935.H | Tube &
+  3049	21:26	In ptb-0935.H
+  3050	21:26	Window n2=1024 f2=120 < ptb-0935.H > ptbw-0935.H
+  3051	21:27	Add velw-0935.H ptbw-0935.H > velw2-0935.H
+  3052	21:27	Cat axis=3 velw-0935.H velw2-0935.H | Cgr gainpanel=a | Tube &
+  3053	21:28	sfdepth2time dt=0.0112 velocity=velw2-0935.H < zodog-0935.H > zodogt-0935.H
+  3054	21:29	Agc < zodogt-0935.H | Grey | Tube &
+  3055	21:29	Agc < zofogt-0935.H | Grey | Tube &
+  3056	21:31	sfdepth2time dt=0.0112 velocity=velw-0935.H < zofog-0935.H > zofogt2-0935.H
+  3057	21:32	Cat axis=3 zofogt2-0935.H zofogt-0935.H zodogt-0935.H | Agc | Grey gainpanel=a | Tube &
+  3058	21:33	Cgr < velw2-0935.H | Tube &
+  3059	21:36	Cat axis=3 zodogt-0935.H zodog-0935.H | Agc | Grey gainpanel=a | Tube &
+  3060	21:37	Add velw-0935.H ptbw-0935.H scale=1,-1 > velw2-0935.H
+  3061	21:37	sfdepth2time dt=0.0112 velocity=velw-0935.H < zodog-0935.H > zodogt-0935.H
+  3062	21:38	Cat axis=3 zodogt2-0935.H zodogt-0935.H | Agc | Grey gainpanel=a | Tube &
+  3063	21:39	Cat axis=3 zodogt2-0935.H zofogt2-0935.H | Agc | Grey gainpanel=a | Tube &
+  3064	21:40	Cat axis=3 zodogt-0935.H zofogt2-0935.H | Agc | Grey gainpanel=a | Tube &
+  3065	21:40	Cat axis=3 zodogt-0935.H zofogt-0935.H | Agc | Grey gainpanel=a | Tube &
+  3066	21:41	sfdepth2time dt=0.0112 velocity=velw2-0935.H < zodog-0935.H > zodogt2-0935.H
+  3067	21:41	Cat axis=3 zodog-0935.H zofog-0935.H | Agc | Grey gainpanel=a | Tube &
+  3068	21:42	sfdepth2time dt=0.0112 velocity=velw2-0935.H < zofog-0935.H > zofogt-0935.H
+  3069	21:42	Cat axis=3 zofogt-0935.H zofog-0935.H | Agc | Grey | Tube &
+  3070	21:44	sfdepth2time dt=0.0112 velocity=velw-0935.H < zofog-0935.H > zofogt-0935.H
+  3071	21:44	sfdepth2time dt=0.0112 velocity=velw2-0935.H < zofog-0935.H > zofogt2-0935.H
+  3072	21:44	Cat axis=3 zofogt2-0935.H zofogt-0935.H | Agc | Grey gainpanel=a | Tube &
+  3073	15:37	l -h/scr2/joseph29/
+  3074	15:37	l -h /scr2/joseph29/
+  3075	15:37	view /scr2/joseph29/elfhdrs.txt
+  3076	16:26	In elfwhole.H
+  3077	16:26	Rm elfwhole.H
+  3078	16:26	In elfwhole2.H
+  3079	16:26	Rm elfwhole2.H
+  3080	16:26	In elfwhole3.H
+  3081	16:27	Rm elfwhole3.H
+  3082	16:27	In testelf.H
+  3083	16:27	Rm testelf.H
+  3084	16:27	rm elfhdrs.txt
+  3085	16:27	In elf2900.H
+  3086	16:27	Rm elf2900.H
+  3087	23:46	cd /data2/Cardamom/
+  3088	14:41	cd sep141
+  3089	14:42	cd 3dex/
+  3090	14:42	view elf.3D.mig.topsed_it05.agc.recip5km.H
+  3091	14:43	view elf.fold1_cmp2400.H
+  3092	14:44	view elf.fold_cmp.H
+  3093	14:45	view sortcmp4000.P
+  3094	14:45	grep -r 's_x'
+  3095	14:47	cd data1
+  3096	14:47	cd data1/
+  3097	14:47	locate raw_43Gb
+  3098	14:47	locate elf
+  3099	14:48	locate elf.H
+  3100	14:49	view /homes/sep/bob/Src/cpp/rtm_gpu2/wave.elf.H
+  3101	14:49	In /homes/sep/bob/Src/cpp/rtm_gpu2/wave.elf.H
+  3102	14:49	In /homes/sep/bob/Src/cpp/rtm_gpu2/elf.shots.H
+  3103	14:49	view /homes/sep/bob/Src/cpp/rtm_gpu2/elf.shots.H
+  3104	14:56	view sx.H
+  3105	14:57	grep -r 'sx'
+  3106	15:10	view sortsht.P
+  3107	15:10	locate sortsht.P
+  3108	15:10	locate sortshty2500.P
+  3109	15:11	l elf.sort_shots.H
+  3110	15:11	locate elf.sort_shots.H
+  3111	15:12	view sortcmp.P
+  3112	15:12	sep /report/sep106/
+  3113	15:13	sep /report/
+  3114	15:13	cd sep106/
+  3115	15:13	cd 3d/
+  3116	15:13	cd e
+  3117	15:13	cd elf/
+  3118	15:14	tube j0.v
+  3119	15:15	tube j1.v
+  3120	15:15	tube j3.v
+  3121	15:15	In elf.sou.H
+  3122	15:22	grep elf.rec.H
+  3123	15:23	l ( akefile
+  3124	15:23	l *akefile
+  3125	15:23	view FigMakefile
+  3126	16:47	h > hhh
+  3127	16:47	vi hhh
+  3128	17:29	cd bench/elf/
+  3129	17:29	rm hhh
+  3130	17:29	vi scripts/make_elf_data.py
+  3131	17:37	Window3d n2=1 f2=0 synch=1 < /data/elf_L7d/elf.H > elf1tr.H hff=/scr2/joseph29/elf1tr.H@@
+  3132	17:42	locate L7d_all.H
+  3133	17:42	echo $ELFDATA
+  3134	17:42	echo $ELF_DATA
+  3135	17:43	cd brick6
+  3136	17:43	cd data2
+  3137	17:43	cd brick7/
+  3138	17:43	cd data/
+  3139	17:43	cd /data4/
+  3140	17:44	cd /data3/
+  3141	17:44	cd /data2/
+  3142	17:44	cd Cardamom/
+  3143	17:44	cd CardamonDataAccessAgreement.pdf
+  3144	17:44	cd CARD_HYDRO/
+  3145	17:44	cd 910.00-hydrophone_sgy
+  3146	17:44	cd CatemDir/
+  3147	17:44	view Scat3dTest.H
+  3148	17:44	In Scat3dTest.HW
+  3149	17:44	In Scat3dTest.
+  3150	17:44	In Scat3dTest.H
+  3151	17:47	cd /scr2/joseph29/
+  3152	17:47	view elfhdrs2nospacewspacesort.txt
+  3153	17:59	mv elfhdrs2nospacewspacesort.txt elfhdrs_sortshot.txt
+  3154	17:59	view elfhdrs_sortshot.txt
+  3155	18:06	l scripts/
+  3156	18:06	view scripts/plot_elf_headers.py
+  3157	18:13	vi scripts/plot_elf_headers.py
+  3158	18:17	vi scripts/plot_oneshot_headers.py
+  3159	7:44	ipython --pylab
+  3160	23:36	sudo quota -vsu minjun
+  3161	12:11	view 3dMakefile
+  3162	12:12	vi ~/projects/resfoc/bench/elf/claudio
+  3163	12:12	l /net/server2/report/sep141/3dex/3dMakefile
+  3164	12:12	l ~/
+  3165	12:13	sudo su
+  3166	12:13	quota -vsu nlindsey
+  3167	12:15	cd haru/
+  3168	12:15	groups haru
+  3169	12:15	sudo edquota nlindsey
+  3170	12:16	view util/quotas
+  3171	12:16	view util/stdquota
+  3172	12:18	sudo quota -vsu nlindsey
+  3173	12:18	sudo yum install iotop
+  3174	12:31	groups nlindsey
+  3175	12:31	l /homes/sep/nlindsey/
+  3176	12:37	l haru/
+  3177	12:37	d
+  3178	12:38	sudo userdel -r haru
+  3179	12:38	sudo userdel -r noir
+  3180	12:39	view /etc/groups
+  3181	12:39	sudo view /etc/groups
+  3182	12:40	sudo groupdel haru
+  3183	12:40	sudo groupdel noir
+  3184	12:41	sudo groupdel zhuwq
+  3185	12:41	sudo su zhuwq
+  3186	12:42	cd ~ywdong/
+  3187	12:42	sudo groupdel ywdong
+  3188	12:42	sudo groupdel nurbek
+  3189	12:42	vi util/createuser
+  3190	12:42	view util/createuser
+  3191	12:43	groups rali8
+  3192	12:43	more util/createuser
+  3193	12:43	sudo usermod -g class rali8
+  3194	12:43	cd ../
+  3195	12:44	cd rali8/
+  3196	12:44	sudo groupdel rali8
+  3197	12:45	groups fpicetti
+  3198	12:45	sudo groupdel fpicetti
+  3199	12:46	sudo usermod -g class ejdawson
+  3200	12:46	sudo groupdel ejdawson
+  3201	12:46	sudo usermod -g class zj8628
+  3202	12:46	sudo groupdel zj8628
+  3203	12:47	sudo usermod -g class yanglei
+  3204	12:47	sudo usermod -g class axelwang
+  3205	12:47	sudo groupdel yanglei
+  3206	12:47	sudo groupdel axelwang
+  3207	12:48	sudo usermod -g class sagar18
+  3208	12:49	sudo groupdel sagar18
+  3209	12:49	view /etc/group
+  3210	12:49	cd ../../class/sagar18/
+  3211	12:49	cd nurbek/
+  3212	12:50	cd ejdawson/
+  3213	12:50	groups ejdawson
+  3214	12:50	groups joseph29
+  3215	12:50	groups juliojof
+  3216	12:52	sudo iotop
+  3217	12:52	Grey < node1027-h-line1784.H | Tube &
+  3218	12:53	mkdir nodelines
+  3219	12:53	rmdir nodelines/
+  3220	13:52	sudo du -sh ~joseph29
+  3221	13:53	sudo quota -vsu jon
+  3222	13:54	quota -vsu jon
+  3223	13:55	cd /
+  3224	13:55	l scratch/
+  3225	13:55	du -sh nlindsey/
+  3226	15:13	dmesg
+  3227	15:32	locate Sep2mat
+  3228	15:32	locate Sep2MAT
+  3229	15:32	cd /sep/stew/
+  3230	15:33	cd sep2mat.dir/
+  3231	15:33	vi Sep2Mat.c
+  3232	15:36	cp Sep2Mat ~/projects/cardamom_pzsum/Bin/
+  3233	15:38	kill -9 65725
+  3234	15:38	rm node319.mat
+  3235	15:39	bc -l
+  3236	15:40	kill -9 65958
+  3237	15:41	rm /scr2/joseph29/node319.mat
+  3238	15:49	cd cardamom_pzsum/
+  3239	15:08	top u joseph29 -c
+  3240	15:09	top u stuart
+  3241	15:09	top -c u stuart
+  3242	15:14	glances --theme-white --username joseph29
+  3243	15:14	man glances
+  3244	9:21	ssh thanos
+  3245	9:29	ssh -vv vision
+  3246	10:23	ssh -t vision 'cd / ; bash'
+  3247	10:24	systemctl status
+  3248	11:00	sudo journalctl -xfe > out
+  3249	11:31	gpustat
+  3250	15:44	which nvcc
+  3251	15:44	nvcc --version
+  3252	17:43	sudo systemctl restart nfs
+  3253	17:44	ping vision
+  3254	17:44	ssh vision
+  3255	19:33	cls
+  3256	18:01	ssh sep
+  3257	18:01	cd /web/html/data/media/public/
+  3258	18:01	cd sep/
+  3259	18:02	cd pubs/
+  3260	18:02	evince Jennings-2018-combined.pdf
+  3261	18:12	pwd
+  3262	18:12	mv Jennings-2018-combined.pdf ../
+  3263	18:13	mv ../Jennings-2018-combined.pdf .
+  3264	21:18	mpstat
+  3265	21:20	top -n1
+  3266	23:50	cd projects/resfoc/bench/sigsbee/
+  3267	23:50	l par/
+  3268	23:50	vi par/torchmigtru.par
+  3269	23:52	view scripts/cubeplot_func.py
+  3270	23:52	view scripts/cubeplot.py
+  3271	10:20	cd nlindsey/
+  3272	10:20	mkdir test
+  3273	10:20	cd ariel/
+  3274	10:22	sudo mkdir joseph29
+  3275	10:23	cd fpicetti/
+  3276	10:23	cd data6
+  3277	10:23	cd data5/
+  3278	10:25	cd Kietta/
+  3279	10:25	sudo test
+  3280	10:26	sudo mkdir test
+  3281	10:26	cd SEP/
+  3282	10:26	ssh root@brick6
+  3283	10:27	cd /data5/
+  3284	10:34	cd /net/data5
+  3285	10:34	cd /net/brick6
+  3286	10:40	cd /net/brick6/data4/
+  3287	10:41	rm test
+  3288	10:41	ls lrt
+  3289	10:41	ls
+  3290	10:47	cd /net/brick6/
+  3291	10:48	cd data4/
+  3292	10:57	sotrm
+  3293	10:57	cd /net/brick6/data5
+  3294	10:57	touch test
+  3295	10:58	view /etc/hosts
+  3296	10:58	l /net/brick6/data4
+  3297	10:58	l /net/brick6/data4nl
+  3298	10:58	l /net/brick6/data4/nlindsey/
+  3299	10:58	l /net/brick6/data4/nlindsey/mb19/
+  3300	20:38	ssh -Y rcf
+  3301	23:06	l projects/resfoc
+  3302	23:06	l projects/resfoc/velocity/
+  3303	23:15	ssh 192.168.106.3
+  3304	15:04	mv *.py seam357/
+  3305	15:04	mv ../pplot.py .
+  3306	15:05	ssh thing
+  3307	15:05	cd geo2011WideAzimuthAngleDecomposition/
+  3308	15:05	cd seam357/
+  3309	15:07	In /data/seam/earthmodel/vel.H
+  3310	17:27	kill -9 67465
+  3311	18:13	cd them/
+  3312	18:14	finger af1990
+  3313	12:07	rm ;
+  3314	12:07	rm \;
+  3315	12:07	evince fig/videofigs/fogfltprb-fogfltprb-img-tmp.pdf
+  3316	12:07	evince
+  3317	12:08	ssh -Y jarvis
+  3318	12:09	cd projects/resfoc
+  3319	12:09	cd bench/ml/
+  3320	12:09	l f
+  3321	12:09	l if
+  3322	12:09	l fig/
+  3323	12:09	evince fig/videofigs/fogfltprb-img-tmp.pdf
+  3324	12:16	rm fig/videofigs/*
+  3325	12:17	evince fig/fogfltprb-img.png
+  3326	12:18	l fig/videofigs/
+  3327	12:19	evince fig/videofigs/test.pdf
+  3328	12:29	evince fig/videofigs/fogfltprb-prd.pdf
+  3330	12:31	evince fig/videofigs/fogfltprb-img.pdf
+  3331	23:56	rm random_fault_focdefres.py
+  3332	9:59	xfs_quota -x -c 'report -h' /homes |
+  3333	9:59	xfs_quota -x -c 'report -h' /homes
+  3334	10:00	l /homes/them/klevtsov/
+  3335	16:49	kill -9 73374
+  3336	16:49	kill -9 73378
+  3337	16:50	groups minjun
+  3338	16:51	l seg_eage_salt/
+  3339	16:51	sudo chmod a+r seg_eage_salt/
+  3340	16:53	ssh root@brick7
+  3341	16:53	su rep
+  3342	16:55	l | grep seg_eage_salt
+  3343	11:09	sydo systemctl restart docker
+  3344	11:09	sudo systemctl restart docker
+  3345	11:09	glances --theme-whote
+  3346	11:09	journalctl -u docker.socket
+  3347	11:10	sudo journalctl -u docker.socket
+  3348	20:31	more util/quotas
+  3349	20:33	cd /sep/joseph29/
+  3350	20:33	mv figsold/ imagefigs
+  3351	20:33	mkdir mlfigs
+  3352	21:13	sudo du -sh * | sort -hr | grep G
+  3353	20:32	rcf
+  3354	7:38	top u joseph29
+  3355	10:53	cd /report/sep144/
+  3356	10:53	cd chap2/
+  3357	10:53	cd chap3/
+  3358	10:54	cd greens/
+  3359	10:54	view grn_oneway_mod.f90
+  3360	10:55	view wem_wfdexp_mod.f90
+  3361	12:19	locate gendownkern
+  3362	12:19	cd /book/book/3DI/Lib/gendownkern3d_v2/SGI64
+  3363	12:20	cd gendown3d_v9/
+  3364	12:20	cd LINUX/
+  3365	12:20	find . -iname '*.f90'
+  3366	12:20	cd Src
+  3367	12:20	cd SCR/
+  3368	12:20	cd SEG/
+  3369	12:21	cd LINUX
+  3370	12:21	locate 3D
+  3371	12:21	locate 3D | grep Biondo
+  3372	12:21	locate 3D | grep biondo
+  3373	12:21	cd /sep/biondo/3DI
+  3374	12:21	cd Lib/
+  3375	12:22	locate gendown3d
+  3376	12:22	view /homes/sep/biondo/Code/GenRev/GenRev/v2/OLD/gendown3d_mod.f90
+  3377	12:24	cd sep159/
+  3378	12:24	cd source_code/
+  3379	12:25	cd Makefile
+  3380	12:26	h | less
+  3381	12:26	l wem_wfdexp_mod.f90
+  3382	12:26	grep -r 'ssf' *
+  3383	12:41	cd script/
+  3384	12:41	grep -r 'fdfou' *
+  3385	12:41	grep -r 'oper'*
+  3386	12:41	grep -r 'oper' *
+  3387	12:43	view ../yaxun_weo/source/bwi/src/bwi-wem3d.f90
+  3388	12:46	cd ../yaxun_weo/source/bwi/src/
+  3389	12:46	grep -r 'ssfpi' *
+  3390	12:47	view bwi_wfdexp_mod.f90
+  3391	13:29	tool-8
+  3392	19:26	tool-7
+  3393	20:12	conda activate py35
+  3394	11:00	locate midpts.h
+  3395	11:00	locate midpts.H
+  3396	11:00	In /book/bei/Data/allmidpts.HH
+  3397	11:01	Grey gainpanel=a < /book/bei/Data/allmidpts.HH | Tube &
+  3398	20:57	cd /boo
+  3399	20:57	cd /book
+  3400	20:57	In gomdata.H
+  3401	20:57	Grey < gomdata.H | Tube &
+  3402	20:58	Grey gainpanel=a < allmidpts.HH | Tube &
+  3403	20:58	In wz.34.H
+  3404	20:58	Grey < wz.34.H | Tube &
+  3405	21:04	In /homes/sep/joseph29/courses/bei/labs/Lab4_fortran/wgkirch.H
+  3406	21:05	locate wgkirch.H
+  3407	21:05	In /sep/bob/oldClass/gp257/bei/chap5/krch/wgkirch90/wgkirch.H
+  3408	21:05	In /sep/bob/oldClass/bei/chap5/krch/wgkirch90/wgkirch.H
+  3409	21:53	du -sh /scr2/arustam/
+  3410	21:53	l /scr2/arustam/
+  3411	21:54	l -h /scr2/arustam/
+  3412	21:54	du -sh /scr2/joseph29
+  3413	21:55	df -h
+  3414	21:55	l /scr2/
+  3415	21:55	l /scr2/ettore/
+  3416	21:55	rm /scr2/joseph29/vel*
+  3417	21:56	l /scr2/joseph29/vel-pars*
+  3418	21:56	rm -f /scr2/joseph29/vel-pars*
+  3419	21:56	l /scr2/joseph29/
+  3420	21:56	l /scr2/joseph29/velmodels
+  3421	21:56	l /scr2/joseph29/velmodelshe
+  3422	21:56	l /scr2/joseph29/velmodels/headers/
+  3423	21:57	rm -rf /scr2/joseph29/velmodels/headers/
+  3424	9:16	jarvis
+  3425	9:16	storm
+  3426	13:25	ssh 192.168.106.2
+  3427	9:18	man MLM
+  3428	9:20	more ~/util/quotas
+  3429	9:21	du -sh cardamom_pzsum/
+  3430	9:21	du -sh scaas
+  3431	9:21	du -sh resfoc
+  3432	9:21	du -sh * | sort -hr | grep G
+  3433	9:21	cd resmigml/
+  3434	9:21	du -sh
+  3435	9:22	rm marmousi-2-vp.H*
+  3436	9:22	In example.H
+  3437	9:22	Grey < example.H | Tube &
+  3438	9:22	Rm example.H
+  3439	9:22	du -sh * | sort -hr | grep M
+  3440	9:23	rm GenWavelet.x
+  3441	9:23	rm ModelShots.x
+  3442	9:23	rm MigrateShots.x
+  3443	9:23	rm ModelDataWvlt.x
+  3444	9:23	rm laplacian-test.x grad_taper-test.x VelModelMask.x ZDerivative.x StoltResMigDefoc3d.x
+  3445	9:23	rm SynModelBuilder
+  3446	9:24	rm Stolt.x
+  3447	9:24	rm RStolt.x
+  3448	9:24	rm PostRStolt3d.x
+  3449	9:24	rm Wavelet.x
+  3450	9:24	cd doc/
+  3451	9:24	cd spring2020/
+  3452	9:25	Cgr < velfltmod0000.H | Tube &
+  3453	9:25	cd fig
+  3454	9:26	rm -f *.png
+  3455	9:26	cd focdat/
+  3456	9:26	cd fig/
+  3457	9:27	du -sh /sep/joseph29/
+  3458	9:28	torch
+  3459	9:28	cd /sep/
+  3460	9:28	du -sh joseph29
+  3461	9:30	cd elfpreds/
+  3462	9:30	cd elf
+  3463	9:30	cd reproduce/
+  3464	9:30	rmdir reproduce/
+  3465	9:30	view SConstruct
+  3466	9:31	cd mldat/
+  3467	9:31	du -sh pres
+  3468	9:31	du -sh SEP7.0/
+  3469	9:31	du -sh resmigmlrep/
+  3470	9:31	cd resmigmlrep/
+  3471	9:31	cd keep/
+  3472	9:31	cd Dat/
+  3473	9:32	duff trdat.h5 ../../trdat.h5
+  3474	9:32	diff trdat.h5 ../../trdat.h5
+  3475	9:32	du -sh ~joseph29
+  3476	9:33	quota -vsu
+  3477	9:33	cd joseph29/
+  3478	9:33	cd resfoc_bkp/
+  3479	9:33	mkdir focfigs
+  3480	9:33	eog .
+  3481	9:34	mv fig/* /sep/joseph29/resfoc_bkp/focfigs/
+  3482	9:37	rm fltclasswgt*
+  3483	9:37	rm vrtfltclasswgt5-gpu10ep. &
+  3484	9:37	rm vrtfltclasswgt5-gpu10ep*
+  3485	9:38	rm fltclass2.h5
+  3486	9:38	rm resfind-gpu10.json
+  3487	9:39	cd ml/
+  3488	9:39	rm fltclass-gpu40ep.h5
+  3489	9:42	rm fltclass*
+  3490	9:42	l -h
+  3491	9:43	sudo xfs_quota -x -c 'report -h' /homes | grep joseph28
+  3492	9:44	cd widb/
+  3493	9:44	make -B ./Bin/FWI_lf.x
+  3494	9:45	view Src/test/FullGNHessian.cpp
+  3495	9:46	view Src/test/FullGNHessian_fast.cpp
+  3496	9:47	cd .
+  3497	9:47	make -B ./Bin/FullGNHessian_fast.x
+  3498	9:48	l Bin/
+  3499	9:48	cd Bin/
+  3500	9:48	l Obj/
+  3501	9:48	rm -f Obj/*.o
+  3502	9:49	cd resfocs/
+  3503	9:49	cd resfoc_old
+  3504	9:49	cd dat/
+  3505	9:49	cd vels/
+  3506	9:49	rm -rf vels/
+  3507	9:49	In preds/preds.H
+  3508	9:49	Cgr gainpanel=a < preds/preds.H | Tube &
+  3509	9:50	l preds/
+  3510	9:50	cd preds/
+  3511	9:50	rmdir preds/
+  3512	9:50	cd networks/
+  3513	9:50	rm -f *
+  3514	9:50	rmdir networks/
+  3515	9:50	cd nnhistory/
+  3516	9:50	rmdir nnhistory/
+  3517	9:50	rm -rf nnhistory/
+  3518	9:50	l ptscat0/
+  3519	9:50	cd ptscat0/
+  3520	9:51	Rm *.H
+  3521	9:51	rmdir ptscat0/
+  3522	9:51	du -sh *
+  3523	9:51	cd pybind/
+  3524	9:51	rm -f velocity/
+  3525	9:51	rm -rf velocity/
+  3526	9:51	view kerasnets.py
+  3527	9:52	cd cluster/
+  3528	9:52	cd resfoc/
+  3529	9:53	rm -rf resfoc/
+  3530	9:53	l deeplearn/
+  3531	9:53	rm ConvAutoencoder.*
+  3532	9:53	cd keras-fit-generator
+  3533	9:53	cd deeplearn/
+  3534	9:53	rm -rf keras-fit-generator
+  3535	9:54	du -sh * | sort -hr
+  3536	9:54	du -sh * | sort -hr | less
+  3537	9:54	cd resfoc
+  3538	9:54	cd velocity/
+  3539	10:09	l focfigs/
+  3540	10:09	rm ../../trdat.h5
+  3541	10:09	diff vadat.h5 ../../vadat.h5
+  3542	10:29	rm ../../vadat.h5
+  3543	10:29	diff tsdat.h5 ../../tsdat.h5
+  3544	11:50	groups pradhan
+  3545	11:50	cd /homes/them/
+  3546	11:50	cd class/
+  3547	11:50	l pradhan1/
+  3548	11:50	groups pradhan1/
+  3549	11:51	view /etc/passwd
+  3550	11:52	view ~/util/createuser
+  3551	11:52	sudo usermod -a -G sep pradhan1
+  3552	11:52	sudo quota -vsu pradhan1
+  3553	11:53	more ~/util/createuser
+  3554	11:53	cd /var/yp/
+  3555	11:53	sudo make
+  3556	11:53	oas
+  3557	11:53	groups pradhan1
+  3558	17:09	fantasti
+  3559	17:09	top -c
+  3560	17:09	sfsrmig3
+  3562	17:10	sfin < stra.rsf
+  3563	17:12	vi stra.rsf
+  3564	17:13	vi rtra.rsf
+  3565	17:13	vi slow.rsf
+  3566	17:13	sfin slow.rsf
+  3567	17:14	Cgr < slow.rsf | Tube &
+  3568	17:14	Window n2=1 f2=0 < slow.rsf | Cgr | Tube &
+  3569	17:14	Window n2=1 f2=0 < slow.rsf | Transp | Cgr | Tube &
+  3570	17:17	vi ~/.cshrc
+  3571	17:17	setenv OMP_NUM_THREADS 24
+  3572	17:17	echo $OMP_NUM_THREADS
+  3573	17:17	< stra.rsf sfsrmig3 nrmax=20 dtmax=5e-05 eps=0.01 verb=y ompnth=24 tmx=16 rwf=rtra.rsf slo=slow.rsf itype=o cig=/dev/null > img.rsf
+  3574	17:18	< stra.rsf sfsrmig3 nrmax=20 dtmax=5e-05 eps=0.01 verb=y ompnth=4 tmx=16 rwf=rtra.rsf slo=slow.rsf itype=o cig=/dev/null > img.rsf
+  3575	20:24	sfin < img.rsf
+  3576	20:24	Window n2=1 f2=0 < img.rsf | Transp | Grey | Tube &
+  3577	20:39	Attr < img.rsf
+  3578	20:39	Attr < mysigimgwind.H
+  3579	12:18	mazama
+  3580	14:03	cd /book/
+  3581	14:03	cd Data/
+  3582	14:18	Grey < WGstack.H | Tube &
+  3583	14:19	In WGshot.H
+  3584	14:22	more xukai_readme
+  3585	14:22	less xukai_readme
+  3586	14:24	ls -lrt
+  3587	14:24	find . -iname 'allmidpts.HH'
+  3588	14:25	cd ./book/bei/allmidpts.HH
+  3589	14:25	cd ./book/bei/
+  3590	14:25	Window f1=500 n1=1 < allmidpts.HH | Grey | Tube &
+  3591	14:26	In allmidpts.HH
+  3592	14:37	l /tmp/
+  3593	14:38	mv /tmp/img.rsf@ /scr2/joseph29/savaimg.rsf@
+  3594	15:01	sudo xfs_quota -x -c 'report -h' /homes
+  3595	15:02	sudo xfs_quota -x -c 'report -h' /homes | grep josephj29
+  3596	15:16	vi bwi_search_mod.f90
+  3597	15:17	l -a
+  3598	15:18	rm .bwi_wfdexp_mod.f90.swp
+  3599	15:18	rm -rf yaxun_weo/
+  3600	15:21	view bwi_kernel_mod.f90
+  3601	15:30	vi bwi_wfdexp_mod.f90
+  3602	15:31	view bwi_ssrepi_mod.f90
+  3603	15:33	view bwi_extrpl_mod.f90
+  3604	0:36	fantatic
+  3605	0:37	cp -r /opt/RSF/madagascar-1.7/book/gallery/sigsbee/oway/ .
+  3606	0:37	cd oway/
+  3607	0:37	scons
+  3608	0:44	sfin rtra.rsf
+  3609	0:44	sfwindow n4=2 < rtra.rsf > rtrawind.rsf
+  3610	0:44	sfwindow n4=2 < stra.rsf > strawind.rsf
+  3611	0:44	sfin strawind.rsf
+  3612	0:45	< rtrawind.rsf /opt/RSF/RSF1.7/bin/sftransp plane=12 | /opt/RSF/RSF1.7/bin/sftransp plane=23 > rtrawindt.rsf
+  3613	0:45	sfin rwav.rsf
+  3614	0:46	sfspray
+  3615	0:46	sfin < rtrawind.rsf
+  3616	0:47	sftransp plane=34 < rtrawind.rsf | sftransp plane=23 > rtrawindt.rsf
+  3617	0:47	sfin rtrawindt.rsf
+  3618	0:47	sfin < rtra.rsf
+  3619	0:47	sftransp plane=34 < strawind.rsf | sftransp plane=23 > strawindt.rsf
+  3620	0:47	sfin strawindt.rsf
+  3621	0:48	< strawind.rsf /opt/RSF/RSF1.7/bin/sfsrmig3 nrmax=20 dtmax=5e-05 eps=0.01 --readwrite=y verb=y ompnth=4 tmx=16 rwf=rtrawind.rsf slo=slow.rsf cig=cig.rsf itype=o > img.rsf
+  3622	0:49	< strawindt.rsf /opt/RSF/RSF1.7/bin/sfsrmig3 nrmax=20 dtmax=5e-05 eps=0.01 --readwrite=y verb=y ompnth=4 tmx=16 rwf=rtrawindt.rsf slo=slow.rsf cig=cig.rsf itype=o > img.rsf
+  3623	0:49	< strawindt.rsf /opt/RSF/RSF1.7/bin/sfsrmig3 nrmax=20 dtmax=5e-05 eps=0.01 --readwrite=y verb=y ompnth=1 tmx=16 rwf=rtrawindt.rsf slo=slow.rsf cig=cig.rsf itype=o > img.rsf
+  3624	1:17	k
+  3625	1:17	In img.rsf
+  3626	9:22	Window n2=1 < img.rsf | Transp | Grey | Tube &
+  3627	9:25	view bwi-img_dptest.f90
+  3628	9:26	view bwi-wem3d.f90
+  3629	10:31	vi bwi_extrpl_mod.f90
+  3630	10:32	vi bwi_ssrepi_mod.f90
+  3631	10:33	cd bwi
+  3632	10:33	make -B
+  3633	10:36	locate libm
+  3634	10:37	locate libm.so
+  3635	10:40	ifort -fast -static ../../obj/bwi_struct_mod.o ../../obj/bwi_wnbmap_mod.o ../../obj/bwi_kernel_Zh_mod.o ../../obj/bwi_fftwv3_mod.o ../../obj/bwi_hescpt_mod.o ../../obj/bwi_wfdexp_mod.o ../../obj/bwi_glocal_mod.o ../../obj/base_velgrd_mod.o ../../obj/base_ioutil_mod.o ../../obj/bwi_report_mod.o ../../obj/base_outgrd_mod.o ../../obj/bwi_velref_mod.o ../../obj/base_spline_mod.o ../../obj/base_fftwfl_mod.o ../../obj/bwi_imgcon_mod.o ../../obj/base_blkcal_mod.o ../../obj/bwi_fileio_mod.o ../../obj/base_fftwv3_mod.o ../../obj/bwi_rdmgen_mod.o ../../obj/base_window_mod.o ../../obj/base_progrd_mod.o ../../obj/bwi_histos_mod.o ../../obj/bwi_extrpl_mod.o ../../obj/bwi_bornsc_mod.o ../../obj/bwi_sbcond_mod.o ../../obj/bwi_tapers_mod.o ../../obj/bwi_ssrepi_mod.o ../../obj/base_struct_mod.o ../../obj/bwi-wem3d-Zh.o -L/opt/SEP/SEP7.0/lib -L/usr/lib64 ../../lib/sepwindow.o -lsupersetf90 -lsepgeef90 -lsuperset -lsepauxf90 -lsepmathf90 -lsep2df90 -lsep3df90 -lsep3d -lsepf90 -lsep -openmp -lsvml -L/opt/FFTW/lib -lfftw3f -lsep3df90 -lsep3d -lsepf90 -lsep -Vaxlib -lm
+  3636	10:41	ifort -fast ../../obj/bwi_struct_mod.o ../../obj/bwi_wnbmap_mod.o ../../obj/bwi_kernel_Zh_mod.o ../../obj/bwi_fftwv3_mod.o ../../obj/bwi_hescpt_mod.o ../../obj/bwi_wfdexp_mod.o ../../obj/bwi_glocal_mod.o ../../obj/base_velgrd_mod.o ../../obj/base_ioutil_mod.o ../../obj/bwi_report_mod.o ../../obj/base_outgrd_mod.o ../../obj/bwi_velref_mod.o ../../obj/base_spline_mod.o ../../obj/base_fftwfl_mod.o ../../obj/bwi_imgcon_mod.o ../../obj/base_blkcal_mod.o ../../obj/bwi_fileio_mod.o ../../obj/base_fftwv3_mod.o ../../obj/bwi_rdmgen_mod.o ../../obj/base_window_mod.o ../../obj/base_progrd_mod.o ../../obj/bwi_histos_mod.o ../../obj/bwi_extrpl_mod.o ../../obj/bwi_bornsc_mod.o ../../obj/bwi_sbcond_mod.o ../../obj/bwi_tapers_mod.o ../../obj/bwi_ssrepi_mod.o ../../obj/base_struct_mod.o ../../obj/bwi-wem3d-Zh.o -L/opt/SEP/SEP7.0/lib -L/usr/lib64 ../../lib/sepwindow.o -lsupersetf90 -lsepgeef90 -lsuperset -lsepauxf90 -lsepmathf90 -lsep2df90 -lsep3df90 -lsep3d -lsepf90 -lsep -openmp -lsvml -L/opt/FFTW/lib -lfftw3f -lsep3df90 -lsep3d -lsepf90 -lsep -Vaxlib
+  3637	10:42	ifort -fast ../../obj/bwi_struct_mod.o ../../obj/bwi_wnbmap_mod.o ../../obj/bwi_kernel_Zh_mod.o ../../obj/bwi_fftwv3_mod.o ../../obj/bwi_hescpt_mod.o ../../obj/bwi_wfdexp_mod.o ../../obj/bwi_glocal_mod.o ../../obj/base_velgrd_mod.o ../../obj/base_ioutil_mod.o ../../obj/bwi_report_mod.o ../../obj/base_outgrd_mod.o ../../obj/bwi_velref_mod.o ../../obj/base_spline_mod.o ../../obj/base_fftwfl_mod.o ../../obj/bwi_imgcon_mod.o ../../obj/base_blkcal_mod.o ../../obj/bwi_fileio_mod.o ../../obj/base_fftwv3_mod.o ../../obj/bwi_rdmgen_mod.o ../../obj/base_window_mod.o ../../obj/base_progrd_mod.o ../../obj/bwi_histos_mod.o ../../obj/bwi_extrpl_mod.o ../../obj/bwi_bornsc_mod.o ../../obj/bwi_sbcond_mod.o ../../obj/bwi_tapers_mod.o ../../obj/bwi_ssrepi_mod.o ../../obj/base_struct_mod.o ../../obj/bwi-wem3d-Zh.o -L/opt/SEP/SEP7.0/lib -L/usr/lib ../../lib/sepwindow.o -lsupersetf90 -lsepgeef90 -lsuperset -lsepauxf90 -lsepmathf90 -lsep2df90 -lsep3df90 -lsep3d -lsepf90 -lsep -openmp -lsvml -L/opt/FFTW/lib -lfftw3f -lsep3df90 -lsep3d -lsepf90 -lsep -Vaxlib
+  3638	10:42	ifort -fast ../../obj/bwi_struct_mod.o ../../obj/bwi_wnbmap_mod.o ../../obj/bwi_kernel_Zh_mod.o ../../obj/bwi_fftwv3_mod.o ../../obj/bwi_hescpt_mod.o ../../obj/bwi_wfdexp_mod.o ../../obj/bwi_glocal_mod.o ../../obj/base_velgrd_mod.o ../../obj/base_ioutil_mod.o ../../obj/bwi_report_mod.o ../../obj/base_outgrd_mod.o ../../obj/bwi_velref_mod.o ../../obj/base_spline_mod.o ../../obj/base_fftwfl_mod.o ../../obj/bwi_imgcon_mod.o ../../obj/base_blkcal_mod.o ../../obj/bwi_fileio_mod.o ../../obj/base_fftwv3_mod.o ../../obj/bwi_rdmgen_mod.o ../../obj/base_window_mod.o ../../obj/base_progrd_mod.o ../../obj/bwi_histos_mod.o ../../obj/bwi_extrpl_mod.o ../../obj/bwi_bornsc_mod.o ../../obj/bwi_sbcond_mod.o ../../obj/bwi_tapers_mod.o ../../obj/bwi_ssrepi_mod.o ../../obj/base_struct_mod.o ../../obj/bwi-wem3d-Zh.o -L/opt/SEP/SEP7.0/lib -L/usr/lib ../../lib/sepwindow.o -lsupersetf90 -lsepgeef90 -lsuperset -lsepauxf90 -lsepmathf90 -lsep2df90 -lsep3df90 -lsep3d -lsepf90 -lsep -openmp -lsvml -L/opt/FFTW/lib -lfftw3f -lsep3df90 -lsep3d -lsepf90 -lsep -Vaxlib -lm
+  3639	10:42	ifort ../../obj/bwi_struct_mod.o ../../obj/bwi_wnbmap_mod.o ../../obj/bwi_kernel_Zh_mod.o ../../obj/bwi_fftwv3_mod.o ../../obj/bwi_hescpt_mod.o ../../obj/bwi_wfdexp_mod.o ../../obj/bwi_glocal_mod.o ../../obj/base_velgrd_mod.o ../../obj/base_ioutil_mod.o ../../obj/bwi_report_mod.o ../../obj/base_outgrd_mod.o ../../obj/bwi_velref_mod.o ../../obj/base_spline_mod.o ../../obj/base_fftwfl_mod.o ../../obj/bwi_imgcon_mod.o ../../obj/base_blkcal_mod.o ../../obj/bwi_fileio_mod.o ../../obj/base_fftwv3_mod.o ../../obj/bwi_rdmgen_mod.o ../../obj/base_window_mod.o ../../obj/base_progrd_mod.o ../../obj/bwi_histos_mod.o ../../obj/bwi_extrpl_mod.o ../../obj/bwi_bornsc_mod.o ../../obj/bwi_sbcond_mod.o ../../obj/bwi_tapers_mod.o ../../obj/bwi_ssrepi_mod.o ../../obj/base_struct_mod.o ../../obj/bwi-wem3d-Zh.o -L/opt/SEP/SEP7.0/lib -L/usr/lib ../../lib/sepwindow.o -lsupersetf90 -lsepgeef90 -lsuperset -lsepauxf90 -lsepmathf90 -lsep2df90 -lsep3df90 -lsep3d -lsepf90 -lsep -openmp -lsvml -L/opt/FFTW/lib -lfftw3f -lsep3df90 -lsep3d -lsepf90 -lsep -Vaxlib -lm
+  3640	10:43	vi Makefile
+  3641	10:43	make
+  3642	10:46	l bin/
+  3643	10:46	rm bwi-wem3d.x
+  3644	10:48	cd /report/
+  3645	10:49	cd sep140/
+  3646	11:09	view junk1.bwi.sigsb2c.csou.H
+  3647	11:10	view junk2.bwi.sigsb2c.csou.H
+  3648	11:10	cd scratch/
+  3649	11:11	cd sep141/
+  3650	11:11	cd sep142/
+  3651	11:11	cd yang1/
+  3652	11:11	cd yaxun1/
+  3653	11:12	grep -r 'bwi-wem3d' *
+  3654	11:31	grep -r 'bwi-wem3d' * > ~/wem3dexes
+  3655	11:43	tail -f wem3dexes
+  3656	11:54	l *lloyd*
+  3657	11:54	grep -r 'lloyd' *
+  3658	11:57	vi wem3dexes
+  3659	11:57	cd sep144/
+  3660	11:57	view tpg.tex
+  3661	11:59	cd utils/
+  3662	12:00	find . -iname 'fftw_transf.x'
+  3663	12:00	./bin/fftw_transf.x
+  3664	12:00	find . -iname 'fftw_trans'
+  3665	12:00	find . -iname 'fftw_trans*'
+  3666	12:00	view cd source/
+  3667	12:00	cd fftw_transf/
+  3668	12:01	cd fwi/
+  3669	12:01	cd src/
+  3670	12:01	view fftw_transf.f90
+  3671	12:01	cd chap1/
+  3672	12:01	view Ma
+  3673	12:02	Hwt2d
+  3674	12:03	view ../DEFmakefile
+  3675	12:12	view Makefile
+  3676	12:12	mv wem3dexes yaxun_weo/
+  3677	12:12	cd yaxun_weo/
+  3678	12:12	cd source/
+  3679	12:12	cd bin/
+  3680	12:13	./bwi-wem3d.x
+  3681	18:37	kcdsudo
+  3682	18:37	sudo xfs_quota -x -c 'report -h' /homes | grep joseph29
+  3683	18:38	mv yaxun_weo/ ~/projects/
+  3684	18:38	mv oway/ ~/projects/
+  3685	18:38	cd projects/oway/
+  3686	19:45	cd /etc/passwd
+  3687	19:45	cd /etc/
+  3688	19:45	l passwd
+  3689	12:54	vi shots.HH
+  3690	10:04	ssh root@friday
+  3691	10:04	sudo journalctl -xfe
+  3692	10:05	sudo journalctl -u nfs
+  3693	10:05	systemctl
+  3694	10:06	systemctl status nfs-server.service
+  3695	10:07	sudo journalctl nfs-server
+  3696	10:07	sudo journalctl -u nfs-server
+  3697	10:07	l util/
+  3698	10:07	more util/sudo
+  3699	10:07	sudo journalctl _COMM=sudo
+  3700	10:07	su
+  3701	10:08	sudo journalctl -u nfs-server.service
+  3702	10:10	ssh -vvv friday
+  3703	10:11	ssh friday
+  3704	10:11	last | less
+  3705	10:11	exitr
+  3706	18:21	locate marmrefl.hh
+  3707	18:21	cd /data1
+  3708	18:21	w
+  3709	18:21	cd /data1/
+  3710	18:21	cd marmousi
+  3711	18:22	In marmousi.H
+  3712	18:22	l marm.sgy
+  3713	18:22	surange < marm.su
+  3714	18:22	suximage perc=99 < marm.su
+  3715	17:10	thing
+  3716	17:10	cd /data
+  3717	17:10	cd oldq2/
+  3718	17:10	cd wz/
+  3719	17:10	cd data
+  3720	17:12	l /homes/sep/prof/bei/Data/allmidpts.HH
+  3721	17:12	In /homes/sep/prof/bei/Data/shots.HH
+  3722	17:13	In /homes/sep/prof/bei/Data/midpts.HH
+  3723	17:13	In /homes/sep/prof/bei/Data/allmidpts.HH
+  3724	13:05	cd /data/oldq2/
+  3725	13:05	cd dataset/
+  3726	13:06	l WGcdp.H
+  3727	13:06	In WGcdp.H
+  3728	13:06	locate WGcdp5.segy
+  3729	13:06	more README
+  3730	13:07	cd ebook/
+  3732	13:07	cd sepdatalib/
+  3733	13:07	cd bei/
+  3734	13:07	view paper.tex
+  3735	16:29	locate shots.HH
+  3736	16:29	In /share2/eraseLATER/guest/guest/daniel/bei/shots.HH
+  3737	16:29	In /sep/jon/beidata/shots.HH
+  3738	16:29	locate WGcdp5_shots.HH
+  3739	16:30	locate classdata
+  3740	16:31	locate preshots.HH
+  3741	16:32	locate WG*
+  3742	16:32	locate *WG*
+  3743	16:32	locate *wg*
+  3744	22:09	cd .ssh/
+  3745	22:09	vi config
+  3746	22:26	cd
+  3747	22:26	cd projects/
+  3748	22:26	cd scaas
+  3749	22:26	cd bench/
+  3750	22:26	vi scripts2/dask-example.py
+  3751	22:35	glances --theme-white
+  3752	21:09	fantastic
+  3753	21:09	conda activate py37
+  3756	9:44	exit
+  3759	10:19	cd projects/resfoc/bench/hale/
+  3760	10:19	Sep_cube spimgbobangsep.H
+  3762	10:19	In spimgbobangsep.H
+  3763	10:19	Window n3=1 < spimgbobangsep.H > spimgbobangsepwin.H
+  3764	10:19	In spimgbobangsepwin.H
+  3765	10:19	Sep_cube spimgbobangsepwin.H &
+  3766	12:31	Sep_cube spimgbobangsepwin.H & l
+  3768	12:32	bash
+  3772	9:24	cd sigsbee/
+  3775	9:25	Rm sigsbee_veloverw2slo.H
+  3778	9:27	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=130 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3779	9:35	sfwindow f2=5 < sig-rays.rsf
+  3780	9:35	62 ; c62 ; c
+  3781	9:37	sfgraph < sig-rays.rsf transp=y yreverse=y plotcol=1 wantaxis=n > sig-rays.vpl
+  3782	9:37	which sfpen
+  3783	9:37	which sfrays2
+  3787	9:38	sfin sig-rays.vpl
+  3788	9:38	sfin sig-rays.rsf
+  3792	9:40	sfrays2 < sigsbee_vel.H dt=0.01 yshot=12 nt=130 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3795	9:41	Cgr < sigsbee_vel.H | Tube &
+  3796	9:41	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=260 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3799	9:41	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=500 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3802	9:43	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=1000 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3806	9:45	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=600 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-rays.rsf
+  3807	9:45	sfgraph < sig-rays.rsf transp=y yreverse=y plotcol=1 title=' ' > sig-rays.vpl
+  3809	9:47	sfrays2 < sigsbee_veloverw.H dt=0.01 yshot=5 nt=600 nr=201 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-raysoverw.rsf
+  3811	9:47	/opt/RSF/RSF1.7/bin/sfpen sig-rays.vpl
+  3814	9:48	sfrays2 < sigsbee_veloverw.H dt=0.01 yshot=5 nt=600 nr=401 a0=130 amax=230 zshot=0 sym=n | sfreverse which=2 > sig-raysoverw.rsf
+  3815	9:48	sfgraph < sig-raysoverw.rsf transp=y yreverse=y plotcol=1 title=' ' > sig-raysoverw.vpl
+  3816	9:48	/opt/RSF/RSF1.7/bin/sfpen sig-raysoverw.vpl
+  3817	10:28	sfreverse
+  3818	13:18	sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=600 nr=401 a0=130 amax=230 sym=n shotfile=srcxzcoords.H | sfreverse which=2 > sig-raysallshots.rsf
+  3820	13:25	In sig-raysallshots.rsf
+  3822	13:26	sfwindow n3=1 f3=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3823	13:27	sfwindow n3=1 f3=0 f2=5 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3824	13:27	sfwindow n3=1 f3=0 f2=20 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3826	13:27	sfwindow n3=1 f3=0 j2=1 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3828	13:27	sfwindow n3=1 f3=0 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3829	13:28	sfwindow n3=1 f3=20 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3831	13:28	sfwindow n3=1 f3=40 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3832	13:28	sfwindow n3=1 f3=50 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3833	13:28	sfwindow n3=1 f3=60 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3834	13:28	sfwindow n3=1 f3=70 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3835	13:28	sfwindow n3=1 f3=80 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3836	13:28	sfwindow n3=1 f3=90 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3837	13:28	sfwindow n3=1 f3=100 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3838	13:29	sfwindow n3=1 f3=200 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3839	13:29	sfwindow n3=1 f3=300 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3840	13:29	sfwindow n3=1 f3=400 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3841	13:29	sfwindow n3=1 f3=500 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3843	14:12	sfin sig-raysallshots.rsf
+  3844	14:13	sfwindow n3=1 f3=499 n2=1 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3845	14:13	sfwindow n3=1 f3=499 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3846	14:13	sfwindow n3=1 f3=30 j2=2 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3848	14:13	sfwindow n3=1 f3=30 n2=1 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3849	14:13	sfwindow n3=1 f3=30 n2=2 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3850	14:14	sfwindow n3=1 f3=30 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3853	14:14	sfwindow n3=1 f3=30 n2=20 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3854	14:14	sfwindow n3=1 f3=30 n2=100 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3855	14:15	sfwindow n3=1 f3=30 n2=399 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' | /opt/RSF/RSF1.7/bin/sfpen
+  3857	14:15	sfwindow n3=1 f3=30 n2=399 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.1 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3858	14:15	sfwindow n3=1 f3=30 n2=399 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3859	14:16	sfwindow n3=1 f3=30 n2=1 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3860	14:16	sfwindow n3=1 f3=30 n2=10 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3861	14:16	sfwindow n3=1 f3=30 n2=50 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3862	14:16	sfwindow n3=1 f3=30 n2=100 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3863	14:16	sfwindow n3=1 f3=30 n2=200 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3864	14:16	sfwindow n3=1 f3=30 n2=300 f2=0 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3865	17:43	sfrays3
+  3866	17:43	sfrays2
+  3867	17:46	sfrays2a
+  3868	19:01	sfplotrays
+  3869	19:02	sfwindow n3=1 f3=30 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen
+  3870	19:02	bg
+  3871	19:02	sfwindow n3=1 f3=60 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen &
+  3872	19:02	sfwindow n3=1 f3=200 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max2=14 min2=3 max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen &
+  3873	19:03	sfwindow n3=1 f3=200 < sig-raysallshots.rsf | sfgraph transp=y yreverse=y plotcol=1 title=' ' max1=9.5 min1=0 | /opt/RSF/RSF1.7/bin/sfpen &
+  3875	23:45	git status
+  3876	23:45	git diff ../../utils/plot.py
+  3877	23:45	cd ..
+  3878	23:45	l
+  3879	9:38	h > sigsbee/rayscmds.txt
