@@ -27,6 +27,12 @@ def shutdown_sshcluster(hosts):
       remkill = """ ssh -n -f %s "sh -c \\"pkill -f \\"distributed.cli.dask_\\"\\"" """%(hname)
       subprocess.check_call(remkill,shell=True)
 
+def clean_slurm(path="."):
+  """
+  Cleans all of the slurm files generated from cluster submissions
+  """
+  subprocess.check_call('rm -f %s/slurm*.out'%(path),shell=True)
+
 def check_kill_process(pstring):
   """ Kills a process given a string """
   for line in os.popen("ps ax | grep " + pstring + " | grep -v grep"): 
