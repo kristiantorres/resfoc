@@ -6,7 +6,7 @@ and viewing frames of a numpy array
 """
 import os
 import inpout.seppy as seppy
-from utils.ptyprint import create_inttag, progressbar
+from genutils.ptyprint import create_inttag, progressbar
 import numpy as np
 import matplotlib.pyplot as plt
 
