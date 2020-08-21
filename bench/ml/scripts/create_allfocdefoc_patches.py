@@ -8,12 +8,12 @@ import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import glob
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from resfoc.gain import agc
 from deeplearn.utils import plotseglabel, normextract
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from utils.plot import plot_imgpang, plot_allanggats
+from genutils.plot import plot_imgpang, plot_allanggats
 import matplotlib.pyplot as plt
 
 # Parse the config file

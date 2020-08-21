@@ -8,12 +8,12 @@ import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import glob
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from resfoc.gain import agc
 from deeplearn.focuslabels import extract_defocpatches
 from deeplearn.utils import plotseglabel
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 import matplotlib.pyplot as plt
 
 # Parse the config file

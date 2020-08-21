@@ -11,7 +11,7 @@ from deeplearn.utils import resample
 from scipy.ndimage import gaussian_filter
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

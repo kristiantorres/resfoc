@@ -7,9 +7,9 @@ import resfoc.depth2time as d2t
 from resfoc.gain import agc
 from resfoc.ssim import ssim,cwssim
 from skimage.measure import compare_ssim
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 import matplotlib.pyplot as plt
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 from scipy.signal.signaltools import correlate2d
 
 def pmetpptch(img,tgt,show=False):

@@ -9,7 +9,7 @@ import sys, os, argparse, configparser
 import inpout.seppy as seppy
 import glob
 import h5py
-from utils.ptyprint import progressbar, create_inttag
+from genutils.ptyprint import progressbar, create_inttag
 import numpy as np
 from resfoc.gain import agc
 from deeplearn.faultlabels import faultseg_labels

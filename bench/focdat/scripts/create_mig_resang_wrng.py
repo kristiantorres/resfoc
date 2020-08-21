@@ -14,7 +14,7 @@ from scaas.velocity import create_randomptb_loc, create_randomptbs_loc
 from scaas.wavelet import ricker
 from resfoc.gain import agc,tpow
 from resfoc.resmig import preresmig,get_rho_axis
-from utils.ptyprint import create_inttag
+from genutils.ptyprint import create_inttag
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)

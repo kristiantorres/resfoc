@@ -13,8 +13,8 @@ from scaas.velocity import create_randomptbs_loc
 from scaas.trismooth import smooth
 import scaas.defaultgeom as geom
 from scaas.wavelet import ricker
-from utils.signal import ampspec2d
-from utils.movie import viewimgframeskey
+from genutils.signal import ampspec2d
+from genutils.movie import viewimgframeskey
 
 # Parse the config file
 conf_parser = argparse.ArgumentParser(add_help=False)
