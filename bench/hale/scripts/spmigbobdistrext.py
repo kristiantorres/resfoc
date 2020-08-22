@@ -11,7 +11,7 @@ sep = seppy.sep()
 
 # Start workers
 hosts = ['fantastic','storm', 'thing']
-cfile = "/homes/sep/joseph29/projects/scaas/oway/imagesshworker.py"
+cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworker.py"
 launch_sshworkers(cfile,hosts=hosts,sleep=1,verb=1,clean=False)
 
 # Read in data
