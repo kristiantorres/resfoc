@@ -2,15 +2,14 @@ import inpout.seppy as seppy
 import numpy as np
 import zmq
 from oway.imagechunkr import imagechunkr
-from server.distribute import dstr_collect, dstr_sum
+from server.distribute import dstr_sum
 from client.sshworkers import launch_sshworkers, kill_sshworkers
-import matplotlib.pyplot as plt
 
 # IO
 sep = seppy.sep()
 
 # Start workers
-hosts = ['fantastic','storm','vision','torch', 'thing']
+hosts = ['fantastic','storm','vision','torch', 'thing', 'thanos', 'friday']
 cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworker.py"
 launch_sshworkers(cfile,hosts=hosts,sleep=1,verb=1,clean=False)
 

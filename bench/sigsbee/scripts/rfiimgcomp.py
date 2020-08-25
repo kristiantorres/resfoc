@@ -1,6 +1,6 @@
 import inpout.seppy as seppy
 import numpy as np
-from utils.movie import viewimgframeskey
+from genutils.movie import viewimgframeskey
 
 sep = seppy.sep()
 
@@ -13,9 +13,15 @@ stk = stk.reshape(saxes.n,order='F')
 raxes,rfi = sep.read_file("sigrfi.H")
 rfi = rfi.reshape(raxes.n,order='F')
 
-comb = np.zeros([2,nz,nx],dtype='float32')
-comb[0] = stk; comb[1] = rfi
+# Correct image
+taxes,tru = sep.read_file("sigsbeeresmsktstkro1.H")
+tru = tru.reshape(taxes.n,order='F')
+# Window image
+truw = tru[240:1150,20:480]
+
+comb = np.zeros([3,nz,nx],dtype='float32')
+comb[0] = stk; comb[1] = rfi; comb[2] = truw
 
 viewimgframeskey(comb,interp='bilinear',transp=False,xmin=ox,xmax=ox+nx*dx,
-                 zmin=oz,zmax=oz+nz*dz,pclip=0.5)
+                 zmin=oz,zmax=oz+nz*dz,pclip=0.1)
 

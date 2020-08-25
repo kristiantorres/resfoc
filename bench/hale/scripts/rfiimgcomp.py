@@ -5,7 +5,7 @@ from genutils.movie import viewimgframeskey
 sep = seppy.sep()
 
 # Defocused stack
-saxes,stk = sep.read_file("halerfi.H")
+saxes,stk = sep.read_file("halestkdistr.H")
 [nz,nx] = saxes.n; [dz,dx] = saxes.d; [oz,ox] = saxes.o
 stk = stk.reshape(saxes.n,order='F')
 

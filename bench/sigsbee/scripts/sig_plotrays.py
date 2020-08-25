@@ -1,7 +1,7 @@
 import inpout.seppy as seppy
 import numpy as np
 from deeplearn.utils import resample
-from utils.plot import plot_imgvelptb
+from genutils.plot import plot_imgvelptb
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()
@@ -50,24 +50,24 @@ ax.set_ylabel('Z (km)',fontsize=fsize)
 plt.close()
 
 # Plot perturbation on reflectivity
-plot_imgvelptb(imgre,ptb,dz*1000,dx*1000,velmin=-100,velmax=100,thresh=thresh,aagc=False,
-               imin=pclip*imin,imax=pclip*imax,figname="./fig/sigvelptb.png",hbar=0.5,barz=0.25)
+plot_imgvelptb(imgre,ptb,dz,dx,velmin=-100,velmax=100,thresh=thresh,aagc=False,
+               imin=pclip*imin,imax=pclip*imax,figname="./fig/sigvelptb.png",hbar=0.5,barz=0.25,xmin=ox,xmax=(ox+nx*dx))
 
-jsx = 10
-for isx in range(0,nsx,jsx):
-  fig = plt.figure(figsize=(14,7)); ax = fig.gca()
-  ax.imshow(vel,cmap='jet',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0])
-  ax.imshow(img,cmap='gray',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
-             vmin=pclip*imin,vmax=pclip*imax,alpha=0.5)
-  ax.imshow(mask1,cmap='seismic',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
-             vmin=-100,vmax=100,alpha=0.3)
-  ax.imshow(mask2,cmap='seismic',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
-             vmin=-100,vmax=100,alpha=0.3)
-  ax.plot(raysxtj[isx,:,:],raysztj[isx,:,:],color='m')
-  ax.set_xlabel('X (km)',fontsize=fsize)
-  ax.set_ylabel('Z (km)',fontsize=fsize)
-  ax.tick_params(labelsize=fsize)
-  plt.savefig('./fig/rays/sigrays%d.png'%(isx),dpi=150,transparent=True,bbox_inches='tight')
-  plt.close()
-  #plt.show()
+#jsx = 10
+#for isx in range(0,nsx,jsx):
+#  fig = plt.figure(figsize=(14,7)); ax = fig.gca()
+#  ax.imshow(vel,cmap='jet',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0])
+#  ax.imshow(img,cmap='gray',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
+#             vmin=pclip*imin,vmax=pclip*imax,alpha=0.5)
+#  ax.imshow(mask1,cmap='seismic',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
+#             vmin=-100,vmax=100,alpha=0.3)
+#  ax.imshow(mask2,cmap='seismic',interpolation='bilinear',extent=[ox,ox+nx*dx,nz*dz,0],
+#             vmin=-100,vmax=100,alpha=0.3)
+#  ax.plot(raysxtj[isx,:,:],raysztj[isx,:,:],color='m')
+#  ax.set_xlabel('X (km)',fontsize=fsize)
+#  ax.set_ylabel('Z (km)',fontsize=fsize)
+#  ax.tick_params(labelsize=fsize)
+#  plt.savefig('./fig/rays/sigrays%d.png'%(isx),dpi=150,transparent=True,bbox_inches='tight')
+#  plt.close()
+#  #plt.show()
 

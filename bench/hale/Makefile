@@ -62,6 +62,28 @@ ascn.H: amute.H
 	sfvscan < $< semblance=y v0=1.4 nv=51 dv=0.025 > $@ \
 		datapath=${XPATH}
 
+# Mute the velocity scan
+ascnmute.H: ascn.H
+	sfmutter x0=1.5 v0=0.67 half=n < $< > $@ \
+		datapath=${XPATH}
+
+# Pick the velocities
+arms.H: ascnmute.H
+	sfpick rect1=40 rect2=7 < $< > $@ \
+		datapath=${XPATH}
+
+# NMO correction
+anmo.H: arms.H amute.H
+	sfnmo velocity=$< < amute.H > $@ datapath=${XPATH}
+
+# FX-decon
+afxd.H: anmo.H
+	Fx2d < $< > $@ datapath=${XPATH}
+
+# Inverse NMO
+aden.H: afxd.H
+	sfinmo velocity=arms.H < $<  > $@ datapath=${XPATH}
+
 ###=========================
 ### Process odd midpoints
 ###=========================
@@ -83,6 +105,28 @@ bscn.H: bmute.H
 	sfvscan < $< semblance=y v0=1.4 nv=51 dv=0.025 > $@ \
 		datapath=${XPATH}
 
+# Mute the velocity scan
+bscnmute.H: bscn.H
+	sfmutter x0=1.5 v0=0.67 half=n < $< > $@ \
+		datapath=${XPATH}
+
+# Pick the velocities
+brms.H: bscnmute.H
+	sfpick rect1=40 rect2=7 < $< > $@ \
+		datapath=${XPATH}
+
+# NMO correction
+bnmo.H: brms.H bmute.H
+	sfnmo velocity=$< < bmute.H > $@ datapath=${XPATH}
+
+# FX-decon
+bfxd.H: bnmo.H
+	Fx2d < $< > $@ datapath=${XPATH}
+
+# Inverse NMO
+bden.H: bfxd.H
+	sfinmo velocity=brms.H < $< > $@ datapath=${XPATH}
+
 ###============================
 ### Combine for Dix inversion
 ###============================
@@ -102,12 +146,17 @@ vintzcomb.H: vinttcomb.H
 ### Convert to shots
 ###==========================
 
-threeD.H:  ./dat/allmidpts.HH
-	Window3d < ./dat/allmidpts.HH j3=2 >a.H
-	Window3d < ./dat/allmidpts.HH j3=2 >b.H f3=1
-	echo o2=.331 >>b.H
-	Create3d < a.H >a.3.H keyname1=offset keyname2=cmp_x
-	Create3d < b.H >b.3.H keyname1=offset keyname2=cmp_x
+# Combine denoised midpoints
+allmidptsden.H: aden.H bden.H scripts/combmpts.py
+	python scripts/combmpts.py
+
+#threeD.H:  ./dat/allmidpts.HH
+threeD.H:  allmidptsden.H
+	Window3d < $< j3=2 >an.H
+	Window3d < $< j3=2 >bn.H f3=1
+	echo o2=.331 >>bn.H
+	Create3d < an.H >a.3.H keyname1=offset keyname2=cmp_x
+	Create3d < bn.H >b.3.H keyname1=offset keyname2=cmp_x
 	Scat3d a.3.H b.3.H >$@ axis=2
 
 math.H: threeD.H
@@ -118,11 +167,11 @@ sort.H: math.H
 	Sort3d < math.H >$@ nkeys=2 key1=offset key2=s_x ng1=48 og1=.264 dg1=.067  \
 		ng2=173 og2=5.36 dg2=.067 verb=1 verbose=1
 
-shots.H: sort.H
-	Infill3d < sort.H > shots.H
+shotsden.H: sort.H
+	Infill3d < sort.H > shotsden.H
 
 # Reshape gathers before migration
-hale_shotflatbob.H: shots.H ./scripts/bobflat.py
+hale_shotflatbobden.H: shotsden.H ./scripts/bobflat.py
 	python ./scripts/bobflat.py
 
 burn:

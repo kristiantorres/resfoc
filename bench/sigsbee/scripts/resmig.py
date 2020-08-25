@@ -15,7 +15,7 @@ imgtw = imgt[:,0,:,:]
 [nz,nx,ny,nhx] = iaxes.n; [oz,ox,oy,ohx] = iaxes.o; [dz,dx,dy,dhx] = iaxes.d
 
 # Depth Residual migration
-inro = 21; idro = 0.00250
+inro = 21; idro = 0.001250
 rmig = preresmig(imgtw,[dhx,dx,dz],nps=[65,1025,2049],nro=inro,dro=idro,time=False,nthreads=18,verb=True)
 onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 
