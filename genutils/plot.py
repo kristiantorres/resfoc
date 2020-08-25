@@ -254,20 +254,20 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
     thresh - threshold in velocity to apply
     agc    - apply AGC to the image before plotting [True]
     alpha  - transparence value [0.3]
-    xmin   - the minimum x sample to plot for windowing [0]
-    xmax   - the maximum x sample to plot for windowing [nx]
-    zmin   - the minimum z sample to plot for windowing [0]
-    zmax   - the maximum z sample to plot for windowing [nz]
+    ixmin  - the minimum x sample to plot for windowing [0]
+    ixmax  - the maximum x sample to plot for windowing [nx]
+    izmin  - the minimum z sample to plot for windowing [0]
+    izmax  - the maximum z sample to plot for windowing [nz]
     pclip  - pclip to apply for gain                    [1.0]
   """
   if(img.shape != velptb.shape):
     raise Exception("Image and velocity must have same shape")
   # Get spatial plotting range
   [nz,nx] = img.shape;
-  ixmin = kwargs.get('xmin',0); ixmax = kwargs.get('xmax',nx)
-  xmin = ixmin*dx; xmax = ixmax*dx
-  izmin = kwargs.get('zmin',0); izmax = kwargs.get('zmax',nz)
-  zmin = izmin*dz; zmax = izmax*dz
+  ixmin = kwargs.get('ixmin',0); ixmax = kwargs.get('ixmax',nx)
+  xmin  = kwargs.get('xmin',ixmin*dx); xmax = kwargs.get('xmax',ixmax*dx)
+  izmin = kwargs.get('izmin',0); izmax = kwargs.get('izmax',nz)
+  zmin  = kwargs.get('zmin',izmin*dz); zmax = kwargs.get('zmax',izmax*dz)
   # Get amplitude range
   ivmin = kwargs.get('imin',np.min(img)); ivmax = kwargs.get('imax',np.max(img))
   pvmin = kwargs.get('velmin',np.min(velptb)); pvmax = kwargs.get('velmax',np.max(velptb))
@@ -276,7 +276,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   fig1 = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax1 = fig1.gca()
   im1 = ax1.imshow(velptb[izmin:izmax,ixmin:ixmax],cmap='seismic',
-      extent=[ixmin*dx/1000,(ixmax-1)*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],interpolation='bilinear',
+      extent=[xmin,xmax,zmax,zmin],interpolation='bilinear',
       vmin=pvmin,vmax=pvmax)
   plt.close()
   # Plot perturbation on the image
@@ -287,12 +287,12 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   else:
     gimg = img
   ax.imshow(gimg[izmin:izmax,ixmin:ixmax],vmin=ivmin*pclip,vmax=ivmax*pclip,
-             extent=[ixmin*dx/1000,(ixmax)*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],cmap='gray',interpolation='sinc')
+             extent=[xmin,xmax,zmax,zmin],cmap='gray',interpolation='sinc')
   mask1 = np.ma.masked_where((velptb) < thresh, velptb)
   mask2 = np.ma.masked_where((velptb) > -thresh, velptb)
-  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[ixmin*dx/1000,ixmax*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],alpha=alpha,
+  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
       cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
-  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[ixmin*dx/1000,ixmax*dx/1000.0,izmax*dz/1000.0,izmin*dz/1000.0],alpha=alpha,
+  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
       cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
@@ -305,9 +305,9 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   cbar.set_label('Velocity (m/s)',fontsize=kwargs.get('labelsize',15))
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
+    plt.close()
   if(show):
     plt.show()
-  #plt.close()
 
 def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   """
