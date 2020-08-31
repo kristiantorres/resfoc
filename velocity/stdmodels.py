@@ -10,13 +10,15 @@ Current models are:
 import numpy as np
 import velocity.mdlbuild as mdlbuild
 from scaas.wavelet import ricker
-from utils.ptyprint import progressbar, create_inttag
-import utils.rand as rndut
+from genutils.ptyprint import progressbar, create_inttag
+import genutils.rand as rndut
 import deeplearn.utils as dlut
 from scipy.ndimage import gaussian_filter
-from utils.signal import bandpass
+from genutils.signal import bandpass
 
-def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,maxvel=5000,rect=0.5,**kwargs):
+def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
+                    minvel=1600,maxvel=5000,rect=0.5,
+                    verb=True,**kwargs):
   """
   Builds a 2D highly faulted and folded velocity model.
   Returns the velocity model, reflectivity, fault labels and a zero-offset image
@@ -30,6 +32,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
     minvel - minimum velocity in model [1600]
     maxvel - maximum velocity in model [5000]
     rect   - length of gaussian smoothing [0.5]
+    verb   - verbosity flag [True]
 
   Returns
     The velocity, reflectivity, fault label and image all of size [nx,nz]
@@ -40,7 +43,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
   mb = mdlbuild.mdlbuild(nxi,dx,ny,dy=dx,dz=dz,basevel=5000)
 
   # First build the v(z) model
-  props = mb.vofz(nlayer,minvel,maxvel)
+  props = mb.vofz(nlayer,minvel,maxvel,npts=kwargs.get('nptsvz',2))
 
   # Specify the thicknesses
   thicks = np.random.randint(40,61,nlayer)
@@ -50,8 +53,9 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
   csq = 0
 
   dlyr = 0.05
-  for ilyr in progressbar(range(nlayer), "ndeposit:", 40):
-    mb.deposit(velval=props[ilyr],thick=thicks[ilyr],band2=0.01,band3=0.05,dev_pos=0.0,layer=150,layer_rand=0.00,dev_layer=dlyr)
+  for ilyr in progressbar(range(nlayer), "ndeposit:", 40, verb=verb):
+    mb.deposit(velval=props[ilyr],thick=thicks[ilyr],dev_pos=0.0,
+               layer=kwargs.get('layer',150),layer_rand=0.00,dev_layer=dlyr)
     # Random folding
     if(ilyr in sqlyrs):
       if(sqlyrs[csq] < 15):
@@ -81,7 +85,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
 
   # Large faults
   nlf = np.random.randint(2,5)
-  for ifl in progressbar(range(nlf), "nlfaults:", 40):
+  for ifl in progressbar(range(nlf), "nlfaults:", 40, verb=verb):
     azim = np.random.choice(azims)
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.1,0.9)
@@ -89,7 +93,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
 
   # Medium faults
   nmf = np.random.randint(3,6)
-  for ifl in progressbar(range(nmf), "nmfaults:", 40):
+  for ifl in progressbar(range(nmf), "nmfaults:", 40, verb=verb):
     azim = np.random.choice(azims)
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.05,0.95)
@@ -97,7 +101,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
 
   # Small faults (sliding or small)
   nsf = np.random.randint(5,10)
-  for ifl in progressbar(range(nsf), "nsfaults:", 40):
+  for ifl in progressbar(range(nsf), "nsfaults:", 40, verb=verb):
     azim = np.random.choice(azims)
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.05,0.95)
@@ -106,7 +110,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
 
   # Tiny faults
   ntf = np.random.randint(5,10)
-  for ifl in progressbar(range(ntf), "ntfaults:", 40):
+  for ifl in progressbar(range(ntf), "ntfaults:", 40, verb=verb):
     azim = np.random.choice(azims)
     xpos = rndut.randfloat(0.05,0.95)
     zpos = rndut.randfloat(0.15,0.3)
@@ -134,12 +138,20 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,minvel=1600,m
   img = dlut.normalize(np.array([np.convolve(refr[ix,:],wav) for ix in range(nx)])[:,ns:nz+ns])
   # Create noise
   nze = dlut.normalize(bandpass(np.random.rand(nx,nz)*2-1, 2.0, 0.01, 2, pxd=43))/rndut.randfloat(3,5)
-  img += img + nze
+  img += nze
 
-  velt = np.ascontiguousarray(velr.T).astype('float32')
-  reft = np.ascontiguousarray(refr.T).astype('float32')
-  imgt = np.ascontiguousarray(img.T).astype('float32')
-  lblt = np.ascontiguousarray(lblr.T).astype('float32')
+  if(kwargs.get('transp',False) == True):
+    velt = np.ascontiguousarray(velr.T).astype('float32')
+    reft = np.ascontiguousarray(refr.T).astype('float32')
+    imgt = np.ascontiguousarray(img.T).astype('float32')
+    lblt = np.ascontiguousarray(lblr.T).astype('float32')
+  else:
+    velt = np.ascontiguousarray(velr).astype('float32')
+    reft = np.ascontiguousarray(refr).astype('float32')
+    imgt = np.ascontiguousarray(img).astype('float32')
+    lblt = np.ascontiguousarray(lblr).astype('float32')
+
+  if(kwargs.get('km',True)): velt /= 1000.0
 
   return velt,reft,imgt,lblt
 
