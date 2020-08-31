@@ -43,7 +43,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
   mb = mdlbuild.mdlbuild(nxi,dx,ny,dy=dx,dz=dz,basevel=5000)
 
   # First build the v(z) model
-  props = mb.vofz(nlayer,minvel,maxvel)
+  props = mb.vofz(nlayer,minvel,maxvel,npts=kwargs.get('nptsvz',2))
 
   # Specify the thicknesses
   thicks = np.random.randint(40,61,nlayer)
