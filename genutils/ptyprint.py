@@ -52,12 +52,12 @@ def printprogress(prefix,j,count,size=40,file=sys.stdout):
   @author: Joseph Jennings
   """
   x = int(size*j/count)
-  file.write("%s:[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), j, count))
+  file.write("%s[%s%s] %i/%i\r" % (prefix+" ", "#"*x, "."*(size-x), j, count))
   if(j == count):
     file.write("\n")
   file.flush()
 
-def progressbar(it, prefix="", size=40, file=sys.stdout):
+def progressbar(it, prefix="", size=40, file=sys.stdout, verb=True):
   """
   Progress bar
 
@@ -68,12 +68,13 @@ def progressbar(it, prefix="", size=40, file=sys.stdout):
   if(count == 0): count += 1
   def show(j):
     x = int(size*j/count)
-    file.write("%s[%s%s] %i/%i\r" % (prefix+": ", "#"*x, "."*(size-x), j, count))
+    file.write("%s[%s%s] %i/%i\r" % (prefix+" ", "#"*x, "."*(size-x), j, count))
     file.flush()
-  show(0)
+  if(verb): show(0)
   for i, item in enumerate(it):
     yield item
-    show(i+1)
-  file.write("\n")
-  file.flush()
+    if(verb): show(i+1)
+  if(verb):
+    file.write("\n")
+    file.flush()
 
