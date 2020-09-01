@@ -9,9 +9,9 @@ resprefix=resfltimg
 ptbprefix=resfltptb
 # Data arguments
 nfiles=110
-ptchz=128
-ptchx=128
-strdx=64
-strdz=64
+ptchz=64
+ptchx=64
+strdx=32
+strdz=32
 norm=y
 

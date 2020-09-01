@@ -13,8 +13,9 @@ import glob
 from utils.ptyprint import progressbar, create_inttag
 import numpy as np
 import deeplearn.utils as dlut
-from resfoc.estro import estro_tgt
+from resfoc.estro import estro_tgt, refocusimg
 from resfoc.gain import agc
+from scaas.trismooth import smooth
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from utils.movie import viewimgframeskey
@@ -136,11 +137,23 @@ for ifile in progressbar(range(nfiles), "nfiles"):
   izro = img[:,:,16]; rzro = res[:,:,16,:]; pzro = ptb[:,:]
   # Compute the label
   rho,lbls = estro_tgt(rzro.T,izro.T,dro,oro,nzp=nzp,nxp=nxp,strdx=strdx,strdz=strdz,onehot=True)
-  fig,ax = plt.subplots(1,2,figsize=(14,7))
-  ax[0].imshow(rho.T,cmap='seismic',vmin=0.98,vmax=1.02)
-  ax[1].imshow(pzro,cmap='jet',vmin=-100,vmax=100)
-  viewimgframeskey(rzro.T,show=False)
-  plt.show()
+
+  # Smooth rho and refocus
+  #rhosm = smooth(rho.astype('float32'),rect1=30,rect2=30)
+  #ref = refocusimg(rzro.T,rhosm,dro)
+  #fig,ax = plt.subplots(1,2,figsize=(14,7))
+  #ax[0].imshow(rho.T,cmap='seismic',vmin=0.98,vmax=1.02)
+  #ax[1].imshow(-pzro,cmap='seismic',vmin=-100,vmax=100)
+  #viewimgframeskey(agc(rzro.T),show=False,pclip=0.6,ttlstring=r'$\rho=%.3f$',dttl=dro,ottl=oro,wbox=10,hbox=6)
+  #plt.figure(3,figsize=(14,7))
+  #grzro = agc(rzro[:,:,9].astype('float32').T)
+  #pclip = 0.8
+  #vmin = pclip*np.min(grzro); vmax = pclip*np.max(grzro)
+  #plt.imshow(agc(ref).T,cmap='gray',vmin=vmin,vmax=vmax)
+  #plt.figure(4,figsize=(14,7))
+  #plt.imshow(grzro.T,cmap='gray',vmin=vmin,vmax=vmax)
+  #plt.show()
+
   # Create image patches
   rzrop = np.squeeze(pe.extract(rzro.T))
   # Flatten the labels and write to H5 file
@@ -151,6 +164,7 @@ for ifile in progressbar(range(nfiles), "nfiles"):
   hf.create_dataset("x"+datatag, (pz*px,nxp,nzp,nro), data=rzropt, dtype=np.float32)
   hf.create_dataset("y"+datatag, (pz*px,nro), data=lbls, dtype=np.float32)
   #TODO: save the velocity perturbation files
+  #TODO: save the well focused images
   k += 1
 
 hf.close()
