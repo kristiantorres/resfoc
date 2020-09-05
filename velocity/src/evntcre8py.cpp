@@ -1,7 +1,7 @@
 /**
  * Python interface to C++ geologic event creator
  * @author: Joseph Jennings
- * @version: 2020.01.22
+ * @version: 2020.04.22
  */
 
 #include <pybind11/pybind11.h>
@@ -92,6 +92,33 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("thetashift"), py::arg("perpdie"), py::arg("distdie"), py::arg("thetadie"),
              py::arg("dir"), py::arg("scalethrw"), py::arg("lyrot"), py::arg("velot"), py::arg("olblot"), py::arg("nlblot")
          )
+     .def("fault_shifts2d",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<float, py::array::c_style> lblin,
+             float azim,
+             float begx,
+             float begz,
+             float dz,
+             float daz,
+             float thetashift,
+             float distdie,
+             float thetadie,
+             float scalethrw,
+             py::array_t<float, py::array::c_style> olblot,
+             py::array_t<float, py::array::c_style> nlblot,
+             py::array_t<float, py::array::c_style> shiftx,
+             py::array_t<float, py::array::c_style> shiftz
+             )
+             {
+               ec8.fault_shifts2d(nz, lblin.mutable_data(),
+                   azim, begx, begz, dz, daz, thetashift, distdie, thetadie, scalethrw,
+                   olblot.mutable_data(), nlblot.mutable_data(), shiftx.mutable_data(), shiftz.mutable_data());
+             },
+             py::arg("nz"), py::arg("lblin"), py::arg("azim"), py::arg("begx"), py::arg("begz"),
+             py::arg("dz"), py::arg("daz"), py::arg("thetashift"), py::arg("distdie"),
+             py::arg("thetadie"), py::arg("scalethrw"), py::arg("olblot"), py::arg("nlblot"), py::arg("shiftx"),
+             py::arg("shiftz")
+         )
      .def("squish",[](evntcre8 &ec8,
              int nz,
              py::array_t<int, py::array::c_style> lyrin,
@@ -116,6 +143,42 @@ PYBIND11_MODULE(evntcre8,m) {
              py::arg("azim"), py::arg("maxshift"), py::arg("lambda"), py::arg("rinline"), py::arg("rxline"),
              py::arg("nzot"), py::arg("lyrot"), py::arg("velot")
          )
+     .def("squish_shifts",[](evntcre8 &ec8,
+             int nz,
+             py::array_t<float, py::array::c_style> shftin,
+             int mode,
+             float azim,
+             float lambda,
+             float rinline,
+             float rxline,
+             py::array_t<float, py::array::c_style> shfty,
+             py::array_t<float, py::array::c_style> shftx,
+             py::array_t<float, py::array::c_style> shftz
+             )
+             {
+               ec8.squish_shifts(nz, shftin.mutable_data(),
+                   mode, azim, lambda, rinline, rxline,
+                   shfty.mutable_data(), shftx.mutable_data(), shftz.mutable_data());
+             },
+             py::arg("nz"), py::arg("shftin"), py::arg("mode"),
+             py::arg("azim"), py::arg("lambda"), py::arg("rinline"), py::arg("rxline"),
+             py::arg("shfty"), py::arg("shftx"), py::arg("shftz")
+         )
+     .def("fill_top_bottom",[](evntcre8 &ec8,
+              int nz,
+              float maxshift,
+              float basevel,
+              py::array_t<int, py::array::c_style> lyrot,
+              py::array_t<float, py::array::c_style> velot
+              )
+              {
+                 ec8.fill_top_bottom(nz, maxshift, basevel,
+                     lyrot.mutable_data(), velot.mutable_data());
+              },
+              py::arg("nz"),
+              py::arg("maxshift"), py::arg("basevel"),
+              py::arg("lyrot"), py::arg("velot")
+              )
      .def("zder",[](evntcre8 &ec8,
              int nz,
              py::array_t<float, py::array::c_style> lblin,
@@ -145,6 +208,17 @@ PYBIND11_MODULE(evntcre8,m) {
                ec8.calcref(nz, vel.mutable_data(), ref.mutable_data());
              },
              py::arg("nz"), py::arg("vel"), py::arg("ref")
+         )
+     .def("calcref2d",[](evntcre8 &ec8,
+					  int nx,
+            int nz,
+            py::array_t<float, py::array::c_style> vel,
+            py::array_t<float, py::array::c_style> ref
+            )
+            {
+               ec8.calcref2d(nx, nz, vel.mutable_data(), ref.mutable_data());
+            },
+						py::arg("nx"), py::arg("nz"), py::arg("vel"), py::arg("ref")
          );
 
 }

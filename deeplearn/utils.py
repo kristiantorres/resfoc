@@ -4,21 +4,50 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2020.03.13
+@version: 2020.05.28
 """
 import sys
 import numpy as np
 from scipy import interpolate
+from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
-from utils.image import remove_colorbar
+from genutils.image import remove_colorbar
+from genutils.ptyprint import progressbar
 
-def normalize(img,eps=sys.float_info.epsilon):
+def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
   Normalizes an image accross channels  by removing
   the mean and dividing by the standard deviation
+
+  Parameters
+    img - the input image. If the image has three dimensions,
+          will normalize each image individually
+    eps - parameters to avoid dividing a zero standard deviation
+    mode - normalize in 2D or 3D (['2d'] or '3d')
+
+  Returns normalized image(s)
   """
-  return (img - np.mean(img))/(np.std(img) + eps)
+  if(mode == '2d'):
+    if(len(img.shape) == 3):
+      imgnrm = np.zeros(img.shape)
+      nimg = img.shape[0]
+      for k in range(nimg):
+        imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+      return imgnrm
+    else:
+      return (img - np.mean(img))/(np.std(img) + eps)
+  elif(mode == '3d'):
+    if(len(img.shape) == 4):
+      imgnrm = np.zeros(img.shape)
+      nimg = img.shape[0]
+      for k in range(nimg):
+        imgnrm[k] = (img[k] - np.mean(img[k]))/(np.std(img[k]) + eps)
+      return imgnrm
+    else:
+      return (img - np.mean(img))/(np.std(img) + eps)
+  else:
+    raise Exception("Mode not recognized")
 
 def resizepow2(img,kind='linear'):
   """
@@ -41,8 +70,8 @@ def resample(img,new_shape,kind='linear',ds=[]):
   assumes that the nz and nx axes are the last two (fastest)
   """
   # Original coordinates
-  length=img.shape[1]
-  height=img.shape[0]
+  length=img.shape[-1]
+  height=img.shape[-2]
   x=np.linspace(0,length,length)
   y=np.linspace(0,height,height)
   # New coordinates for interpolation
@@ -64,12 +93,13 @@ def resample(img,new_shape,kind='linear',ds=[]):
         res[i,j,:,:] = f(xnew,ynew)
   elif len(img.shape)==3:
     res = np.zeros([img.shape[0],new_shape[0],new_shape[1]],dtype='float32')
-    for i in range(img.shape[0]):
+    for i in progressbar(range(img.shape[0]),"nimg:"):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
   elif len(img.shape)==2:
+    res = np.zeros([new_shape[0],new_shape[1]],dtype='float32')
     f=interpolate.interp2d(x,y,img,kind=kind)
-    res=f(xnew,ynew)
+    res[:] = f(xnew,ynew)
 
   if(len(ds) == 0):
     return res
@@ -130,6 +160,7 @@ def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
         kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
   if(fname):
       ax.set_aspect(kwargs.get('aratio',1.0))
@@ -169,9 +200,10 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
+    ftype = kwargs.get('ftype','png')
     ax.set_aspect(kwargs.get('aratio',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
-    cbar.remove()
+  cbar.remove()
   # Plot label
   imp = ax.imshow(mask,cmap='jet',
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
@@ -188,8 +220,58 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   if(show):
     plt.show()
   if(fname):
-    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
     # Crop and pad the image so they are the same size
-    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype,opath=fname+"-img."+ftype)
 
+def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
+  """
+  Extract patches from an image and normalize each patch. Works for 2D
+  and for 3D when the third dimension stride is one.
+
+  Parameters:
+    img   - the input image [n3,nz,nx]
+    nzp   - size of the patch in z dimension [64]
+    nxp   - size of the patch in x dimension [64]
+    strdz - size of patch stride in z dimension [32]
+    strdx - size of patch stride in x dimension [32]
+    norm  - normalize the patches [True]
+    flat  - return the patches flattened [nptch,nzp,nxp] or in a grid [numpz,numpx,nzp,nxp]
+
+    Returns normalized image patches
+  """
+  if(len(img.shape) == 2):
+    # Extract patches
+    pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+    ptch = pe.extract(img)
+
+    # Get patch dimensions
+    numpz = ptch.shape[0]; numpx = ptch.shape[1]
+
+    # Flatten and normalize
+    if(norm):
+      ptchf = normalize(ptch.reshape([numpz*numpx,nzp,nxp]),mode='2d')
+    else:
+      ptchf = ptch.reshape([numpz*numpx,nzp,nxp])
+
+  elif(len(img.shape) == 3):
+    # Get size of third dimension
+    n3 = img.shape[0]
+
+    # Extract patches
+    pea = PatchExtractor((n3,nzp,nxp),stride=(1,strdz,strdx))
+    ptch = np.squeeze(pea.extract(img))
+
+    # Get patch dimensions
+    numpz = ptch.shape[0]; numpx = ptch.shape[1]
+
+    # Flatten and normalize
+    if(norm):
+      ptchf = normalize(ptch.reshape([numpz*numpx,n3,nzp,nxp]),mode='3d')
+    else:
+      ptchf = ptch.reshape([numpz*numpx,n3,nzp,nxp])
+  else:
+    raise Exception("function supported only up to 3D")
+
+  return ptchf

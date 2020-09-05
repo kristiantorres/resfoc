@@ -1,3 +1,11 @@
+"""
+Functions for performing residual stolt migration
+and time to depth conversion
+
+@author: Joseph Jennings
+@version: 2020.06.13
+"""
+
 import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.rstoltbig as rstoltbig
@@ -5,8 +13,8 @@ import resfoc.cosft as cft
 import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
 from deeplearn.utils import next_power_of_2
-from utils.ptyprint import printprogress
-from utils.movie import viewcube3d
+from genutils.ptyprint import printprogress
+from genutils.movie import viewcube3d
 
 def pad_cft(n):
   """ Computes the size necessary to pad the image to next power of 2"""
@@ -52,7 +60,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debu
       nhp = nps[0] - img.shape[0]; nmp = nps[1] - img.shape[1]; nzp = nps[2] - img.shape[2]
   # Compute cosine transform
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
-  if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
+  if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]),flush=True)
   imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=True)
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
@@ -60,7 +68,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debu
   # Residual migration
   nzpc = imgpft.shape[2]; nmpc = imgpft.shape[1]; nhpc = imgpft.shape[0]
   foro = oro - (nro-1)*dro; fnro = 2*nro-1
-  if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1))
+  if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1),flush=True)
   rmigiftswind = np.zeros([fnro,nh,nm,nz],dtype='float32')
   if(not debug):
     # Mode for large images
