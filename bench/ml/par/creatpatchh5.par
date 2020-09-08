@@ -1,0 +1,15 @@
+[defaults]
+# IO argument
+sepdir=./dat/velflts
+out=./dat/fltclass_va.h5
+# Data arguments
+prefix=velflt
+nfiles=20
+nzo=512
+nxo=1024
+ptchz=128
+ptchx=128
+strdx=64
+strdz=64
+norm=y
+
