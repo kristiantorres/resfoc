@@ -4,34 +4,96 @@ Classes and functions for loading in data for deep learning
 @author: Joseph Jennings
 @version: 2020.05.17
 """
-from tensorflow.keras.utils import Sequence
 import h5py
 import numpy as np
 import random
 import subprocess
-from genutils.ptyprint import progressbar
+from genutils.ptyprint import progressbar, create_inttag
 
-class resmig_generator_h5(Sequence):
+class WriteToH5:
 
-  def __init__(self, fname, batch_size):
-    self.hfin = h5py.File(fname,'r')
-    self.hfkeys = list(self.hfin.keys())
-    self.nb = int(len(self.hfkeys)/2) # Half is features, half is labels
-    self.indices = np.arange(self.nb)
-    self.batch_size = batch_size
+  def __init__(self,name,nmax=1000000,dsize=1):
+    """
+    Creates a WriteToH5 object that writes training data
+    to an HDF5 file
 
-  def get_xyshapes(self):
-    return self.hfin[self.hfkeys[0]].shape[1:], self.hfin[self.hfkeys[self.nb]].shape[1:]
+    Parameters:
+      name  - the name of the output HDF5 file
+      dsize - number of training examples in an individual H5 dataset [1]
 
-  def __len__(self):
-    return self.nb
+    Returns WriteToH5 object
+    """
+    self.__hf = h5py.File(name,'w')
+    self.__dsize = dsize
+    # For naming the datasets
+    self.__nmax = nmax; self.__ctr = 0
+    # Left over examples
+    self.__xlef = []; self.__ylef = []
+    self.__recurse = False
 
-  def __getitem__(self,idx):
-    xb = self.hfin[self.hfkeys[idx]]
-    yb = np.expand_dims(self.hfin[self.hfkeys[idx + self.nb]],axis=-1)
-    return xb, yb
+  def write_examples(self,x,y):
+    """
+    Writes training examples to the H5 file
 
-#
+    Parameters:
+      x - the training examples
+      y - the corresponding labels
+    """
+    tag = create_inttag(self.__ctr,self.__nmax)
+    if(x.shape[0] != y.shape[0]):
+      raise Exception("Number of examples must be same for input data and labels")
+    nex = x.shape[0]
+
+    # Shapes of each example
+    xshape  = [self.__dsize,*x.shape[1:],1]
+    yshape  = [self.__dsize,*y.shape[1:],1]
+
+    igr,rem = divmod(nex,self.__dsize)
+
+    if(igr > 0):
+      # Write out what fits
+      beg = 0; end = 0
+      for k in range(igr):
+        beg = end; end += self.__dsize
+        datatag = create_inttag(self.__ctr,self.__nmax)
+        self.__hf.create_dataset('x'+datatag,xshape,data=np.expand_dims(x[beg:end],axis=-1),dtype=np.float32)
+        self.__hf.create_dataset('y'+datatag,yshape,data=np.expand_dims(y[beg:end],axis=-1),dtype=np.float32)
+        self.__ctr += 1
+      # Save what you can
+      if(end < nex):
+        if(self.__recurse):
+          self.__xlef = []
+          self.__ylef = []
+          self.__recurse = False
+        self.__xlef.append(x[end:])
+        self.__ylef.append(y[end:])
+      elif(end == nex):
+        if(self.__recurse):
+          self.__recurse = False
+          self.__xlef = []
+          self.__ylef = []
+    else:
+      # Append the examples to the saved list
+      self.__xlef.append(x)
+      self.__ylef.append(y)
+
+    # If the size of the left over array is larger than dsize
+    # and recurse
+    nlef = np.sum([ex.shape[0] for ex in self.__ylef])
+    if(nlef >= self.__dsize):
+      xr = np.concatenate(self.__xlef,axis=0)
+      yr = np.concatenate(self.__ylef,axis=0)
+      self.__recurse = True
+      self.write_examples(xr,yr)
+
+  def __del__(self):
+    """
+    Deletes a WriteToH5 object
+    """
+    try:
+      self.__hf.close()
+    except:
+      pass
 
 def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
   """

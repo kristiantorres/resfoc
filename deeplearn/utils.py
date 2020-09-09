@@ -225,7 +225,7 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
     # Crop and pad the image so they are the same size
     remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype,opath=fname+"-img."+ftype)
 
-def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
+def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
   """
   Extract patches from an image and normalize each patch. Works for 2D
   and for 3D when the third dimension stride is one.
@@ -241,6 +241,8 @@ def normextract(img,nzp=64,nxp=64,strdz=64,strdx=64,norm=True,flat=True):
 
     Returns normalized image patches
   """
+  if(strdz is None): strdz = int(nzp/2 + 0.5)
+  if(strdx is None): strdx = int(nxp/2 + 0.5)
   if(len(img.shape) == 2):
     # Extract patches
     pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
