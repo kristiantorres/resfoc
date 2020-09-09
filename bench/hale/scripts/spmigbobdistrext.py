@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 
 # Start workers
-hosts = ['fantastic','storm', 'thing']
+hosts = ['fantastic','storm', 'thing', 'torch', 'jarvis']
 cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworker.py"
 launch_sshworkers(cfile,hosts=hosts,sleep=1,verb=1,clean=False)
 
@@ -42,7 +42,7 @@ icnkr = imagechunkr(nchnk,
                     nrec=nrec,srcx=srcx,recx=recx,
                     ovx=ovx,dvx=dvx,ox=oxi)
 
-icnkr.set_image_pars(ntx=16,nhx=20,nthrds=40,nrmax=10,sverb=False)
+icnkr.set_image_pars(ntx=16,nhx=20,nthrds=40,nrmax=10,sverb=True)
 gen = iter(icnkr)
 
 # Bind to socket
