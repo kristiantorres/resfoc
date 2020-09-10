@@ -9,8 +9,8 @@ from client.sshworkers import launch_sshworkers, kill_sshworkers, create_host_li
 sep = seppy.sep()
 
 # Start workers
-hosts = ['fantastic', 'storm', 'thing', 'torch', 'jarvis']
-wph = [10,10,10,10,10]
+hosts = ['fantastic', 'storm', 'torch', 'jarvis']
+wph = [10,10,10,10]
 hin = create_host_list(hosts,wph)
 cfile = "/homes/sep/joseph29/projects/resfoc/velocity/veltrworker.py"
 launch_sshworkers(cfile,hosts=hin,sleep=1,verb=1,clean=True)
@@ -18,7 +18,7 @@ launch_sshworkers(cfile,hosts=hin,sleep=1,verb=1,clean=True)
 # Make generator
 nchnk = len(hin)
 vcnkr = veltrchunkr(nchnk,
-                    nmodels=50,
+                    nmodels=40,
                     nx=800,ny=20,nz=900,layer=70,maxvel=3000,nptsvz=1)
 gen = iter(vcnkr)
 
