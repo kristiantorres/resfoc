@@ -19,10 +19,17 @@ dfc = np.ascontiguousarray(dfc.reshape(daxes.n,order='F').T).astype('float32')
 dfcstk = np.sum(dfc[:,:,0,:,:],axis=2)
 gdfc = agc(dfcstk)
 
-tot = np.zeros([nmf+nmd,nx,nz],dtype='float32')
+# Read in residually defocused images
+raxes,res = sep.read_file("sigsbee_restrimgs.H")
+res = np.ascontiguousarray(res.reshape(raxes.n,order='F').T).astype('float32')
+resstk = np.sum(res[:,:,0,:,:],axis=2)
+gres = agc(resstk)
 
-tot[0::2,:,:] = gfoc[:]
-tot[1::2,:,:] = gdfc[:]
+tot = np.zeros([2*nmf+nmd,nx,nz],dtype='float32')
+
+tot[0::3,:,:] = gfoc[:]
+tot[1::3,:,:] = gdfc[:]
+tot[2::3,:,:] = gres[:]
 
 viewimgframeskey(tot,pclip=0.5,interpolation='bilinear',show=True,
                  zmin=0,zmax=nz*dz,xmin=ox,xmax=ox+nx*dx)

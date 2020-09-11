@@ -89,7 +89,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
     azim = np.random.choice(azims)
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.1,0.9)
-    mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=2.0,tscale=6.0,fpr=fpr,twod=True)
+    mb.largefault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=4.0,tscale=6.0,fpr=fpr,twod=True)
 
   # Medium faults
   nmf = np.random.randint(3,6)
@@ -97,7 +97,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
     azim = np.random.choice(azims)
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.05,0.95)
-    mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=2.0,tscale=3.0,fpr=fpr,twod=True)
+    mb.mediumfault(azim=azim,begz=0.65,begx=xpos,begy=0.5,dist_die=4.0,tscale=3.0,fpr=fpr,twod=True)
 
   # Small faults (sliding or small)
   nsf = np.random.randint(5,10)
@@ -106,7 +106,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
     fpr  = np.random.choice(fprs)
     xpos = rndut.randfloat(0.05,0.95)
     zpos = rndut.randfloat(0.2,0.5)
-    mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=2.0,tscale=2.0,fpr=fpr,twod=True)
+    mb.smallfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=4.0,tscale=2.0,fpr=fpr,twod=True)
 
   # Tiny faults
   ntf = np.random.randint(5,10)
@@ -114,7 +114,7 @@ def velfaultsrandom(nz=512,nx=1024,ny=20,dz=12.5,dx=25.0,nlayer=20,
     azim = np.random.choice(azims)
     xpos = rndut.randfloat(0.05,0.95)
     zpos = rndut.randfloat(0.15,0.3)
-    mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=2.0,tscale=2.0,twod=True)
+    mb.tinyfault(azim=azim,begz=zpos,begx=xpos,begy=0.5,dist_die=4.0,tscale=2.0,twod=True)
 
   # Parameters for ricker wavelet
   nt = kwargs.get('nt',250); ot = 0.0; dt = kwargs.get('dt',0.001); ns = int(nt/2)

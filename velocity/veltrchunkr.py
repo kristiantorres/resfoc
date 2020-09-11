@@ -53,7 +53,7 @@ class veltrchunkr:
     self.__sigma   = 20
 
   def set_ano_pars(self,nptbs=3,romin=0.95,romax=1.05,
-                   minnaz=100,maxnaz=150,minnax=100,maxnax=400,
+                   minnaz=100,maxnaz=150,minnax=150,maxnax=400,
                    mincz=None,maxcz=None,mincx=None,maxcx=None,
                    mindist=100,nptsz=2,nptsx=2,octaves=2,period=80,persist=0.2,sigma=20):
     """
@@ -81,13 +81,13 @@ class veltrchunkr:
     """
     # Compute default bounds
     if(mincz is None):
-      mincz = int(0.13*self.__nz)
+      mincz = self.__mincz
     if(maxcz is None):
-      maxcz = int(0.22*self.__nz)
+      maxcz = self.__maxcz
     if(mincx is None):
-      mincx = int(0.25*self.__nx)
+      mincx = self.__mincx
     if(maxcx is None):
-      maxcx = int(0.75*self.__nz)
+      maxcx = self.__maxcx
     # Set parameters
     self.__nptbs   = nptbs;    self.__romin  = romin; self.__romax = romax
     self.__minnaz  = minnaz;   self.__maxnaz = maxnaz

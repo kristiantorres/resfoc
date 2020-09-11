@@ -1,6 +1,6 @@
 import inpout.seppy as seppy
 import numpy as np
-import zmq, time
+import time
 from oway.hessnchunkr import hessnchunkr
 from server.distribute import dstr_sum
 from server.utils import startserver, stopserver
@@ -19,7 +19,6 @@ sep = seppy.sep()
 # Start workers
 cfile = "/data/sep/joseph29/projects/scaas/oway/hessnworker.py"
 logpath = "./log"
-#TODO: need to block some worker ids
 wrkrs,status = launch_pbsworkers(cfile,nworkers=50,wtime=120,queue='default',
                                    logpath=logpath,chkrnng=True)
 print("Workers status: ",*status)
@@ -64,7 +63,7 @@ trestart = 90*60 # Restart every 90 min
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
 # Loop over all models
-beg = 0
+beg = 10
 for im in progressbar(range(beg,nm),"nmod:"):
   # Restart the workers if approaching two hour limit
   if(im == beg): start = time.time()
@@ -126,8 +125,9 @@ for im in progressbar(range(beg,nm),"nmod:"):
     if(k == 0):
       nsin  = [nhx,nrx,nz]
       nps = [next_power_of_2(nin)+1 for nin in nsin]
-      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,dx,dz],nps=nps,nro=nro,dro=dro,verb=False)
-      rmige = rmig[np.newaxis,:,np.newaxis,:,:]
+      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,drx,dz],nps=nps,nro=nro,dro=dro,offset=7,verb=False)
+      rmigt = convert2time(rmig,dz,dt=d1,oro=rho,dro=dro,verb=False)[0]
+      rmige = rmigt[np.newaxis,:,np.newaxis,:,:]
 
     # Convert to angle
     na = 64

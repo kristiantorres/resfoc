@@ -12,7 +12,8 @@ sep = seppy.sep()
 cfile = "/data/sep/joseph29/projects/resfoc/velocity/veltrworker.py"
 logpath = "./log"
 wrkrs,status = launch_pbsworkers(cfile,ncore=3,mem=8,nworkers=50,queue='default',
-                                 logpath=logpath,slpbtw=0.5,chkrnng=True)
+                                 logpath=logpath,slpbtw=0.5,chkrnng=True,
+                                 ignore=['ZHZ28O','G7C6LR'])
 
 print("Workers status: ",*status)
 
@@ -21,6 +22,7 @@ nchnk = status.count('R')
 vcnkr = veltrchunkr(nchnk,
                     nmodels=500,
                     nx=2133,ny=20,nz=1201,layer=100,maxvel=3800)
+vcnkr.set_ano_pars(minnax=300,maxnax=700,minnaz=100,maxnaz=250)
 gen = iter(vcnkr)
 
 # Bind to socket
