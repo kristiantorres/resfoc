@@ -9,24 +9,28 @@ from deeplearn.utils import thresh, normalize, resizepow2
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from scaas.trismooth import smooth
 
-def segmentfaults(img,mdl,nzp=128,nxp=128,strdz=None,strdx=None,verb=False):
+def segmentfaults(img,mdl,nzp=128,nxp=128,strdz=None,strdx=None,resize=False,verb=False):
   """
   Segments faults on a 2D image. Returns the probablility of each
   pixel being a fault or not.
 
   Parameters:
-    img   - the input image [nz,nx]
-    mdl   - the trained keras model
-    nzp   - z-dimension of the patch provided to the CNN [128]
-    nxp   - x-dimension of the patch provided to the CNN [128]
-    strdz - z-dimension of the patch stride (50% overlap) [npz/2]
-    strdx - x-dimension of the patch stride (50% overlap) [npx/2]
-    verb  - verbosity flag [False]
+    img    - the input image [nz,nx]
+    mdl    - the trained keras model
+    nzp    - z-dimension of the patch provided to the CNN [128]
+    nxp    - x-dimension of the patch provided to the CNN [128]
+    strdz  - z-dimension of the patch stride (50% overlap) [npz/2]
+    strdx  - x-dimension of the patch stride (50% overlap) [npx/2]
+    resize - option to resize the image to a power of two in each dimension [False]
+    verb   - verbosity flag [False]
 
   Returns the spatial fault probability map [nz,nx]
   """
   # Resample to nearest power of 2
-  rimg = resizepow2(img,kind='linear')
+  if(resize):
+    rimg = resizepow2(img,kind='linear')
+  else:
+    rimg = img
   # Perform the patch extraction
   if(strdz is None): strdz = int(nzp/2)
   if(strdx is None): strdx = int(nxp/2)
@@ -43,8 +47,12 @@ def segmentfaults(img,mdl,nzp=128,nxp=128,strdz=None,strdx=None,verb=False):
   # Reconstruct the predictions
   ipra  = iprd.reshape([numpz,numpx,nzp,nxp])
   iprb  = pe.reconstruct(ipra)
-
-  return iprb
+  if(iprb.shape != rimg.shape):
+    iptch = pe.extract(rimg)
+    rimg  = pe.reconstruct(iptch)
+    return iprb, rimg
+  else:
+    return iprb
 
 def detectfaultpatch(img,mdl,nzp=64,nxp=64,strdz=None,strdx=None,rectx=30,rectz=30,verb=False):
   """

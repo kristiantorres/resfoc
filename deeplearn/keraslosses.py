@@ -44,7 +44,6 @@ def cross_entropy_balanced(y_true, y_pred):
 
   return tf.where(tf.equal(count_pos, 0.0), 0.0, cost)
 
-
 def _to_tensor(x, dtype):
   """Convert the input `x` to a tensor of type `dtype`.
   # Arguments

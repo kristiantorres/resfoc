@@ -13,7 +13,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from genutils.image import remove_colorbar
-from genutils.ptyprint import progressbar
+from genutils.ptyprint import progressbar, create_inttag
 
 def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
@@ -277,3 +277,26 @@ def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
     raise Exception("function supported only up to 3D")
 
   return ptchf
+
+def torchprogress(cur :int,tot :int,loss :float,acc :float,size :int=40, file=sys.stdout) -> None:
+  """
+  Prints a progress bar during training of a torch
+  neural network
+
+  Parameters:
+    cur  - index of the current batch
+    tot  - the total number batches
+    loss - the current running loss value
+    acc  - the current accuracy
+
+  Prints a progressbar to the screen
+  """
+  x = int(size*cur/tot)
+  if(cur == 0): div = 1
+  else: div = cur
+  curform = create_inttag(cur,tot)
+  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss/div,acc))
+  if(cur == tot):
+    file.write("\n")
+  file.flush()
+
