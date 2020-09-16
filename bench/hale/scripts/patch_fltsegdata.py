@@ -11,7 +11,7 @@ from genutils.ptyprint import create_inttag, progressbar
 # IO
 sep = seppy.sep()
 
-taxes = sep.read_header("sigsbee_foctrimgs.H")
+taxes = sep.read_header("hale_foctrimgs.H")
 [nz,na,naz,nx,nm] = taxes.n
 [dz,da,daz,dx,dm] = taxes.d
 [oz,oa,oaz,ox,om] = taxes.o
@@ -25,21 +25,21 @@ nw = 20; nex = nm//nw
 ptchz = 128; ptchx = 128
 
 # Define window
-bxw = 20;  exw = nx - 20
-bzw = 177; ezq = nz
+bxw = 100;  exw = nx - 100
+bzw = 0; ezq = nz
 
 # Open the output HDF5 file
-wh5 = WriteToH5("/scr2/joseph29/sigsbee_fltseg128.h5",dsize=1)
+wh5 = WriteToH5("/scr2/joseph29/hale_fltseg128.h5",dsize=1)
 
-k = 0; ctr = 0; tot = 0
+k = 0
 for iex in progressbar(range(nex),"iex:"):
   # Read in the focused images
-  faxes,foc = sep.read_wind("sigsbee_foctrimgs.H",fw=k,nw=nw)
+  faxes,foc = sep.read_wind("hale_foctrimgs.H",fw=k,nw=nw)
   foc   = np.ascontiguousarray(foc.reshape(faxes.n,order='F').T).astype('float32')
   foct  = np.ascontiguousarray(np.transpose(foc[:,:,0,:,:],(0,2,1,3)))
   focts = np.sum(foct,axis=1)
   # Read in the labels
-  laxes,lbl = sep.read_wind("sigsbee_trlblsint.H",fw=k,nw=nw)
+  laxes,lbl = sep.read_wind("hale_trlbls.H",fw=k,nw=nw)
   lbl = np.ascontiguousarray(lbl.reshape(laxes.n,order='F').T).astype('float32')
   ldats = []; llbls = []
   for iw in range(nw):
@@ -56,12 +56,5 @@ for iex in progressbar(range(nex),"iex:"):
     nptch = lptch.shape[0]
     # Write the training data to HDF5 file
     wh5.write_examples(fptch,lptch)
-    #hf.create_dataset('x'+datatag,(nptch,ptchz,ptchx,1),data=np.expand_dims(fptch,axis=-1),dtype=np.float32)
-    #hf.create_dataset('y'+datatag,(nptch,ptchz,ptchx,1),data=np.expand_dims(lptch,axis=-1),dtype=np.float32)
-    #ctr += 1
-    tot += nptch
   k += nw
-
-# Close the H5 file
-#hf.close()
 

@@ -137,3 +137,42 @@ def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
 
   return time
 
+def rand_preresmig(img,ds,nro=6,oro=1.0,dro=0.01,offset=5,nps=None,transp=False,verb=False,wantrho=True):
+  """
+  Chooses a random rho (from the provided rho axis) and residually migrates
+  the input image for that rho
+
+  Parameters:
+    img    - the input prestack image (probably focused) [nhx,nx,nz]
+    ds     - the sampling of the image. [dh,dx,dz] (or [dh,dz,dx] if transp=True)
+    nro    - number of rhos from which to choose (will actually be 2*nro - 1)
+    oro    - the origin of the rho axis [1.0]
+    dro    - the sampling of the rho axis [0.01]
+    offset - select rhos from offset number of rhos away from rho=1. Avoids
+             choosing a rho too close to rho=1. [5]
+    nps    - list of sizes that specify how much to pad for the cosine transform
+             ([nhp,nxp,nzp] or [nhp,nzp,nxp] if transp=True)
+    transp - take input [nh,nz,nx] and return output [nro,nh,nz,nx]
+    verb   - verbosity flag [True]
+
+  Returns a residually migrated image for a randomly selected rho
+  """
+  # Build the rhos from which to select
+  foro = oro - (nro-1)*dro; fnro = 2*nro-1
+  rhos = np.linspace(foro,foro + (fnro-1)*dro,2*nro-1)
+
+  # Choose a rho for residual migration
+  if(np.random.choice([0,1])):
+    rho = np.random.randint(0,nro-offset)*dro + foro
+  else:
+    rho = np.random.randint(nro+offset+1,fnro)*dro + foro
+
+  if(verb): print("randrho=%.3f"%(rho))
+  rmig  = preresmig(img,ds,nps,nro=1,oro=rho,dro=dro,time=False,nthreads=1,verb=verb)
+
+  if(wantrho):
+    return rmig,rho
+  else:
+    return rmig
+
+
