@@ -149,29 +149,20 @@ def load_alldata(trfile,vafile,dsize,begex=None,endex=None):
   else:
     nex = endex - begex
   # Allocate output arrays
-  if(len(xshape) == 4):
-    allx = np.zeros([(nex+nva)*dsize,xshape[1],xshape[2],xshape[3]],dtype='float32')
-  elif(len(xshape) == 3):
-    allx = np.zeros([(nex+nva)*dsize,xshape[1],xshape[2]],dtype='float32')
-  ally = np.zeros([(nex+nva)*dsize,yshape[1],yshape[2],1],dtype='float32')
+  allx = np.zeros([(nex+nva)*dsize,*xshape[1:]],dtype='float32')
+  ally = np.zeros([(nex+nva)*dsize,*yshape[1:]],dtype='float32')
   k = 0
   # Get all training examples
   for itr in progressbar(range(begex,endex), "numtr:"):
     for iex in range(dsize):
-      allx[k,:,:,:]  = hftr[trkeys[itr]    ][iex,:,:,:]
-      if(len(yshape) == 3):
-        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:]
-      else:
-        ally[k,:,:,0]  = hftr[trkeys[itr+ntr]][iex,:,:,0]
+      allx[k]  = hftr[trkeys[itr]    ][iex]
+      ally[k]  = hftr[trkeys[itr+ntr]][iex]
       k += 1
   # Get all validation examples
   for iva in progressbar(range(nva), "numva:"):
     for iex in range(dsize):
-      allx[k,:,:,:]  = hfva[vakeys[iva]    ][iex,:,:,:]
-      if(len(yshape) == 3):
-        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:]
-      else:
-        ally[k,:,:,0]  = hfva[vakeys[iva+nva]][iex,:,:,0]
+      allx[k]  = hfva[vakeys[iva]    ][iex]
+      ally[k]  = hfva[vakeys[iva+nva]][iex]
       k += 1
   # Close the files
   hftr.close()

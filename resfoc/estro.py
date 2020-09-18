@@ -66,6 +66,8 @@ def refocusimg(rimgs,rho,dro,ro1=None):
   # Compute the coordinates for shifting
   rhoshifts(nro,nx,nz,dro,rho,coords)
 
+  print(np.min(coords),np.max(coords))
+
   # Apply shifts
   rfc = map_coordinates(rimgs,coords)
 
@@ -166,7 +168,7 @@ def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, 
     return rhosm
 
 def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
-                         rectz=30,rectx=30,qcimgs=True):
+                         rectz=30,rectx=30,qcimgs=True,verb=False):
   """
   Estimates rho by choosing the residually migrated patch that has
   highest angle gather and fault focus probability given by the neural network
@@ -184,6 +186,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
     rectx      - length of smoother in x dimension [30]
     qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
                  and fault patches [nz,nx]
+    verb       - verbosity flag [False]
 
   Returns an estimate of rho(x,z)
   """
@@ -200,7 +203,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   # Flatten patches and make a prediction on each
   numpz = aptch.shape[0]; numpx = aptch.shape[1]
   aptchf = np.expand_dims(normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp])),axis=-1)
-  focprd = foccnn.predict(aptchf)
+  focprd = foccnn.predict(aptchf,verbose=verb)
 
   # Assign prediction to entire patch for QC
   focprdptch = np.zeros([numpz*numpx*nro,nzp,nxp])
@@ -292,6 +295,7 @@ def estro_varimax(rimgs,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None,rectz=30,rec
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
   rhop = pe.extract(rho)
 
+  # Using hasfault array, estimate rho from fault focus probabilities
   hlfz = int(nzp/2); hlfx = int(nxp/2)
   for izp in range(numpz):
     for ixp in range(numpx):
