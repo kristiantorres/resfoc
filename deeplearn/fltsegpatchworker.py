@@ -14,7 +14,7 @@ import numpy as np
 # Connect to socket
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://oas.stanford.edu:5555")
+socket.connect("tcp://thing.stanford.edu:5555")
 
 # Listen for work from server
 while True:

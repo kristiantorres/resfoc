@@ -23,5 +23,5 @@ comb = np.zeros([3,nz,nx],dtype='float32')
 comb[0] = stk; comb[1] = rfi; comb[2] = truw
 
 viewimgframeskey(comb,interp='bilinear',transp=False,xmin=ox,xmax=ox+nx*dx,
-                 zmin=oz,zmax=oz+nz*dz,pclip=0.1)
+                 zmin=oz,zmax=oz+nz*dz,pclip=0.2)
 

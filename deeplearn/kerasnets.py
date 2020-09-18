@@ -10,7 +10,7 @@ from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose, Conv3D
 from tensorflow.keras.layers import BatchNormalization, Concatenate, Activation, Cropping2D, concatenate
 from tensorflow.keras.layers import ZeroPadding2D, MaxPooling2D, MaxPooling3D, UpSampling2D, LeakyReLU, Flatten, Dense, Dropout
 from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.initializers import RandomNormal
 from deeplearn.keraslosses import cross_entropy_balanced
 from tensorflow.keras.losses import categorical_crossentropy
@@ -199,6 +199,27 @@ def vgg3_3d(pretrained_weights=None, input_size=(64,64,64,1)):
 
   model = Model(inputs=[inputs], outputs=[acto])
   model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+
+  return model
+
+def vgg3_3d2(pretrained_weights=None, input_size=(32,64,64,1)):
+  inputs = Input(input_size)
+  conv1 = Conv3D(32, (3,3,3), activation='relu', padding='same')(inputs)
+  pool1 = MaxPooling3D(pool_size=(1,2,2))(conv1) # 64 -> 32
+
+  conv2 = Conv3D(64, (3,3,3), activation='relu', padding='same')(pool1)
+  pool2 = MaxPooling3D(pool_size=(2,2,2))(conv2) # 32 -> 16
+
+  conv3 = Conv3D(128, (3,3,3), activation='relu', padding='same')(pool2)
+  pool3 = MaxPooling3D(pool_size=(2,2,2))(conv3) # 16 -> 8
+
+  flat   = Flatten()(pool3)
+  dense1 = Dense(128,activation='relu')(flat)
+  acto   = Dense(1,activation='sigmoid')(dense1)
+
+  model = Model(inputs=[inputs], outputs=[acto])
+  model.compile(optimizer = Adam(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
+  #model.compile(optimizer = SGD(lr = 1e-4), loss = cross_entropy_balanced, metrics = ['accuracy'])
 
   return model
 
