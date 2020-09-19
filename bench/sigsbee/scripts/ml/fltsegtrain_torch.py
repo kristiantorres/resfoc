@@ -2,14 +2,34 @@ import torch
 import numpy as np
 from sigsbee_fltsegdata import SigsbeeFltSegData
 from torch.utils.data import DataLoader
+from torch.utils.data.sampler import SubsetRandomSampler
 from deeplearn.utils import plotseglabel, torchprogress
 from deeplearn.torchnets import Unet
 from deeplearn.torchlosses import bal_ce
 from genutils.ptyprint import create_inttag
 
+# Training set
 sig_fltseg = SigsbeeFltSegData('/net/thing/scr2/joseph29/sigsbee_fltseg.h5')
 
-dataloader = DataLoader(sig_fltseg,batch_size=20,shuffle=True,num_workers=0)
+# Get idxs and cutoff
+nex   = len(sig_fltseg); split = 0.2
+idxs  = list(range(nex))
+split = int(np.floor(split*nex))
+
+# Shuffle the idxs
+seed  = 1992
+np.random.seed(seed)
+np.random.shuffle(idxs)
+
+# Randomly split examples
+trnidx,validx = idxs[split:], idxs[:split]
+
+# Samplers
+trsampler = SubsetRandomSampler(trnidx)
+vasampler = SubsetRandomSampler(validx)
+
+trloader = DataLoader(sig_fltseg,batch_size=20,num_workers=0,sampler=trsampler)
+valoader = DataLoader(sig_fltseg,batch_size=20,num_workers=0,sampler=vasampler)
 
 #for i in range(len(sig_fltseg)):
 #  sample = sig_fltseg[i]
@@ -17,7 +37,7 @@ dataloader = DataLoader(sig_fltseg,batch_size=20,shuffle=True,num_workers=0)
 #  plotseglabel(sample['img'][0].numpy(),sample['lbl'][0].numpy(),show=True,interpolation='bilinear',aratio=0.5)
 
 # Get the GPU
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
 # Get the network
 net = Unet()
@@ -37,8 +57,8 @@ nepoch = 10
 for epoch in range(nepoch):
   print("Epoch: %s/%d"%(create_inttag(epoch,nepoch),nepoch))
   running_loss = 0.0
-  for i,data in enumerate(dataloader,0):
-    inputs,labels = data['img'].to(device), data['lbl'].to(device)
+  for i,trdat in enumerate(trloader,0):
+    inputs,labels = trdat['img'].to(device), trdat['lbl'].to(device)
     #plotseglabel(inputs.numpy()[0,0],labels.numpy()[0,0],show=True,interpolation='bilinear',aratio=0.5)
 
     # Zero the parameters gradients
@@ -56,10 +76,25 @@ for epoch in range(nepoch):
     running_loss += loss.item()
     cor = ((outputs > 0.5).float() == labels).float().sum().item()
     acc = (cor/np.prod(labels.size()))
-    if(i%100 == 0):
-      torchprogress(i,len(dataloader),running_loss,acc)
+    if(i%10 == 0):
+      torchprogress(i,len(trloader),running_loss,acc)
 
-  torchprogress(i+1,len(dataloader),running_loss,acc)
+  torchprogress(i+1,len(trloader),running_loss,acc)
+
+  # Check on validation data
+  with torch.no_grad():
+    va_loss = 0
+    for vadat in valoader:
+      # Get example
+      vadat,valbl = vadat['img'].to(device), vadat['lbl'].to(device)
+      # Make prediction
+      vaprd = net(vadat)
+      vloss = criterion(vaprd,valbl)
+      # Compute loss and accuracy
+      va_loss += vloss.item()
+      vcor = ((vaprd > 0.5).float() == valbl).float().sum().item()
+      vacc = (vcor/np.prod(valbl.size()))
+    print("val_loss=%.4g val_acc=%.4f"%(va_loss/len(valoader),vacc))
 
 torch.save(net.state_dict(), "/scr1/joseph29/sigsbee_fltseg_torch.pth")
 

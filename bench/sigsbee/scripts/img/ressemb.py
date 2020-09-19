@@ -4,12 +4,13 @@ from resfoc.semb import rho_semb, pick
 from resfoc.estro import refocusimg
 from scaas.velocity import salt_mask
 import matplotlib.pyplot as plt
-from utils.plot import plot_rhopicks, plot_anggatrhos
+from genutils.plot import plot_rhopicks, plot_anggatrhos
 
 sep = seppy.sep()
 
 # Read in residually migrated gathers
-saxes,storm = sep.read_file("resmskoverwt.H")
+#saxes,storm = sep.read_file("resmskoverwt.H")
+saxes,storm = sep.read_file("sigsbeewrngposrest.H")
 [nz,na,nx,nro] = saxes.n; [oz,oa,ox,oro] = saxes.o; [dz,da,dx,dro] = saxes.d
 storm = storm.reshape(saxes.n,order='F').T
 
@@ -33,12 +34,12 @@ sc2 = 0.2
 kmin = sc2*np.min(stkw); kmax= sc2*np.max(stkw)
 
 fsize = 16
-for ix in range(0,nx,50):
-  plot_anggatrhos(stormw,ix,dz,dx,oro,dro,ox=ox,show=False,pclip=0.4,fontsize=fsize,ticksize=fsize,
-                  imgaspect=2.0,roaspect=0.005,figname='./fig/ressemb/imgline%d'%(ix))
-  # Plot the picked
-  plot_rhopicks(stormw[:,ix,:,:],semb[ix,:,:],rho[ix],dro,dz,oro,show=True,angaspect=0.005,
-                vmin=smin,vmax=smax,wspace=0.0,figname='./fig/ressemb/rhopick%d'%(ix))
+#for ix in range(0,nx,50):
+#  plot_anggatrhos(stormw,ix,dz,dx,oro,dro,ox=ox,show=False,pclip=0.4,fontsize=fsize,ticksize=fsize,
+#                  imgaspect=2.0,roaspect=0.005,figname='./fig/ressemb/imgline%d'%(ix))
+#  # Plot the picked
+#  plot_rhopicks(stormw[:,ix,:,:],semb[ix,:,:],rho[ix],dro,dz,oro,show=True,angaspect=0.005,
+#                vmin=smin,vmax=smax,wspace=0.0,figname='./fig/ressemb/rhopick%d'%(ix))
 
 # Mask the rho image
 msk,rhomsk = salt_mask(rho,velw,saltvel=4.5)
@@ -57,14 +58,14 @@ cbar = fig.colorbar(im,cbar_ax,format='%.2f')
 cbar.solids.set(alpha=1)
 cbar.ax.tick_params(labelsize=fsize)
 cbar.set_label(r'$\rho$',fontsize=fsize)
-plt.savefig("./fig/rhoimg.png",dpi=150,bbox_inches='tight',transparent=True)
+plt.savefig("./fig/rhoimgpos.png",dpi=150,bbox_inches='tight',transparent=True)
 #plt.show()
 
 # Refocus the stack
 rfi = refocusimg(stkw,rhomsk,dro)
 
-sep.write_file("sigsemb.H",semb.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("sigrho.H",rho.T,os=[oz,ox+20*dx],ds=[dz,dx])
-sep.write_file("sigrfi.H",rfi.T,os=[oz,ox+20*dx],ds=[dz,dx])
-sep.write_file("stkwind.H",stkw[20].T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("sigsembpos.H",semb.T,os=[oz,oro],ds=[dz,dro])
+sep.write_file("sigrhopos.H",rho.T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("sigrfipos.H",rfi.T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("stkwindpos.H",stkw[20].T,os=[oz,ox+20*dx],ds=[dz,dx])
 

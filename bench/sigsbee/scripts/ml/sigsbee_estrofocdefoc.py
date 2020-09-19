@@ -14,7 +14,8 @@ sep = seppy.sep()
 os.environ['CUDA_VISIBLE_DEVICES'] = str(1)
 
 # Read in the residually migrated image
-iaxes,img = sep.read_file("resmskoverwt.H")
+#iaxes,img = sep.read_file("resmskoverwt.H")
+iaxes,img = sep.read_file("sigsbeewrngposrest.H")
 [nz,na,nx,nro] = iaxes.n; [dz,da,dx,dro] = iaxes.d; [oz,oa,ox,oro] = iaxes.o
 img  = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T).astype('float32')
 imgt = np.ascontiguousarray(np.transpose(img,(0,2,3,1)))
@@ -24,8 +25,8 @@ strdz = int(nzp/2 + 0.5)
 strdx = int(nxp/2 + 0.5)
 
 # Define window
-bxw = 50;  exw = nx - 50
-bzw = 177; ezw = nz - 50
+bxw = 20;  exw = 480
+bzw = 240; ezw = 1150
 
 # Window and stack
 imgw = imgt[:,:,bzw:ezw,bxw:exw]
@@ -51,7 +52,7 @@ velww = pev.reconstruct(pev.extract(velw))
 # Read in the fault focusing network
 with open('./dat/focangarc.json','r') as f:
   focmdl = model_from_json(f.read())
-focwgt = focmdl.load_weights('/scr1/joseph29/sigsbee_focangchkpt.h5')
+focwgt = focmdl.load_weights('/scr1/joseph29/sigsbee_focangnoreschkpt.h5')
 #focwgt = focmdl.load_weights('./dat/focangwgts.h5')
 
 verb = False
@@ -85,7 +86,7 @@ print(stkw.shape,rhomsk.shape)
 # Refocus the stack
 rfi = refocusimg(stkw,rhomsk,dro)
 
-sep.write_file("sigfocrho2.H",rhomsk,ds=[dz,dx])
-sep.write_file("sigfocrfi2.H",rfi,ds=[dz,dx])
-sep.write_file("stkfocwind2.H",stkw[20],ds=[dz,dx])
+sep.write_file("sigfocrhopos.H",rhomsk,ds=[dz,dx])
+sep.write_file("sigfocrfipos.H",rfi,ds=[dz,dx])
+sep.write_file("stkfocwindpos.H",stkw[20],ds=[dz,dx])
 

@@ -26,8 +26,10 @@ print(resdat.shape,reslbl.shape)
 
 # Concatenate focused and defocused images and labels
 #allx = np.concatenate([focdat,resdat,defdat],axis=0)[:,32:,:,:,:]
-allx = np.concatenate([focdat,resdat,defdat],axis=0)
-ally = np.concatenate([foclbl[:,:,0],reslbl[:,:,0],deflbl],axis=0)
+#allx = np.concatenate([focdat,resdat,defdat],axis=0)
+#ally = np.concatenate([foclbl[:,:,0],reslbl[:,:,0],deflbl],axis=0)
+allx = np.concatenate([focdat,defdat],axis=0)
+ally = np.concatenate([foclbl[:,:,0],deflbl],axis=0)
 
 allx,ally = shuffle(allx,ally,random_state=1992)
 
@@ -60,16 +62,16 @@ print(model.summary())
 tf.compat.v1.GPUOptions(allow_growth=True)
 
 # Create callbacks
-checkpointer = ModelCheckpoint(filepath="/scr1/joseph29/sigsbee_focangchkpt.h5", verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(filepath="/scr1/joseph29/sigsbee_focangnoreschkpt.h5", verbose=1, save_best_only=True)
 
 # Train the model
 bsize   = 20
-nepochs = 5
+nepochs = 10
 history = model.fit(allx,ally,epochs=nepochs,batch_size=bsize,verbose=1,shuffle=True,
                    validation_split=0.2,callbacks=[checkpointer])
 
 # Write the model
-model.save_weights("./dat/focangwgts.h5")
+model.save_weights("./dat/focangwgtsnores.h5")
 
 # Save the loss history
 lossvepch = np.asarray(history.history['loss'])

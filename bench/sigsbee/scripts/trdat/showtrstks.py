@@ -5,7 +5,7 @@ from genutils.movie import viewimgframeskey
 
 sep = seppy.sep()
 
-fw = 50; nw = 100
+fw = 30; nw = 30
 # Read in focused images
 faxes,foc = sep.read_wind("sigsbee_foctrimgs.H",fw=fw,nw=nw)
 [nz,na,ny,nx,nmf] = faxes.n; [oz,oa,oy,ox,om] = faxes.o; [dz,da,dy,dx,dm] = faxes.d

@@ -9,7 +9,7 @@ from deeplearn.utils import plotsegprobs
 import matplotlib.pyplot as plt
 
 sep = seppy.sep()
-os.environ['CUDA_VISIBLE_DEVICES'] = str(3)
+os.environ['CUDA_VISIBLE_DEVICES'] = str(1)
 
 # Read in the sigsbee image
 #iaxes,img = sep.read_file("spimgextbobdistr.H")

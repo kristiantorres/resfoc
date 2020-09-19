@@ -59,3 +59,13 @@ class Unet(nn.Module):
 
     return x11
 
+class Vgg3_3d(nn.Module):
+
+  def __init__(self):
+    super(Vgg_3d,self).__init__()
+    # Maxpool
+
+    # Convolutional blocks
+
+
+
