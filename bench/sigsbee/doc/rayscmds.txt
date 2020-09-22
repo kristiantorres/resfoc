@@ -1953,3 +1953,4 @@
   3877	23:45	cd ..
   3878	23:45	l
   3879	9:38	h > sigsbee/rayscmds.txt
+sfrays2 < sigsbee_vel.H dt=0.01 yshot=5 nt=600 nr=401 a0=130 amax=230 sym=n shotfile=srcxzcoords.H | sfreverse which=2 > sig-raysallshots.rsf datapath=/scr2/joseph29/

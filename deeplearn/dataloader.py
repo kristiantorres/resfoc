@@ -126,7 +126,7 @@ def splith5(fin,f1,f2,split=0.8,rand=False,clean=True):
   if(clean):
     sp = subprocess.check_call('rm %s'%(fin),shell=True)
 
-def load_alldata(trfile,vafile,dsize,begex=None,endex=None):
+def load_alldata(trfile,vafile,dsize,begex=None,endex=None,verb=False):
   """ Loads all data and labels into numpy arrays """
   # Get training number of examples
   hftr = h5py.File(trfile,'r')
@@ -153,7 +153,7 @@ def load_alldata(trfile,vafile,dsize,begex=None,endex=None):
   ally = np.zeros([(nex+nva)*dsize,*yshape[1:]],dtype='float32')
   k = 0
   # Get all training examples
-  for itr in progressbar(range(begex,endex), "numtr:"):
+  for itr in progressbar(range(begex,endex), "numtr:",verb=verb):
     for iex in range(dsize):
       allx[k]  = hftr[trkeys[itr]    ][iex]
       ally[k]  = hftr[trkeys[itr+ntr]][iex]

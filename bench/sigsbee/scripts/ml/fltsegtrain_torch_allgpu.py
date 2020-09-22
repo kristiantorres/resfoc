@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from sigsbee_fltsegdata import SigsbeeFltSegData
+from sigsbee_fltsegdata_gpu import SigsbeeFltSegDataGPU
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from deeplearn.utils import plotseglabel, torchprogress
@@ -8,13 +8,12 @@ from deeplearn.torchnets import Unet
 from deeplearn.torchlosses import bal_ce
 from genutils.ptyprint import create_inttag
 
+# Get the GPU
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+
 # Training set
-sig_fltseg = SigsbeeFltSegData('/net/thing/scr2/joseph29/sigsbee_fltseg.h5')
-#TODO: if the data fit in memory on the GPU, try using todevice()
-#      and then grabbing the batches yourself
-#      Not sure though how you can shuffle it
-#      I suppose for each epoch generate the
-#      batch indices and then use those
+#sig_fltseg = SigsbeeFltSegDataGPU('/net/thing/scr2/joseph29/sigsbee_fltseg.h5',device,verb=True)
+sig_fltseg = SigsbeeFltSegDataGPU('/net/thing/scr2/joseph29/sigsbee_focseg.h5',device,verb=True)
 
 # Get idxs and cutoff
 nex   = len(sig_fltseg); split = 0.2
@@ -39,10 +38,7 @@ valoader = DataLoader(sig_fltseg,batch_size=20,num_workers=0,sampler=vasampler)
 #for i in range(len(sig_fltseg)):
 #  sample = sig_fltseg[i]
 #  print(i,sample['img'].size(),sample['lbl'].size())
-#  plotseglabel(sample['img'][0].numpy(),sample['lbl'][0].numpy(),show=True,interpolation='bilinear',aratio=0.5)
-
-# Get the GPU
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+#  plotseglabel(sample['img'][0].cpu().numpy(),sample['lbl'][0].cpu().numpy(),show=True,interpolation='bilinear',aratio=0.5)
 
 # Get the network
 net = Unet()
@@ -60,11 +56,10 @@ optimizer = torch.optim.Adam(net.parameters(),lr=lr)
 nepoch = 10
 
 for epoch in range(nepoch):
-  print("Epoch: %s/%d"%(create_inttag(epoch,nepoch),nepoch))
+  print("Epoch: %s/%d"%(create_inttag(epoch+1,nepoch),nepoch))
   running_loss = 0.0
   for i,trdat in enumerate(trloader,0):
-    inputs,labels = trdat['img'].to(device), trdat['lbl'].to(device)
-    #plotseglabel(inputs.numpy()[0,0],labels.numpy()[0,0],show=True,interpolation='bilinear',aratio=0.5)
+    inputs,labels = trdat['img'], trdat['lbl']
 
     # Zero the parameters gradients
     optimizer.zero_grad()
@@ -78,6 +73,7 @@ for epoch in range(nepoch):
     optimizer.step()
 
     # Print statistics
+    # TODO: save loss and accuracy metrics with epoch
     running_loss += loss.item()
     cor = ((outputs > 0.5).float() == labels).float().sum().item()
     acc = (cor/np.prod(labels.size()))
@@ -101,5 +97,7 @@ for epoch in range(nepoch):
       vacc = (vcor/np.prod(valbl.size()))
     print("val_loss=%.4g val_acc=%.4f"%(va_loss/len(valoader),vacc))
 
-torch.save(net.state_dict(), "/scr1/joseph29/sigsbee_fltseg_torch.pth")
+  #TODO: if the validation loss has decreased, write the network
+
+torch.save(net.state_dict(), "/scr1/joseph29/sigsbee_fltseg_torch_bigagc.pth")
 

@@ -15,8 +15,8 @@ import time
 sep = seppy.sep()
 
 # Start workers
-hosts = ['fantastic','storm','torch','jarvis']
-wph = len(hosts)*[5]
+hosts = ['torch','fantastic','storm','jarvis']
+wph = len(hosts)*[2]
 hin = create_host_list(hosts,wph)
 cfile = "/homes/sep/joseph29/projects/resfoc/deeplearn/patch2dworker.py"
 launch_sshworkers(cfile,hosts=hin,sleep=1,verb=1,clean=True)
@@ -27,24 +27,21 @@ taxes = sep.read_header("sigsbee_foctrimgs.H")
 [oz,oa,oaz,ox,om] = taxes.o
 
 # Size of input data for reading
-nw = 10; nex = nm//nw
+#nw = 10; nex = nm//nw
+nw = 20; nex = 1
 # Size of a single patch
 ptchz = 64; ptchx = 64
 
 # Define window
-bxw = 20;  exw = nx - 20
+bxw = 50;  exw = nx - 50
 bzw = 177; ezq = nz
 
-context,socket = startserver()
-
-# Create the data writing object
-wh5seg = WriteToH5('/scr2/joseph29/sigsbee_fltseg1.h5',dsize=1)
-wh5foc = WriteToH5('/scr2/joseph29/sigsbee_fltfoc.h5',dsize=1)
+ctx,socket = startserver()
 
 k = 0
-for iex in progressbar(range(nex),"iex:"):
+for iex in range(nex):
+  print("Batch: %s/%d"%(create_inttag(iex,nex),nex))
   # Read in the images
-  beg = time.time()
   faxes,foc = sep.read_wind("sigsbee_foctrimgs.H",fw=k,nw=nw)
   foc   = np.ascontiguousarray(foc.reshape(faxes.n,order='F').T).astype('float32')
   foct  = np.ascontiguousarray(np.transpose(foc[:,:,0,:,:],(0,2,1,3))) # [nw,nx,na,nz] -> [nw,na,nx,nz]
@@ -59,34 +56,26 @@ for iex in progressbar(range(nex),"iex:"):
   # Read in the labels
   laxes,lbl = sep.read_wind("sigsbee_trlblsint.H",fw=k,nw=nw)
   lbl = np.ascontiguousarray(lbl.reshape(laxes.n,order='F').T).astype('float32')
-  print("Finished reading %f"%(time.time() - beg))
-  beg = time.time()
   # Window the data
   focw  = foct[:,:,bxw:exw,bzw:nz]
   dfcw  = dfct[:,:,bxw:exw,bzw:nz]
   rfcw  = rfct[:,:,bxw:exw,bzw:nz]
   lblw  = lbl [:,  bxw:exw,bzw:nz]
   # Concatenate the images
-  fdrptch = np.concatenate([focw,dfcw,rfcw],axis=0)
-  lblptch = np.repeat(lblw,3,axis=0)
-  # Create the patch chunker
-  #nchnk = len(hin)
-  nchnk = fdrptch.shape[0]
-  pcnkr = patch2dchunkr(nchnk,fdrptch,lblptch,nzp=64,nxp=64)
-  gen = iter(pcnkr)
-  # Distribute and collect the results
-  okeys = ['foc','seg','lbl']
-  output = dstr_collect(okeys,nchnk,gen,socket)
-  print("Finished examples %f"%(time.time() - beg))
-  ofoc = np.concatenate(output['foc'])
-  oseg = np.concatenate(outout['seg'])
-  olbl = np.concatenate(output['lbl'])
+  fdrptch = [focw,dfcw,rfcw]
+  lblptch = [lblw,lblw,np.zeros(lblw.shape,dtype='float32')]
+  beg = time.time()
+  for ity in progressbar(range(len(fdrptch)),"nty:"):
+    # Create the patch chunker
+    nchnk = focw.shape[0]//4
+    pcnkr = patch2dchunkr(nchnk,fdrptch[ity],lblptch[ity],nzp=64,nxp=64)
+    gen = iter(pcnkr)
+    # Distribute and collect the results
+    okeys = ['foc','seg','lbl']
+    output = dstr_collect(okeys,nchnk,gen,socket,zlevel=0)
 
-  # Write the training data to HDF5 file
-  #wh5seg.write_examples(oseg,olbl)
-
-  #dummy = np.zeros([ofoc.shape[0],1],dtype='float32') - 1
-  #wh5foc.write_examples(ofoc,dummy)
+  #ntot += foc.shape[0]
+  print("%f seconds"%(time.time()-beg))
 
   # Increment position in file
   k += nw

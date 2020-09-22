@@ -68,20 +68,13 @@ for iex in progressbar(range(nex),"nex:",verb=True):
   # If example has faults, use fault criteria
   if(fltnum > pixthresh):
     if(sembrat < thresh1 and pvarrat  < thresh1):
-      #defout.append(cubd)
       wh5.write_examples(cubd[np.newaxis],flbl)
     elif(sembrat < thresh2 or pvarrat < thresh2):
-      #defout.append(cubd)
       wh5.write_examples(cubd[np.newaxis],flbl)
   else:
     # Compute angle metrics
     if(sembrat < thresh3):
       wh5.write_examples(cubd[np.newaxis],flbl)
-      #defout.append(cubd)
-
-#defarr = np.asarray(defout)
-#print(defarr.shape)
-
 
 hfdef.close()
 hffoc.close()

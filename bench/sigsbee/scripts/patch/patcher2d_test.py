@@ -4,9 +4,6 @@ from resfoc.gain import agc
 from deeplearn.utils import normextract, resample, plotseglabel
 from deeplearn.fltsegpatchchunkr import fltsegpatchchunkr
 from deeplearn.dataloader import WriteToH5
-from client.sshworkers import create_host_list, launch_sshworkers, kill_sshworkers
-from server.utils import startserver
-from server.distribute import dstr_collect
 from genutils.ptyprint import progressbar, create_inttag
 from deeplearn.utils import plotseglabel
 import time
@@ -21,15 +18,15 @@ taxes = sep.read_header("sigsbee_foctrimgs.H")
 [oz,oa,oaz,ox,om] = taxes.o
 
 # Size of input data for reading
-#nw = 10; nex = nm//nw
-nw = 10; nex = 3
+nw = 20; nex = nm//nw
+#nw = 20; nex = 1
 # Size of a single patch
 nzp = 64; nxp = 64
 strdz = int(nzp/2 + 0.5)
 strdx = int(nxp/2 + 0.5)
 
 # Define window
-bxw = 50;  exw = nx - 50
+bxw = 20;  exw = nx - 20
 bzw = 177; ezq = nz
 
 # Create the data writing objects
@@ -46,11 +43,10 @@ wh5foc = [wh5foc,wh5def,wh5res]
 # Focus labels
 focval  = [1,-1,0]
 
-k = 0;
-for iex in progressbar(range(nex),"iex:"):
-  #TODO: apply agc to each image
+k = 0; ntot = 0
+for iex in range(nex):
+  print("Batch: %s/%d"%(create_inttag(iex,nex),nex))
   # Read in the images
-  beg = time.time()
   faxes,foc = sep.read_wind("sigsbee_foctrimgs.H",fw=k,nw=nw)
   foc   = np.ascontiguousarray(foc.reshape(faxes.n,order='F').T).astype('float32')
   foct  = np.ascontiguousarray(np.transpose(foc[:,:,0,:,:],(0,2,1,3))) # [nw,nx,na,nz] -> [nw,na,nx,nz]
@@ -65,8 +61,6 @@ for iex in progressbar(range(nex),"iex:"):
   # Read in the labels
   laxes,lbl = sep.read_wind("sigsbee_trlblsint.H",fw=k,nw=nw)
   lbl = np.ascontiguousarray(lbl.reshape(laxes.n,order='F').T).astype('float32')
-  #print("Finished reading %f"%(time.time() - beg))
-  beg = time.time()
   # Window the data
   focw  = foct[:,:,bxw:exw,bzw:nz]
   dfcw  = dfct[:,:,bxw:exw,bzw:nz]
@@ -75,20 +69,21 @@ for iex in progressbar(range(nex),"iex:"):
   # Concatenate the images
   fdrptch = [focw,dfcw,rfcw]
   lblptch = [lblw,lblw,np.zeros(lblw.shape,dtype='float32')]
-  for ity in range(len(fdrptch)):
+  beg = time.time()
+  for ity in progressbar(range(len(fdrptch)),"nty:"):
     ofoc = []; olbl = []; oseg = []
     for j in range(focw.shape[0]):
+      datg = agc(fdrptch[ity][j].astype('float32'))
+      stk  = agc(np.sum(fdrptch[ity][j],axis=0))
       datt = np.ascontiguousarray(np.transpose(fdrptch[ity][j],(0,2,1)))
+      stkt = np.ascontiguousarray(stk.T)
       lblt = np.ascontiguousarray(lblptch[ity][j].T)
       # Extract patches
       dptch = normextract(datt,nzp=nzp,nxp=nxp,strdz=strdz,strdx=strdx,norm=True)
       lptch = normextract(lblt,nzp=nzp,nxp=nxp,strdz=strdz,strdx=strdx,norm=False)
-      sptch = np.sum(dptch,axis=1)
-      if(agc): gptch = agc(sptch.astype('float32'))
-      else: gptch = sptch
+      sptch = normextract(stkt,nzp=nzp,nxp=nxp,strdz=strdz,strdx=strdx,norm=True)
       # Append to output lists
-      ofoc.append(dptch); olbl.append(lptch); oseg.append(gptch)
-    #print("Finished examples %f"%(time.time() - beg))
+      ofoc.append(dptch); olbl.append(lptch); oseg.append(sptch)
     # Return patched data and labels
     foc = np.concatenate(ofoc,axis=0)
     seg = np.concatenate(oseg,axis=0)
@@ -99,6 +94,9 @@ for iex in progressbar(range(nex),"iex:"):
 
     foclbl = np.zeros([foc.shape[0],1],dtype='float32') + focval[ity]
     wh5foc[ity].write_examples(foc,foclbl)
+
+    ntot += foc.shape[0]
+  print("Wrote %d examples in %f seconds"%(ntot,time.time()-beg))
 
   # Increment position in file
   k += nw
