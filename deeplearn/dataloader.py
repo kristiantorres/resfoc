@@ -2,7 +2,7 @@
 Classes and functions for loading in data for deep learning
 
 @author: Joseph Jennings
-@version: 2020.05.17
+@version: 2020.09.22
 """
 import h5py
 import numpy as np
@@ -12,19 +12,21 @@ from genutils.ptyprint import progressbar, create_inttag
 
 class WriteToH5:
 
-  def __init__(self,name,nmax=1000000,dsize=1):
+  def __init__(self,name,nmax=1000000,dsize=1,channels_last=False):
     """
     Creates a WriteToH5 object that writes training data
     to an HDF5 file
 
     Parameters:
-      name  - the name of the output HDF5 file
-      dsize - number of training examples in an individual H5 dataset [1]
+      name           - the name of the output HDF5 file
+      dsize          - number of training examples in an individual H5 dataset [1]
+      channels_last  - flag indicating channels should come last [False]
 
     Returns WriteToH5 object
     """
     self.__hf = h5py.File(name,'w')
     self.__dsize = dsize
+    self.__channels_last = False
     # For naming the datasets
     self.__nmax = nmax; self.__ctr = 0
     # Left over examples
@@ -45,8 +47,12 @@ class WriteToH5:
     nex = x.shape[0]
 
     # Shapes of each example
-    xshape  = [self.__dsize,*x.shape[1:],1]
-    yshape  = [self.__dsize,*y.shape[1:],1]
+    if(self.__channels_last):
+      xshape  = [self.__dsize,*x.shape[1:],1]
+      yshape  = [self.__dsize,*y.shape[1:],1]
+    else:
+      xshape  = [self.__dsize,1,*x.shape[1:]]
+      yshape  = [self.__dsize,1,*y.shape[1:]]
 
     igr,rem = divmod(nex,self.__dsize)
 
@@ -56,8 +62,14 @@ class WriteToH5:
       for k in range(igr):
         beg = end; end += self.__dsize
         datatag = create_inttag(self.__ctr,self.__nmax)
-        self.__hf.create_dataset('x'+datatag,xshape,data=np.expand_dims(x[beg:end],axis=-1),dtype=np.float32)
-        self.__hf.create_dataset('y'+datatag,yshape,data=np.expand_dims(y[beg:end],axis=-1),dtype=np.float32)
+        if(self.__channels_last):
+          xot = np.expand_dims(x[beg:end],axis=-1)
+          yot = np.expand_dims(y[beg:end],axis=-1)
+        else:
+          xot = x[beg:end,np.newaxis]
+          yot = y[beg:end,np.newaxis]
+        self.__hf.create_dataset('x'+datatag,xshape,data=xot,dtype=np.float32)
+        self.__hf.create_dataset('y'+datatag,yshape,data=yot,dtype=np.float32)
         self.__ctr += 1
       # Save what you can
       if(end < nex):
