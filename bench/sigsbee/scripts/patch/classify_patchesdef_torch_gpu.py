@@ -48,19 +48,6 @@ fstkss = tfstks.cpu().numpy().squeeze()
 dstkss = tdstks.cpu().numpy().squeeze()
 slblss = lblst.squeeze()
 
-#idx = np.random.randint(fstkss.shape[0])
-#fig,axarr = plt.subplots(1,5,figsize=(15,3))
-#axarr[0].imshow(fstkss[idx],cmap='gray',interpolation='bilinear',aspect='auto')
-#axarr[0].set_title('Focused')
-#axarr[1].imshow(dstkss[idx],cmap='gray',interpolation='bilinear',aspect='auto')
-#axarr[1].set_title('Defocused')
-#axarr[2].imshow(slblss[idx],cmap='jet',interpolation='none',aspect='auto')
-#axarr[3].imshow(fprds[idx],cmap='jet',interpolation='bilinear',aspect='auto')
-#axarr[3].set_title('Focused')
-#axarr[4].imshow(dprds[idx],cmap='jet',interpolation='bilinear',aspect='auto')
-#axarr[4].set_title('Defocused')
-#plt.show()
-
 pixthresh = 50
 thresh1 = 0.7
 thresh2 = 0.5

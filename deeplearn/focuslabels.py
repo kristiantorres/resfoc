@@ -3,7 +3,7 @@ Functions for creating labels for quantifying
 image focusing
 
 @author: Joseph Jennings
-@version: 2020.05.12
+@version: 2020.09.23
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
@@ -11,6 +11,7 @@ from deeplearn.utils import normalize, thresh
 from resfoc.ssim import ssim
 from scipy.signal.signaltools import correlate2d
 from scaas.trismooth import smooth
+from genutils.ptyprint import progressbar
 import random
 import matplotlib.pyplot as plt
 
@@ -191,112 +192,91 @@ def focdefocflt_labels(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthres
   else:
     return dptcho,fptcho,lptcho
 
-def extract_defocpatches(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,metric='corr',focthresh=0.7,
-                        norm=True,imgs=False,qcptchgrd=False,dz=10,dx=10):
+def label_defocused_patches(dptchs,fptchs,fltlbls=None,fprds=None,dprds=None,
+                            pixthresh=50,thresh1=0.7,thresh2=0.5,thresh3=0.7,smbthresh=0.4,
+                            streamer=True,verb=False,qc=False) -> np.ndarray:
   """
-  Extracts defocused patches from a non-stationary
-  defocused image
+  Attempts to label patches as defocused using the focused equivalent
 
-  Parameters
-    dimg      - input defocused image [nz,nx]
-    fimg      - input focused image [nz,nx]
-    fltlbl    - input fault label [nz,nx]
-    nxp       - size of patch in x direction [64]
-    nzp       - size of patch in z direction [64]
-    strdx     - size of stride in x direction [64]
-    strdz     - size of stride in z direction [64]
-    pixthresh - number of fault pixels required to keep a patch [20]
-    metric    - metric for computing image similarity ['corr']
-    focthresh - threshold for determing if image is focused [0.7]
-    norm      - normalize patches before returning [True]
-    qcptchgrd - plot patch grid for QC [False]
-    dz        - z sampling for plotting patch grid [10]
-    dx        - x sampling for plotting patch grid [10]
+  Parameters:
+    dptchs    - the input defocused patches [nptch,ang,ptchz,ptchx]
+    fptchs    - the input focused patches   [nptch,ang,ptchz,ptchx]
+    fltlbls   - the input fault labels [None]
+    fprds     - the corresponding focused fault predictions [None]
+    dprds     - the corresponding defocused fault predictions [None]
+    pixthresh - number of fault pixel to determine if patch has fault [50]
+    thresh1   - first threshold [0.7]
+    thresh2   - second threshold [0.5]
+    thresh3   - third threshold [0.7]
+    smbthresh - semblance threshold [0.4]
+    streamer  - streamer geometry (one-sided angle gathers) [True]
+    verb      - verbosity flag [False]
+    qc        - return the computed metrics
 
-  Returns the selected defocused patches [nselect,nzp,nxp]
+  Returns a numpy array of zeros for the defocused patches and -1
+  for the others
   """
-  # Check that dimg, fimg and fltlbl are the same size
-  if(dimg.shape[0] != fltlbl.shape[0] or dimg.shape[1] != fltlbl.shape[1]):
-    raise Exception("Input image and fault label must have same dimensions")
+  # Check that fptchs and dptchs have the same shape
+  if(dptchs.shape != fptchs.shape):
+    raise Exception("Defocused patches must have same shape as focused patches")
 
-  if(dimg.shape[0] != fimg.shape[0] or dimg.shape[1] != fimg.shape[1]):
-    raise Exception("Input defocused image and defocused image must have same dimensions")
-
-  # Patch extraction on the images
-  pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
-  dptch = pe.extract(dimg)
-  fptch = pe.extract(fimg)
-  lptch = pe.extract(fltlbl)
-  numpz = dptch.shape[0]; numpx = dptch.shape[1]
-
-  if(qcptchgrd):
-    nz = img.shape[0]; nx = img.shape[1]
-    # Plot the patch grid
-    bgz = 0; egz = (nz)*dz/1000.0; dgz = nzp*dz/1000.0
-    bgx = 0; egx = (nx)*dx/1000.0; dgx = nxp*dx/1000.0
-    zticks = np.arange(bgz,egz,dgz)
-    xticks = np.arange(bgx,egx,dgx)
-    fig = plt.figure(figsize=(10,6)); ax = fig.gca()
-    ax.imshow(img,extent=[0,(nx)*dx/1000.0,(nz)*dz/1000.0,0],cmap='gray',interpolation='sinc')
-    ax.set_xticks(xticks)
-    ax.set_yticks(zticks)
-    ax.grid(linestyle='-',color='k',linewidth=2)
-    plt.show()
-
-  # Output image patches
-  dptcho = []; fptcho = []; sptcho = []
-
-  # Norm image
-  ptchnrm = np.zeros(lptch.shape)
-
-  # Loop over each patch
-  for izp in range(numpz):
-    for ixp in range(numpx):
-      # Check if patch contains faults
-      if(np.sum(lptch[izp,ixp]) >= pixthresh):
-        # Compute the desired norm between the two images
-        if(metric == 'mse'):
-          ptchnrm[izp,ixp,:,:] = mse(dptch[izp,ixp],fptch[izp,ixp])
-          if(ptchnrm[izp,ixp,int(nzp/2),int(nxp/2)] > focthresh):
-            if(norm):
-              sptcho.append(normalize(dptch[izp,ixp]))
-            else:
-              sptcho.append(dptch[izp,ixp])
-        elif(metric == 'ssim'):
-          ptchnrm[izp,ixp] = ssim(dptch[izp,ixp],fptch[izp,ixp])
-          if(ptchnrm[izp,ixp,int(nzp/2),int(nxp/2)] < focthresh):
-            if(norm):
-              sptcho.append(normalize(dptch[izp,ixp]))
-            else:
-              sptcho.append(dptch[izp,ixp])
-        elif(metric == 'corr'):
-          ptchnrm[izp,ixp] = corrsim(dptch[izp,ixp],fptch[izp,ixp])
-          if(ptchnrm[izp,ixp,int(nzp/2),int(nxp/2)] < focthresh):
-            if(norm):
-              sptcho.append(normalize(dptch[izp,ixp]))
-            else:
-              sptcho.append(dptch[izp,ixp])
-        else:
-          raise Exception("Norm %s not yet implemented. Please try 'ssim','mse' or 'corr'"%(metric))
-        if(norm):
-          dptcho.append(normalize(dptch[izp,ixp,:,:]))
-          fptcho.append(normalize(fptch[izp,ixp,:,:]))
-        else:
-          dptcho.append(dptch[izp,ixp])
-          fptcho.append(fptch[izp,ixp])
-
-  # Convert to numpy arrays
-  dptcho = np.asarray(dptcho)
-  fptcho = np.asarray(fptcho)
-  sptcho = np.asarray(sptcho)
-
-  # Reconstruct the patch norm image (for QC purposes)
-  ptchnrmimg = pe.reconstruct(ptchnrm)
-
-  if(imgs):
-    return sptcho,dptcho,fptcho,ptchnrmimg
+  # Dimensions of inputs
+  [nex,na,nzp,nxp] = fptchs.shape
+  if(streamer):
+    nw = na//2
   else:
-    return sptcho
+    nw = 0
+
+  # Input segmentation labels
+  if(fltlbls is None):
+    fltlbls = np.zeros([nzp,nxp],dtype='float32')
+
+  metrics = {'fsemb':   np.zeros([nex],dtype='float32'),
+             'dsemb':   np.zeros([nex],dtype='float32'),
+             'sembrat': np.zeros([nex],dtype='float32'),
+             'fltnum':  np.zeros([nex],dtype='float32'),
+             'fpvar':   np.zeros([nex],dtype='float32'),
+             'dpvar':   np.zeros([nex],dtype='float32'),
+             'pvarrat': np.zeros([nex],dtype='float32'),
+             'corrprb': np.zeros([nex],dtype='float32')
+             }
+
+  # Output labels
+  flbls = np.ones(nex,dtype='float32')
+
+  for iex in progressbar(range(nex),"nex:",verb=verb):
+    # Get the example
+    cubf = fptchs[iex]
+    cubd = dptchs[iex]
+    # Angle metrics
+    metrics['fsemb']   = semblance_power(cubf[nw:])
+    metrics['dsemb']   = semblance_power(cubd[nw:])
+    metrics['sembrat'] = metrics['dsemb']/metrics['fsemb']
+    if(metrics['sembrat'] < smbthresh):
+      flbls[iex] = 0
+      continue
+    metrics['fltnum'] = np.sum(fltlbls)
+    if(metrics['fltnum'] > pixthresh):
+      fprd = fprds[iex]
+      dprd = dprds[iex]
+      # Compute fault metrics
+      metrics['fpvar']   = varimax(fprd); metrics['dpvar'] = varimax(dprd)
+      metrics['pvarrat'] = dpvar/fpvar
+      metrics['corrprb'] = corrsim(fprd,dprd)
+      if(metrics['sembrat'] < thresh1 and metrics['pvarrat'] < thresh1):
+        flbls[iex] = 0
+      elif(metrics['sembrat'] < thresh2 or metrics['pvarrat'] < thresh2):
+        flbls[iex] = 0
+      elif(metrics['corrprb'] < thresh1):
+        flbls[iex] = 0
+    else:
+      if(metrics['sembrat'] < thresh3):
+        flbls[iex] = 0
+
+  if(qc):
+    return metrics,flbls
+  else:
+    return flbls
 
 def extract_focfltptchs(fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthresh=20,
                          norm=True,qcptchgrd=False,dz=10,dx=10):
