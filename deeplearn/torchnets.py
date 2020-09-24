@@ -62,9 +62,9 @@ class Unet(nn.Module):
 class Vgg3_3d(nn.Module):
 
   def __init__(self):
-    super(Vgg_3d,self).__init__()
+    super(Vgg3_3d,self).__init__()
     # Maxpool
-    self.pool = nn.MaxPool3d(2,2,2)
+    self.pool = nn.MaxPool3d(2)
 
     # Convolutional blocks
     self.conv1 = nn.Conv3d(  1, 32,3,padding=(1,1,1))
@@ -72,7 +72,7 @@ class Vgg3_3d(nn.Module):
     self.conv3 = nn.Conv3d( 64,128,3,padding=(1,1,1))
 
     # Linear
-    self.fc1 = nn.Linear(128*16*16*16,128)
+    self.fc1 = nn.Linear(128 * 8 * 8 * 8,128)
     self.fc2 = nn.Linear(128,1)
 
   def forward(self,x):
@@ -82,10 +82,10 @@ class Vgg3_3d(nn.Module):
     x1d = self.pool(x1)
     x2  = F.relu(self.conv2(x1d))
     x2d = self.pool(x2)
-    x3  = F.relu(self.conv2(x2d))
+    x3  = F.relu(self.conv3(x2d))
     x3d = self.pool(x3)
     # Flatten
-    x3f = x3d.flatten(-1,128*16*16*16)
+    x3f = x3d.view(-1,128 * 8 * 8 * 8)
     x4  = F.relu(self.fc1(x3f))
     x5 = self.fc2(x4)
 
