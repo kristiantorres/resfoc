@@ -47,20 +47,31 @@ iptchs = [ normextract(img,nzp=nzp,nxp=nxp,strdz=strdz,strdx=strdx,norm=True) fo
 
 nex = aptchs[0].shape[0]
 
-
 # Label the defocused patches
 lmet,rollbls = label_defocused_patches(aptchs[0],aptchs[1],qc=True)
 gmet,roglbls = label_defocused_patches(aptchs[2],aptchs[1],qc=True)
 dmet,deflbls = label_defocused_patches(aptchs[3],aptchs[1],qc=True)
 
-titles = ['RL-Defocused','Focused','RU-Defocused','Defocused']
-mets = [lmet,None,gmet,dmet]
-lbls = [rollbls,None,roglbls,deflbls]
+#titles = ['RL-Defocused','Focused','RU-Defocused','Defocused']
+#mets = [lmet,None,gmet,dmet]
+#lbls = [rollbls,None,roglbls,deflbls]
+#for iex in range(nex):
+#  for i in range(4):
+#    if(i == 0 or i == 2 or i == 3):
+#      if(lbls[i][iex] == 0):
+#        print("Fsemb=%f Dsemb=%f Rat=%f"%(mets[i]['fsemb'][iex],mets[i]['dsemb'][iex],mets[i]['sembrat'][iex]))
+#        plot_cubeiso(aptchs[i][iex],stack=True,elev=15,show=False,verb=False,title=titles[i])
+#        plot_cubeiso(aptchs[1][iex],stack=True,elev=15,show=True,verb=False,title=titles[1])
+
+# Concatenate the labels and the data
+olbls = np.expand_dims(np.concatenate([rollbls,np.ones(nex,dtype='float32'),roglbls,deflbls],axis=0),axis=-1)
+oimgs = np.concatenate(aptchs,axis=0)
+
+
+wh5 = WriteToH5('/scr2/joseph29/sigsbee_labeled.h5',dsize=1)
 for iex in range(nex):
-  for i in range(4):
-    if(i == 0 or i == 2 or i == 3):
-      print("Fsemb=%f Dsemb=%f Rat=%f"%(mets[i]['fsemb'],mets[i]['dsemb'],mets[i]['sembrat']))
-      if(lbls[i][iex] == 0): print("Defocused")
-      plot_cubeiso(aptchs[i][iex],stack=True,elev=15,show=False,verb=False,title=titles[i])
-      plot_cubeiso(aptchs[1][iex],stack=True,elev=15,show=True,verb=False,title=titles[1])
+  oimg = oimgs[iex]
+  olbl = olbls[iex]
+  wh5.write_examples(oimg[np.newaxis],olbl[np.newaxis])
+
 

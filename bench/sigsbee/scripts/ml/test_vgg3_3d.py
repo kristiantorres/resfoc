@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from sigsbee_focdata import SigsbeeFocData
 from sigsbee_focdata_gpu import SigsbeeFocDataGPU
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -14,8 +15,8 @@ device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 device = "cpu"
 
 # Training set
-sig_fdr = SigsbeeFocDataGPU('/net/thing/scr2/joseph29/sigsbee_focdefres.h5',device,verb=True,begex=0,endex=100)
-#TODO: need to patch the sigsbee images and read them in during training
+#sig_fdr = SigsbeeFocDataGPU('/net/thing/scr2/joseph29/sigsbee_focdefres.h5',device,verb=True,begex=0,endex=100)
+sig_fdr = SigsbeeFocData('/net/thing/scr2/joseph29/sigsbee_focdefres.h5',nexmax=100)
 
 # Get idxs and cutoff
 nex   = len(sig_fdr); split = 0.2
@@ -52,13 +53,28 @@ optimizer = torch.optim.Adam(net.parameters(),lr=lr)
 # Training
 nepoch = 10
 
+prds = []; macc = k = 0
 for trdat in trloader:
-  inputs,labels = trdat['img'],trdat['lbl']
+  inputs,labels = trdat['img'].to(device),trdat['lbl'].to(device)
+  print(inputs.size(),labels.size())
   if(labels[0].item() == 0):
     print("Defocused")
   else:
     print("Focused")
-  plot_cubeiso(inputs[0,0].cpu().numpy(),stack=True,elev=15,show=True,verb=False)
+  #plot_cubeiso(inputs[0,0].cpu().numpy(),stack=True,elev=15,show=True,verb=False)
   outputs = net(inputs)
+  iprd = ((outputs > 0.5).float() == labels).float()
+  macc += iprd.sum().item()
+  k += 20
+  print(macc/k)
+  prds.append(iprd)
   loss = criterion(outputs,labels)
+
+allprds = torch.cat(prds)
+
+print(macc,allprds.sum().item())
+
+tacc = (allprds.sum().item()/allprds.size()[0])
+nacc = (macc/allprds.size()[0])
+print(tacc,nacc)
 

@@ -249,28 +249,28 @@ def label_defocused_patches(dptchs,fptchs,fltlbls=None,fprds=None,dprds=None,
     cubf = fptchs[iex]
     cubd = dptchs[iex]
     # Angle metrics
-    metrics['fsemb']   = semblance_power(cubf[nw:])
-    metrics['dsemb']   = semblance_power(cubd[nw:])
-    metrics['sembrat'] = metrics['dsemb']/metrics['fsemb']
-    if(metrics['sembrat'] < smbthresh):
+    metrics['fsemb'][iex] = semblance_power(cubf[nw:])
+    metrics['dsemb'][iex] = semblance_power(cubd[nw:])
+    metrics['sembrat'][iex]  = metrics['dsemb'][iex]/metrics['fsemb'][iex]
+    if(metrics['sembrat'][iex] < smbthresh):
       flbls[iex] = 0
       continue
-    metrics['fltnum'] = np.sum(fltlbls)
-    if(metrics['fltnum'] > pixthresh):
+    metrics['fltnum'][iex] = np.sum(fltlbls)
+    if(metrics['fltnum'][iex] > pixthresh):
       fprd = fprds[iex]
       dprd = dprds[iex]
       # Compute fault metrics
-      metrics['fpvar']   = varimax(fprd); metrics['dpvar'] = varimax(dprd)
-      metrics['pvarrat'] = dpvar/fpvar
-      metrics['corrprb'] = corrsim(fprd,dprd)
-      if(metrics['sembrat'] < thresh1 and metrics['pvarrat'] < thresh1):
+      metrics['fpvar'][iex]   = varimax(fprd); metrics['dpvar'][iex] = varimax(dprd)
+      metrics['pvarrat'][iex] = dpvar/fpvar
+      metrics['corrprb'][iex] = corrsim(fprd,dprd)
+      if(metrics['sembrat'][iex] < thresh1 and metrics['pvarrat'][iex] < thresh1):
         flbls[iex] = 0
-      elif(metrics['sembrat'] < thresh2 or metrics['pvarrat'] < thresh2):
+      elif(metrics['sembrat'][iex] < thresh2 or metrics['pvarrat'][iex] < thresh2):
         flbls[iex] = 0
-      elif(metrics['corrprb'] < thresh1):
+      elif(metrics['corrprb'][iex] < thresh1):
         flbls[iex] = 0
     else:
-      if(metrics['sembrat'] < thresh3):
+      if(metrics['sembrat'][iex] < thresh3):
         flbls[iex] = 0
 
   if(qc):
