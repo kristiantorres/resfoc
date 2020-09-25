@@ -278,13 +278,14 @@ def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
 
   return ptchf
 
-def torchprogress(cur :int,tot :int,loss :float,acc :float,size :int=40, file=sys.stdout) -> None:
+def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
   """
   Prints a progress bar during training of a torch
   neural network
 
   Parameters:
     cur  - index of the current batch
+    bsz  - size of a batch
     tot  - the total number batches
     loss - the current running loss value
     acc  - the current accuracy
@@ -295,7 +296,7 @@ def torchprogress(cur :int,tot :int,loss :float,acc :float,size :int=40, file=sy
   if(cur == 0): div = 1
   else: div = cur
   curform = create_inttag(cur,tot)
-  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss/div,acc))
+  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss/div,acc/((cur+1)*bsz)))
   if(cur == tot):
     file.write("\n")
   file.flush()
