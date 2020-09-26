@@ -54,7 +54,7 @@ tsloader = DataLoader(sig_tst,batch_size=tsbsize,num_workers=0)
 
 # Get the network
 net = Vgg3_3d()
-net = torch.nn.DataParallel(net,device_ids=[2,3,4,5,6])
+net = torch.nn.DataParallel(net,device_ids=[2,4,5,6,7])
 net.to(device)
 
 # Loss function
@@ -67,7 +67,7 @@ lr = 1e-4
 optimizer = torch.optim.Adam(net.parameters(),lr=lr)
 
 # Training
-nepoch = 100
+nepoch = 1000
 nprint = 10
 
 for epoch in range(nepoch):
@@ -101,7 +101,6 @@ for epoch in range(nepoch):
   with torch.no_grad():
     va_loss = vacc = 0
     # Validation prediction
-    k = 0
     for vadat in valoader:
       # Get example
       vaexp,valbl = vadat['img'].to(device), vadat['lbl'].to(device)
@@ -127,5 +126,12 @@ for epoch in range(nepoch):
       tacc += ((tsprd > 0.5).float() == tslbl).float().sum().item()
     print("tst_loss=%.4g tst_acc=%.4f"%(ts_loss/len(tsloader),tacc/(len(tsloader)*tsbsize)))
 
-torch.save(net.state_dict(), "/scr1/joseph29/sigsbee_fltfocbig.pth")
+# Get the parameter dictionary
+try:
+  state_dict = net.module.state_dict()
+except AttributeError:
+  state_dict = net.state_dict()
+
+# Save the parameter dictionary to file
+#torch.save(state_dict, "/scr1/joseph29/sigsbee_fltfocbig.pth")
 

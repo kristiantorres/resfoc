@@ -84,42 +84,50 @@ def plot_imgpoff(oimg,dx,dz,zoff,xloc,oh,dh,show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
+def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,figname=None,**kwargs):
   """
   Makes a plot of the image and the extended axis at a specified location
 
   Parameters
-    aimg - the angle domain image
-    dx   - lateral sampling of the image
-    dz   - depth sampling of the image
-    oa   - origin of the angle axis
-    da   - sampling of the angle axis
-    xloc - the location at which to extract the angle gather [samples]
-    show - flag of whether to display the image plot [True]
+    aimg    - the angle domain image
+    dx      - lateral sampling of the image
+    dz      - depth sampling of the image
+    oa      - origin of the angle axis
+    da      - sampling of the angle axis
+    xloc    - the location at which to extract the angle gather [samples]
+    show    - flag of whether to display the image plot [True]
+    figname - name of output image file [None]
   """
   # Get image dimensions
   na = aimg.shape[0]; nz = aimg.shape[1]; nx = aimg.shape[2]
+  # Image amplitudes
+  stk = np.sum(aimg,axis=0)
+  imin = np.min(stk); imax = np.max(stk)
   fig,ax = plt.subplots(1,2,figsize=(kwargs.get('wbox',15),kwargs.get('hbox',8)),gridspec_kw={'width_ratios':[2,1]})
   # Plot the image
-  ax[0].imshow(np.sum(aimg,axis=0),extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-    cmap=kwargs.get('cmap','gray'))
+  ax[0].imshow(stk,extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
+    cmap=kwargs.get('cmap','gray'),vmin=kwargs.get('imin',imin),vmax=kwargs.get('imax',imax))
   # Plot a line at the specified image point
-  lz = np.linspace(0.0,(nz)*dz,nz)
-  lx = np.zeros(nz) + xloc*dx
-  ax[0].plot(lx,lz,color='k',linewidth=2)
+  if(kwargs.get('plotline',True)):
+    lz = np.linspace(0.0,(nz)*dz,nz)
+    lx = np.zeros(nz) + xloc*dx
+    ax[0].plot(lx,lz,color='k',linewidth=2)
   ax[0].set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('labelsize',14))
+  # Extended image amplitudes
+  amin = np.min(aimg); amax = np.max(aimg)
   # Plot the extended axis
   ax[1].imshow(aimg[:,:,xloc].T,extent=[oa,oa+(na)*da,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500))
+      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('amin',amin),vmax=kwargs.get('amax',amax))
   ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel(' ',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
   ax[1].set_yticks([])
-  plt.subplots_adjust(wspace=-0.4)
-  if(show):
-    plt.show()
+  plt.subplots_adjust(wspace=kwargs.get('wspace',-0.4))
+  if(figname is None and show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',dpi=150,transparent=True)
 
 def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=None,**kwargs):
   """
