@@ -16,7 +16,7 @@ from deeplearn.utils import next_power_of_2
 from genutils.ptyprint import printprogress
 from genutils.movie import viewcube3d
 
-def pad_cft(n):
+def pad_cft(n) -> int:
   """ Computes the size necessary to pad the image to next power of 2"""
   np = next_power_of_2(n)
   if(np == n):
@@ -24,7 +24,8 @@ def pad_cft(n):
   else:
     return np + 1 - n
 
-def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debug=False,verb=True,nthreads=4):
+def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
+              debug=False,verb=True,nthreads=4) -> np.ndarray:
   """
   Computes the prestack residual migration
 
