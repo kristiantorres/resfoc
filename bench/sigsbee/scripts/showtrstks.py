@@ -5,22 +5,23 @@ from genutils.movie import viewimgframeskey
 
 sep = seppy.sep()
 
+fw = 300; nw = 11
 # Read in focused images
-faxes,foc = sep.read_file("sigsbee_foctrimgs.H")
+faxes,foc = sep.read_wind("sigsbee_foctrimgs.H",fw=fw,nw=nw)
 [nz,na,ny,nx,nmf] = faxes.n; [oz,oa,oy,ox,om] = faxes.o; [dz,da,dy,dx,dm] = faxes.d
 foc = np.ascontiguousarray(foc.reshape(faxes.n,order='F').T).astype('float32')
 focstk = np.sum(foc[:,:,0,:,:],axis=2)
 gfoc = agc(focstk)
 
 # Read in defocused images
-daxes,dfc = sep.read_file("sigsbee_deftrimgs.H")
+daxes,dfc = sep.read_wind("sigsbee_deftrimgs.H",fw=fw,nw=nw)
 [nz,na,ny,nx,nmd] = daxes.n
 dfc = np.ascontiguousarray(dfc.reshape(daxes.n,order='F').T).astype('float32')
 dfcstk = np.sum(dfc[:,:,0,:,:],axis=2)
 gdfc = agc(dfcstk)
 
 # Read in residually defocused images
-raxes,res = sep.read_file("sigsbee_restrimgs.H")
+raxes,res = sep.read_wind("sigsbee_restrimgs.H",fw=fw,nw=nw)
 res = np.ascontiguousarray(res.reshape(raxes.n,order='F').T).astype('float32')
 resstk = np.sum(res[:,:,0,:,:],axis=2)
 gres = agc(resstk)

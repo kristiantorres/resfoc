@@ -63,7 +63,7 @@ trestart = 90*60 # Restart every 90 min
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
 # Loop over all models
-beg = 10
+beg = 251
 for im in progressbar(range(beg,nm),"nmod:"):
   # Restart the workers if approaching two hour limit
   if(im == beg): start = time.time()
