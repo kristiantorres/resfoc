@@ -16,7 +16,7 @@ from deeplearn.utils import next_power_of_2
 from genutils.ptyprint import printprogress
 from genutils.movie import viewcube3d
 
-def pad_cft(n):
+def pad_cft(n) -> int:
   """ Computes the size necessary to pad the image to next power of 2"""
   np = next_power_of_2(n)
   if(np == n):
@@ -24,7 +24,8 @@ def pad_cft(n):
   else:
     return np + 1 - n
 
-def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debug=False,verb=True,nthreads=4):
+def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
+              debug=False,verb=True,nthreads=4) -> np.ndarray:
   """
   Computes the prestack residual migration
 
@@ -61,7 +62,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debu
   # Compute cosine transform
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
   if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]),flush=True)
-  imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=verb)
+  imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=True)
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
 
@@ -168,10 +169,11 @@ def rand_preresmig(img,ds,nro=6,oro=1.0,dro=0.01,offset=5,nps=None,transp=False,
     rho = np.random.randint(nro+offset+1,fnro)*dro + foro
 
   if(verb): print("randrho=%.3f"%(rho))
-  rmig  = preresmig(img,ds,nro=1,oro=rho,dro=dro,nps=nps,time=False,nthreads=1,verb=verb)
+  rmig  = preresmig(img,ds,nps,nro=1,oro=rho,dro=dro,time=False,nthreads=1,verb=verb)
 
   if(wantrho):
     return rmig,rho
   else:
     return rmig
+
 
