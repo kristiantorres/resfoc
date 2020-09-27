@@ -4,7 +4,7 @@ Simple, inefficient cosine transform of up to 4D data
 @version: 2020.04.02
 """
 import numpy as np
-from utils.ptyprint import printprogress
+from genutils.ptyprint import printprogress
 
 ## Main functions
 def cosft(dat,axis1=None,axis2=None,axis3=None,axis4=None):

@@ -1,3 +1,10 @@
+"""
+Functions for performing residual stolt migration
+and time to depth conversion
+
+@author: Joseph Jennings
+@version: 2020.06.13
+"""
 import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.rstoltbig as rstoltbig
@@ -5,8 +12,8 @@ import resfoc.cosft as cft
 import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
 from deeplearn.utils import next_power_of_2
-from utils.ptyprint import printprogress
-from utils.movie import viewcube3d
+from genutils.ptyprint import printprogress
+from genutils.movie import viewcube3d
 
 def pad_cft(n):
   """ Computes the size necessary to pad the image to next power of 2"""
@@ -52,15 +59,15 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,debu
       nhp = nps[0] - img.shape[0]; nmp = nps[1] - img.shape[1]; nzp = nps[2] - img.shape[2]
   # Compute cosine transform
   imgp   = np.pad(iimg,((0,nhp),(0,nmp),(0,nzp)),'constant')
-  if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]))
-  imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=True)
+  if(verb): print("Padding to size nhp=%d nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1],imgp.shape[2]),flush=True)
+  imgpft = cft.cosft(imgp,axis0=1,axis1=1,axis2=1,verb=verb)
   # Compute samplings
   dcs = cft.samplings(imgpft,ds)
 
   # Residual migration
   nzpc = imgpft.shape[2]; nmpc = imgpft.shape[1]; nhpc = imgpft.shape[0]
   foro = oro - (nro-1)*dro; fnro = 2*nro-1
-  if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1))
+  if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1),flush=True)
   rmigiftswind = np.zeros([fnro,nh,nm,nz],dtype='float32')
   if(not debug):
     # Mode for large images
@@ -128,4 +135,42 @@ def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
   if(verb): printprogress("nrho:",fnro,fnro)
 
   return time
+
+def rand_preresmig(img,ds,nro=6,oro=1.0,dro=0.01,offset=5,nps=None,transp=False,verb=False,wantrho=True):
+  """
+  Chooses a random rho (from the provided rho axis) and residually migrates
+  the input image for that rho
+
+  Parameters:
+    img    - the input prestack image (probably focused) [nhx,nx,nz]
+    ds     - the sampling of the image. [dh,dx,dz] (or [dh,dz,dx] if transp=True)
+    nro    - number of rhos from which to choose (will actually be 2*nro - 1)
+    oro    - the origin of the rho axis [1.0]
+    dro    - the sampling of the rho axis [0.01]
+    offset - select rhos from offset number of rhos away from rho=1. Avoids
+             choosing a rho too close to rho=1. [5]
+    nps    - list of sizes that specify how much to pad for the cosine transform
+             ([nhp,nxp,nzp] or [nhp,nzp,nxp] if transp=True)
+    transp - take input [nh,nz,nx] and return output [nro,nh,nz,nx]
+    verb   - verbosity flag [True]
+
+  Returns a residually migrated image for a randomly selected rho
+  """
+  # Build the rhos from which to select
+  foro = oro - (nro-1)*dro; fnro = 2*nro-1
+  rhos = np.linspace(foro,foro + (fnro-1)*dro,2*nro-1)
+
+  # Choose a rho for residual migration
+  if(np.random.choice([0,1])):
+    rho = np.random.randint(0,nro-offset)*dro + foro
+  else:
+    rho = np.random.randint(nro+offset+1,fnro)*dro + foro
+
+  if(verb): print("randrho=%.3f"%(rho))
+  rmig  = preresmig(img,ds,nro=1,oro=rho,dro=dro,nps=nps,time=False,nthreads=1,verb=verb)
+
+  if(wantrho):
+    return rmig,rho
+  else:
+    return rmig
 
