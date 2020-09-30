@@ -619,3 +619,41 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,f
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
 
+#TODO: don't forget to change the hershey fonts to default
+def plot_img2d(img,**kwargs) -> None:
+  """
+  A generic function for plotting a 2D seismic image
+
+  Parameters:
+    img     - the input image [nx,nz] (if transp flag, [nz,nx])
+    transp  - flag indicating that the input is [nz,nx] [False]
+    figname - name of output figure  [None]
+    show    - display the figure during runtime [True]
+    pclip   - clipping to apply to the image [1.0]
+    imin    - minimum image amplitude [None]
+    imax    - maximum image amplitude [None]
+    xmin    - minumum x value to use in extent [None]
+    xmax    - maximum x value to use in extent [None]
+    zmin    - minumum z value to use in extent [None]
+    zmax    - maximum z value to use in extent [None]
+    xlabel  - label for x axis [None]
+    zlabel  - label for z axis [None]
+    fsize   - fontsize [15]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    im      - an im object used to match a velocity model image [None]
+    crop    - number of pixels used to crop out a colorbar [None]
+    cmap    - colormap for seismic image ['gray']
+  """
+  pass
+
+def plot_vel2d(vel,**kwargs) -> None:
+  """
+  A generic function for plotting a 2D velocity model
+
+  Parameters:
+    vel - the input velocity model [nx,nz] (if transp flag, [nz,nx])
+  """
+  pass
+
