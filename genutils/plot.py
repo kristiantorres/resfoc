@@ -653,7 +653,23 @@ def plot_vel2d(vel,**kwargs) -> None:
   A generic function for plotting a 2D velocity model
 
   Parameters:
-    vel - the input velocity model [nx,nz] (if transp flag, [nz,nx])
+    vel     - the input velocity model [nx,nz] (if transp flag, [nz,nx])
+    transp  - flag indicating that the input is [nz,nx] [False]
+    figname - name of output figure [None]
+    show    - display the figure during runtime [True]
+    vmin    - minimum velocity value [None]
+    vmax    - maximum velocity value [None]
+    xmin    - minumum x value to use in extent [None]
+    xmax    - maximum x value to use in extent [None]
+    zmin    - minumum z value to use in extent [None]
+    zmax    - maximum z value to use in extent [None]
+    xlabel  - label for x axis [None]
+    zlabel  - label for z axis [None]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    im      - an im object used to match a velocity model image [None]
+    cbar    - flag for plotting colorbar [True]
   """
   pass
 
