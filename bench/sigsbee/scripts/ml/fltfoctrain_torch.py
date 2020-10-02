@@ -54,7 +54,7 @@ tsloader = DataLoader(sig_tst,batch_size=tsbsize,num_workers=0)
 
 # Get the network
 net = Vgg3_3d()
-net = torch.nn.DataParallel(net,device_ids=[2,4,5,6,7])
+net = torch.nn.DataParallel(net,device_ids=[2,3,4,5,6])
 net.to(device)
 
 # Loss function
@@ -67,7 +67,7 @@ lr = 1e-4
 optimizer = torch.optim.Adam(net.parameters(),lr=lr)
 
 # Training
-nepoch = 1000
+nepoch = 250
 nprint = 10
 
 for epoch in range(nepoch):

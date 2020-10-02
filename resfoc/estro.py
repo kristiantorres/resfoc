@@ -3,17 +3,19 @@ Functions for estimating the RMS velocity ratio (rho)
 from residual migration images
 
 @author: Joseph Jennings
-@version: 2020.04.29
+@version: 2020.10.01
 """
 import numpy as np
+import torch
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize, thresh
-from deeplearn.focuslabels import find_flt_patches, varimax
+from deeplearn.focuslabels import find_flt_patches, varimax, semblance_power
 from resfoc.ssim import ssim
 from resfoc.rhoshifts import rhoshifts
 from scipy.ndimage import map_coordinates
 from scaas.trismooth import smooth
 from scaas.noise_generator import perlin
+from genutils.ptyprint import progressbar
 
 def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
   """
@@ -168,7 +170,7 @@ def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, 
     return rhosm
 
 def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
-                         rectz=30,rectx=30,qcimgs=True,verb=False):
+                         rectz=30,rectx=30,qcimgs=True,verb=False,fmwrk='torch',device=None):
   """
   Estimates rho by choosing the residually migrated patch that has
   highest angle gather and fault focus probability given by the neural network
@@ -187,6 +189,8 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
     qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
                  and fault patches [nz,nx]
     verb       - verbosity flag [False]
+    fmwrk      - deep learning framework to be used for the prediction [torch]
+    device     - device for pytorch networks
 
   Returns an estimate of rho(x,z)
   """
@@ -202,13 +206,34 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   aptch = np.squeeze(pea.extract(rimgs))
   # Flatten patches and make a prediction on each
   numpz = aptch.shape[0]; numpx = aptch.shape[1]
-  aptchf = np.expand_dims(normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp])),axis=-1)
-  focprd = foccnn.predict(aptchf,verbose=verb)
+  if(fmwrk == 'torch'):
+    aptchf = normalize(aptch.reshape([nro*numpz*numpx,1,na,nzp,nxp]))
+    with(torch.no_grad()):
+      aptchft = torch.tensor(aptchf)
+      focprdt = torch.zeros([nro*numpz*numpx,1])
+      for iptch in progressbar(range(aptchf.shape[0]),verb=verb):
+        gptch = aptchft[iptch].to(device)
+        focprdt[iptch] = torch.sigmoid(foccnn(gptch.unsqueeze(0)))
+      focprd = focprdt.cpu().numpy()
+  elif(fmwrk == 'tf'):
+    aptchf = np.expand_dims(normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp])),axis=-1)
+    focprd = foccnn.predict(aptchf,verbose=verb)
+  elif(fmwrk is None):
+    aptchf = normalize(aptch.reshape([nro*numpz*numpx,na,nzp,nxp]))
+    focprd = np.zeros([nro*numpz*numpx,1])
+    for iptch in progressbar(range(aptchf.shape[0]),verb=verb):
+      focprd[iptch] = semblance_power(aptchf[iptch])
 
   # Assign prediction to entire patch for QC
   focprdptch = np.zeros([numpz*numpx*nro,nzp,nxp])
   for iptch in range(nro*numpz*numpx): focprdptch[iptch,:,:] = focprd[iptch]
   focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
+
+  # Save predictions as a function of rho only
+  focprdr = np.transpose(focprd.reshape([nro,numpz,numpx]),(1,2,0))
+  ros = np.linspace(oro,oro+(nro-1)*dro,nro)
+  import matplotlib.pyplot as plt
+  plt.figure(); plt.plot(ros,focprdr[12,2]); plt.show()
 
   # Output rho image
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
@@ -246,7 +271,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
     for iro in range(nro):
       focprdimgsm[iro] = smooth(focprdimg[iro].astype('float32'),rect1=rectx,rect2=rectz)
     # Return images
-    return rhosm,focprdimgsm
+    return rhosm,focprdimgsm,focprdr
   else:
     return rhosm
 
