@@ -194,7 +194,7 @@ def focdefocflt_labels(dimg,fimg,fltlbl,nxp=64,nzp=64,strdx=32,strdz=32,pixthres
 
 def label_defocused_patches(dptchs,fptchs,fltlbls=None,fprds=None,dprds=None,
                             pixthresh=50,thresh1=0.7,thresh2=0.5,thresh3=0.7,smbthresh=0.4,
-                            streamer=True,verb=False,qc=False) -> np.ndarray:
+                            unsure=True,streamer=True,verb=False,qc=False) -> np.ndarray:
   """
   Attempts to label patches as defocused using the focused equivalent
 
@@ -209,6 +209,7 @@ def label_defocused_patches(dptchs,fptchs,fltlbls=None,fprds=None,dprds=None,
     thresh2   - second threshold [0.5]
     thresh3   - third threshold [0.7]
     smbthresh - semblance threshold [0.4]
+    unsure    - give the unsure label (-1) instead of focused (1) [False]
     streamer  - streamer geometry (one-sided angle gathers) [True]
     verb      - verbosity flag [False]
     qc        - return the computed metrics
@@ -242,7 +243,10 @@ def label_defocused_patches(dptchs,fptchs,fltlbls=None,fprds=None,dprds=None,
              }
 
   # Output labels
-  flbls = np.ones(nex,dtype='float32')
+  if(unsure):
+    flbls = np.ones(nex,dtype='float32')*-1
+  else:
+    flbls = np.ones(nex,dtype='float32')
 
   for iex in progressbar(range(nex),"nex:",verb=verb):
     # Get the example

@@ -301,3 +301,195 @@ def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
     file.write("\n")
   file.flush()
 
+def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
+                     oz=None,ox=None,transp=False,pltcoords=True,**kwargs) -> None:
+  """
+  Plots the patch grid on the input image
+
+  Parameters:
+    img       - the input image [nz,nx]
+    nzp       - the size of the patch in z (samples)
+    nxp       - the size of the patch in x (samples)
+    strdz     - patch stride in z (samples) [nzp//2]
+    strdx     - patch stride in x (samples) [nxp//2]
+    dz        - depth sampling of image [1.0]
+    dx        - lateral sampling of image [1.0]
+    oz        - depth origin of image [0.0]
+    ox        - lateral origin of image [0.0]
+    transp    - flag indicating to transpose the input image [False]
+    pltcoords - flag indicating to plot the patch coordinates on the image [True]
+  """
+  # Get the image axes
+  if(transp):
+    nx,nz = img.shape
+  else:
+    nz,nx = img.shape
+  if(dz is None): dz = 1.0
+  if(oz is None): oz = 0.0
+  if(dx is None): dx = 1.0
+  if(ox is None): ox = 0.0
+
+  if(strdz is None):
+    strdz = nzp//2
+  if(strdx is None):
+    strdx = nxp//2
+
+  # Do the patch extraction
+  totptchs = normextract(img,nzp,nxp,strdz,strdx).shape[0]
+
+  # Make the patch grids
+  bgz = 0; egz = nz*dz+1; dgz = nzp*dz
+  bgx = 0; egx = nx*dx+1; dgx = nxp*dx
+
+  # Get number of patches in each dimensions
+  nptchz,remz = divmod(nz,nzp)
+  nptchx,remx = divmod(nx,nxp)
+
+  # Plotting parameters
+  cmap   = kwargs.get('cmap','gray')
+  pclip  = kwargs.get('pclip',1.0)
+  vmin   = kwargs.get('vmin',pclip*np.min(img))
+  vmax   = kwargs.get('vmax',pclip*np.max(img))
+  xlabel = kwargs.get('xlabel','X (km)')
+  zlabel = kwargs.get('zlabel','Z (km)')
+  fsize  = kwargs.get('fsize',15)
+  interp = kwargs.get('interp','bilinear')
+  aspect = kwargs.get('aspect','auto')
+  xmin   = ox; xmax = ox + nx*dx
+  zmin   = oz; zmax = oz + nz*dz
+  textsize = kwargs.get('textsize',12)
+  if(strdx != 0): xshft = 2
+  if(strdz != 0): zshft = 2
+
+  fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+  ax = fig.gca()
+  zticks = np.arange(bgz,egz,dgz)
+  xticks = np.arange(bgx,egx,dgx)
+  ax.set_xticks(xticks)
+  ax.set_yticks(zticks)
+  ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                 extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+  ax.grid(linestyle='-',color='k',linewidth=2)
+  ax.set_ylabel(zlabel,fontsize=fsize)
+  ax.set_xlabel(xlabel,fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
+  tot1 = nptchz*nptchx
+  ax.set_title(r'Grid 1: X-stride=0, Z-stride=0 $\rightarrow \,\, %d\times%d = %d$ patches'
+               %(nptchx,nptchz,tot1),fontsize=fsize)
+  # Plot the coordinates
+  if(pltcoords):
+    plot_patchcoords(nptchz,nptchx,zticks,xticks,zmax,xmax,0,0,zshft,xshft,
+                     textsize,'k')
+
+  if(strdx != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+    ax = fig.gca()
+    zticks = np.arange(bgz,egz,dgz)
+    xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='r',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot2 = (nptchx-1)*nptchz
+    ax.set_title(r'Grid 2: X-stride=%d, Z-stride=0 $\rightarrow \,\, %d\times%d = %d$ patches'
+                 %(strdx,nptchx-1,nptchz,tot2),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz,nptchx-1,zticks,xticks,zmax,xmax,0,1,zshft,xshft,
+                       textsize,'r')
+
+  if(strdz != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+    ax = fig.gca()
+    zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
+    xticks = np.arange(bgx,egx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='g',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot3 = (nptchx)*(nptchz-1)
+    ax.set_title(r'Grid 3: X-stride=0, Z-stride=%d $\rightarrow \,\, %d\times%d = %d$ patches'
+        %(strdz,nptchx,nptchz-1,tot3),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz-1,nptchx,zticks,xticks,zmax,xmax,1,0,zshft,xshft,
+                       textsize,'g')
+
+  if(strdx != 0 and strdz != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',10)))
+    ax = fig.gca()
+    zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
+    xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='b',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot4 = (nptchx-1)*(nptchz-1)
+    ax.set_title(r'Grid 4: X-stride=%d, Z-stride=%d $\rightarrow \,\, %d\times%d = %d$ patches'
+        %(strdx,strdz,nptchx-1,nptchz-1,tot4),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz-1,nptchx-1,zticks,xticks,zmax,xmax,1,1,zshft,xshft,
+                       textsize,'b')
+
+  print("Total number of patches: %d = %d + %d + %d + %d"%(totptchs,tot1,tot2,tot3,tot4))
+
+  plt.show()
+
+def plot_patchcoords(nptchz,nptchx,zticks,xticks,zmax,xmax,zidxi,xidxi,zshft,xshft,
+                     textsize,color):
+  """
+  Plots the patch coordinates on the image
+  To be used with plot_patchgrid2d
+  """
+  idx = zticks < zmax
+  zticksw = zticks[idx]
+  idx = xticks < xmax
+  xticksw = xticks[idx]
+  # Get the offset
+  xtickdx = xticksw[1] - xticksw[0]
+  ztickdx = zticksw[1] - zticksw[0]
+  for iztick in range(nptchz):
+    zpos = zticksw[iztick] + ztickdx/2
+    xidx = xidxi
+    for ixtick in range(nptchx):
+      xpos = xticksw[ixtick] + xtickdx/2
+      plt.text(xpos,zpos,'(%d,%d)'%(zidxi,xidx),fontsize=textsize,color=color)
+      xidx += xshft
+    zidxi += zshft
+
+def patch_window2d(img,nzp,nxp,transp=False,pad=False) -> np.ndarray:
+  """
+  Windows the data based on the provided patch size so that
+  the patches fit evenly into the image
+
+  Parameters:
+    img    - the input image [n3,nz,nx]
+    nzp    - the size of the patch in z
+    nxp    - the size of the patch in x
+    transp - whether to transpose the input image [False]
+    pad    - pad instead of window [False]
+  """
+  # Get the image shape
+  if(transp):
+    nx,nz = img.shape[-2:]
+  else:
+    nz,nx = img.shape[-2:]
+
+  nzw = nz - divmod(nz,nzp)[1]
+  nxw = nx - divmod(nx,nxp)[1]
+
+  if(len(img.shape) == 2):
+    return img[:nzw,:nxw]
+  else:
+    return img[...,:nzw,:nxw]
+
