@@ -425,7 +425,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
 
   # Compute plotting min and max
-  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin == None or vmax == None):
     vmin = np.min(data)*kwargs.get('pclip',1.0)
     vmax = np.max(data)*kwargs.get('pclip',1.0)
 
@@ -447,7 +448,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   def key_event(e):
     nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
 
-    if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+    if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]):
       zoomed_out = True
     else:
       zoomed_out = False
@@ -579,8 +580,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       if e.key.isdigit():
         curr_pos=int(e.key)
       curr_pos=curr_pos%ns[3]
-      
-      if(zoomed_out): 
+
+      if(zoomed_out):
         ax[0,1].cla()
       else:
         del ax[0,1].lines[:]
@@ -665,7 +666,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         i3=int((loc3-os[2])/ds[2])
         loc3=i3*ds[2]+os[2]
 
-      if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+      if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]):
         zoomed_out = True
       else:
         zoomed_out = False
