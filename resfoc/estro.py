@@ -231,9 +231,6 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
 
   # Save predictions as a function of rho only
   focprdr = np.transpose(focprd.reshape([nro,numpz,numpx]),(1,2,0))
-  ros = np.linspace(oro,oro+(nro-1)*dro,nro)
-  import matplotlib.pyplot as plt
-  plt.figure(); plt.plot(ros,focprdr[12,2]); plt.show()
 
   # Output rho image
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))

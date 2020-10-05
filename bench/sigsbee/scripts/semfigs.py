@@ -24,7 +24,7 @@ xmin = 50; xmax = 200
 zmin = 400; zmax=1100
 
 # Plot the stack
-#fsize = 15
+fsize = 15
 #fig = plt.figure(figsize=(12,6)); ax = fig.gca()
 #ax.imshow(stk.T,cmap='gray',interpolation='bilinear',vmin=smin,vmax=smax,
 #          extent=[oxw,oxw+nxw*dx,oz+nz*dz,oz])
@@ -155,7 +155,7 @@ kmin = sc2*np.min(sestkb); kmax = sc2*np.max(sestkb)
 ## Region of interest
 #xmin2 = 50; xmax2 = 200
 #zmin2 = 160; zmax2=1100
-#
+
 #fig = plt.figure(figsize=(12,6)); ax = fig.gca()
 #ax.imshow(sestkb[zmin2:zmax2,xmin2:xmax2],interpolation='bilinear',cmap='gray',vmin=kmin,vmax=kmax,
 #          extent=[oxw+xmin*dx,oxw+xmax*dx,zmax*dz,zmin*dz])
