@@ -315,11 +315,14 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   cbar.set_label('Velocity (m/s)',fontsize=kwargs.get('labelsize',15))
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
-    plt.close()
+    if(kwargs.get('close',True)):
+      plt.close()
   if(show):
     plt.show()
 
-def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
+  return ax
+
+def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,figname=None,**kwargs):
   """
   Makes a 3D plot of a data cube
 
@@ -345,7 +348,8 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
 
   # Compute plotting min and max
-  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin is None or vmax is None):
     vmin = np.min(data)*kwargs.get('pclip',1.0)
     vmax = np.max(data)*kwargs.get('pclip',1.0)
 
@@ -418,7 +422,21 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax4.set_xticklabels(['%.2f'%(loc1)])
   ax4.tick_params(labelsize=kwargs.get('ticksize',14))
 
+  # Color bar
+  if(kwargs.get('cbar',False)):
+    fig.subplots_adjust(right=0.87)
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.11),
+      kwargs.get('wbar',0.02),kwargs.get('hbar',0.78)])
+    cbar = fig.colorbar(im,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('ticksize',14))
+    cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",13))
+    cbar.draw_all()
+
   ax[0,1].axis('off')
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
+    plt.close()
+
   if(show):
     plt.show()
 
