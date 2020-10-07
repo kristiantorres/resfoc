@@ -872,7 +872,7 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
     interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
     show      - flag for calling plt.show() [True]
   """
-  if(len(data.shape) < 4):
+  if(len(img.shape) < 4):
     raise Exception("Data must be 4D")
 
   # Compute the stack
@@ -880,10 +880,15 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
   # Extract the angle gather from the middle of the patch
   nro,na,nz,nx = img.shape
   if(streamer):
-    ang = img[:,:32,:,nx//2]
+    ang = img[:,32:,:,nx//2]
   else:
     ang = img[:,:,:,nx//2]
   ang = np.transpose(ang,(0,2,1))
+
+  # Normalize predictions and semblance
+  prb /= np.max(prb)
+  if(smb is not None):
+    smb /= np.max(smb)
 
   # Compute rhos
   rhos = np.linspace(oro,oro+(nro-1)*dro,nro)
@@ -891,8 +896,10 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
   curr_pos = 0
   vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
   if(vmin == None or vmax == None):
-    vmin = np.min(stk)*kwargs.get('pclip',0.9)
-    vmax = np.max(stk)*kwargs.get('pclip',0.9)
+    svmin = np.min(stk)*kwargs.get('pclip',1.0)
+    svmax = np.max(stk)*kwargs.get('pclip',1.0)
+    avmin = np.min(ang)*kwargs.get('pclip',1.0)
+    avmax = np.max(ang)*kwargs.get('pclip',1.0)
 
   def key_event(e):
     nonlocal curr_pos,vmin,vmax
@@ -903,43 +910,41 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
         curr_pos = curr_pos - 1
     else:
         return
-    curr_pos = curr_pos % data.shape[0]
+    curr_pos = curr_pos % img.shape[0]
 
     istk = stk[curr_pos,:,:]
     iang = ang[curr_pos,:,:]
-    if('%' in kwargs.get('ttlstring',' ')):
-      ax[0].set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
-          fontsize=kwargs.get('labelsize',14))
-    else:
-      ax[0].set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+    iprb = prb[curr_pos]
+    ax[0].set_title(r'$\rho$=%f prd=%g'%(oro+curr_pos*dro,iprb),fontsize=kwargs.get('labelsize',14))
+    if(smb is not None):
+      ax[1].set_title(r'smb=%g'%(smb[curr_pos]),fontsize=kwargs.get('labelsize',14))
     ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
     if(fast):
       l1.set_data(istk)
       l2.set_data(iang)
     fig.canvas.draw()
 
-  fig,ax = plt.subplots(1,3,figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
+  fig,ax = plt.subplots(1,3,figsize=(kwargs.get("wbox",15),kwargs.get("hbox",6)))
   fig.canvas.mpl_connect('key_press_event', key_event)
   # Show the first frame
-  istk = stk[0,:,:]; iang = ang[0,:,:]
+  istk = stk[0,:,:]; iang = ang[0,:,:]; iprb = prb[0]
   l1 = ax[0].imshow(istk,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
                     extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
                     kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
-                     interpolation=kwargs.get('interp','none'),aspect='auto')
+                     interpolation=kwargs.get('interp','bilinear'),aspect=1)
   ax[0].set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
-  if('%' in kwargs.get('ttlstring',' ')):
-    ax[0].set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0)),fontsize=kwargs.get('labelsize',14))
-  else:
-    ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+  ax[0].set_title(r'$\rho=$%.4f prd=%g'%(oro,iprb),fontsize=kwargs.get('labelsize',14))
   l2 = ax[1].imshow(iang,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
                     extent=[kwargs.get('amin',0.0),kwargs.get('amax',img.shape[1]),
                     kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
-                    interpolation=kwargs.get('interp','none'),aspect='auto')
+                    interpolation=kwargs.get('interp','bilinear'),aspect=1)
   ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('ticksize',14))
+  if(smb is not None):
+    ax[1].set_title('smb=%g'%(smb[curr_pos]),fontsize=kwargs.get('labelsize',14))
   ax[2].plot(rhos,prb)
   if(smb is not None):
     ax[2].plot(rhos,smb)
