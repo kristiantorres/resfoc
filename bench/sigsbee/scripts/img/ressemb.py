@@ -9,8 +9,8 @@ from genutils.plot import plot_rhopicks, plot_anggatrhos
 sep = seppy.sep()
 
 # Read in residually migrated gathers
-#saxes,storm = sep.read_file("resmskoverwt.H")
-saxes,storm = sep.read_file("sigsbeewrngposrest.H")
+saxes,storm = sep.read_file("resmskoverwt.H")
+#saxes,storm = sep.read_file("sigsbeewrngposrest.H")
 [nz,na,nx,nro] = saxes.n; [oz,oa,ox,oro] = saxes.o; [dz,da,dx,dro] = saxes.d
 storm = storm.reshape(saxes.n,order='F').T
 
@@ -26,7 +26,8 @@ smin = sc1*np.min(stormw); smax = sc1*np.max(stormw)
 
 semb = rho_semb(stormw,gagc=True,rectz=15,nthreads=24)
 
-rho = pick(semb,oro,dro,vel0=1.0,verb=True)
+rectx = 20
+rho = pick(semb,oro,dro,vel0=1.0,verb=True,rectx=rectx)
 
 # Compute the stack
 stkw = np.sum(stormw,axis=2)
@@ -58,14 +59,14 @@ cbar = fig.colorbar(im,cbar_ax,format='%.2f')
 cbar.solids.set(alpha=1)
 cbar.ax.tick_params(labelsize=fsize)
 cbar.set_label(r'$\rho$',fontsize=fsize)
-plt.savefig("./fig/rhoimgpos.png",dpi=150,bbox_inches='tight',transparent=True)
-#plt.show()
+#plt.savefig("./fig/rhoimgpos.png",dpi=150,bbox_inches='tight',transparent=True)
+plt.show()
 
 # Refocus the stack
 rfi = refocusimg(stkw,rhomsk,dro)
 
-sep.write_file("sigsembpos.H",semb.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("sigrhopos.H",rho.T,os=[oz,ox+20*dx],ds=[dz,dx])
-sep.write_file("sigrfipos.H",rfi.T,os=[oz,ox+20*dx],ds=[dz,dx])
-sep.write_file("stkwindpos.H",stkw[20].T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("sigsemb%d.H"%(rectx),semb.T,os=[oz,oro],ds=[dz,dro])
+sep.write_file("sigrho%d.H"%(rectx),rho.T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("sigrfi%d.H"%(rectx),rfi.T,os=[oz,ox+20*dx],ds=[dz,dx])
+sep.write_file("stkwind%d.H"%(rectx),stkw[20].T,os=[oz,ox+20*dx],ds=[dz,dx])
 

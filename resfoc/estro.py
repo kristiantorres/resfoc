@@ -6,7 +6,6 @@ from residual migration images
 @version: 2020.10.01
 """
 import numpy as np
-import torch
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 from deeplearn.utils import normalize, thresh
 from deeplearn.focuslabels import find_flt_patches, varimax, semblance_power
@@ -16,6 +15,10 @@ from scipy.ndimage import map_coordinates
 from scaas.trismooth import smooth
 from scaas.noise_generator import perlin
 from genutils.ptyprint import progressbar
+try:
+  import torch
+except:
+  pass
 
 def estro_angs(resang,oro,dro,agc=True,rect1semb=10,rect2semb=3,smooth=True,rect1pick=40,rect2pick=40,gate=3,an=1,niter=100):
   """
@@ -67,8 +70,6 @@ def refocusimg(rimgs,rho,dro,ro1=None):
 
   # Compute the coordinates for shifting
   rhoshifts(nro,nx,nz,dro,rho,coords)
-
-  print(np.min(coords),np.max(coords))
 
   # Apply shifts
   rfc = map_coordinates(rimgs,coords)
