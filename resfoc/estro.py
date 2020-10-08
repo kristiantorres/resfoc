@@ -15,6 +15,7 @@ from scipy.ndimage import map_coordinates
 from scaas.trismooth import smooth
 from scaas.noise_generator import perlin
 from genutils.ptyprint import progressbar
+from genutils.movie import viewresangptch
 try:
   import torch
 except:
@@ -231,7 +232,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   focprdptch = focprdptch.reshape([numpz,numpx,nro,nzp,nxp])
 
   # Save predictions as a function of rho only
-  focprdr = np.transpose(focprd.reshape([nro,numpz,numpx]),(1,2,0))
+  focprdr = focprd.reshape([numpz,numpx,nro])
 
   # Output rho image
   pe = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
