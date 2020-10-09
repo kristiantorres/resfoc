@@ -3,7 +3,7 @@ Functions for estimating the RMS velocity ratio (rho)
 from residual migration images
 
 @author: Joseph Jennings
-@version: 2020.10.01
+@version: 2020.10.07
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
@@ -252,10 +252,6 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
         # Find maximum probability and compute rho
         iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
         rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
-        if(izp >= 10 and izp < 27):
-          if(ixp >= 1 and ixp < 4):
-            print("Patch %d %d rho=%.4f"%(izp,ixp,np.argmax(iprb)*dro + oro))
-            viewresangptch(aptch[izp,ixp],iprb,oro,dro,smb=focprdr[izp,ixp])
         # Normalize across rho within a patch for QC
         if(np.max(focprdptch[izp,ixp,:,hlfz,hlfx]) == 0.0):
           focprdnrm[izp,ixp,:,:,:] = 0.0

@@ -59,8 +59,8 @@ cbar = fig.colorbar(im,cbar_ax,format='%.2f')
 cbar.solids.set(alpha=1)
 cbar.ax.tick_params(labelsize=fsize)
 cbar.set_label(r'$\rho$',fontsize=fsize)
-#plt.savefig("./fig/rhoimgpos.png",dpi=150,bbox_inches='tight',transparent=True)
-plt.show()
+plt.savefig("./fig/rhoimgsemb.png",dpi=150,bbox_inches='tight',transparent=True)
+#plt.show()
 
 # Refocus the stack
 rfi = refocusimg(stkw,rhomsk,dro)

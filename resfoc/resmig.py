@@ -3,7 +3,7 @@ Functions for performing residual stolt migration
 and time to depth conversion
 
 @author: Joseph Jennings
-@version: 2020.06.13
+@version: 2020.10.08
 """
 
 import numpy as np
@@ -12,6 +12,7 @@ import resfoc.rstoltbig as rstoltbig
 import resfoc.cosft as cft
 import resfoc.cosftsimp as scft
 import resfoc.depth2time as d2t
+from server.utils import splitnum
 from deeplearn.utils import next_power_of_2
 from genutils.ptyprint import printprogress
 from genutils.movie import viewcube3d
@@ -72,10 +73,17 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
   if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1),flush=True)
   rmigiftswind = np.zeros([fnro,nh,nm,nz],dtype='float32')
   if(not debug):
-    # Mode for large images
-    rst = rstoltbig.rstoltbig(nz,nm,nh,nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
-    rmig = np.zeros([fnro,nh,nm,nz],dtype='float32')
-    rst.resmig(imgpft,rmigiftswind,nthreads,verb)
+    #TODO: split the rstolt big over small manageable parts if the output will be too big
+    # Check if output will be larger than largest int
+    ntot = nz*nm*nh*fnro
+    maxint = 2**31-1
+    if(ntot > maxint):
+      # Split into chunks less than maxint
+      nchnk = ntot//maxint + 1
+      fnros = splitnum(fnro,nchnk)
+    else:
+      rst = rstoltbig.rstoltbig(nz,nm,nh,nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
+      rst.resmig(imgpft,rmigiftswind,nthreads,verb)
   else:
     # Mode for small images/debugging
     rst = rstolt.rstolt(nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
