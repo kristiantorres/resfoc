@@ -677,17 +677,52 @@ def plot_vel2d(vel,**kwargs) -> None:
     show    - display the figure during runtime [True]
     vmin    - minimum velocity value [None]
     vmax    - maximum velocity value [None]
-    xmin    - minumum x value to use in extent [None]
-    xmax    - maximum x value to use in extent [None]
-    zmin    - minumum z value to use in extent [None]
-    zmax    - maximum z value to use in extent [None]
+    ox      - origin of x axis [0.0]
+    dx      - sampling of x axis [1.0]
+    oz      - origin of z axis [0.0]
+    dz      - sampling of z axis [1.0]
     xlabel  - label for x axis [None]
     zlabel  - label for z axis [None]
     wbox    - figure width set in figure size option [10]
     hbox    - figure height set in figure size option [6]
     interp  - interpolation method applied to the image ['bilinear']
-    im      - an im object used to match a velocity model image [None]
     cbar    - flag for plotting colorbar [True]
+    retim   - flag for returning the imshow object [False]
   """
-  pass
+  # Image dimensions
+  if(len(vel.shape) != 2):
+    raise Exception("Velocity must be two-dimensional len(vel.shape) = %d"%(len(vel.shape)))
+  if(kwargs.get('transp',False)): vel = vel.T
+  [nz,nx] = vel.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',10)))
+  ax = fig.gca()
+  vmin,vmax = kwargs.get('vmin',np.min(vel)), kwargs.get('vmax',np.max(vel))
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx')
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz')
+  im1 = ax.imshow(vel,cmap=kwargs.get('cmap','jet'),vmin=vmin,vmax=vmax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Colorbar
+  if(kwargs.get('cbar',True)):
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+    cbar = fig.colorbar(im1,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+    cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
+  # Display the image
+  if(kwargs.get('show',True)):
+    plt.show()
+  # Save the figure
+  figname = kwargs.get('figname',None)
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+  # Return the image object
+  if(kwargs.get('retim',False)):
+    return im1
 
