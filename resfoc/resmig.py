@@ -5,7 +5,6 @@ and time to depth conversion
 @author: Joseph Jennings
 @version: 2020.10.08
 """
-
 import numpy as np
 import resfoc.rstolt as rstolt
 import resfoc.rstoltbig as rstoltbig
@@ -25,8 +24,28 @@ def pad_cft(n) -> int:
   else:
     return np + 1 - n
 
+def rhos(nro,oro,dro):
+  fnro = 2*nro-1; foro = oro - (nro-1)*dro
+  return np.linspace(foro,foro+dro*(fnro-1),fnro)
+
+def chunks(l,sizes):
+ i = beg = end = 0
+ while i < len(sizes):
+   end += sizes[i]
+   yield l[beg:end]
+   beg = end; i += 1
+
+def force_odd(nums):
+  onums = np.copy(nums)
+  for i in range(len(onums)):
+    if(onums[i]%2 == 0):
+      onums[i] += 1
+      if(i < len(onums)-1): onums[i+1] -= 1
+
+  return onums
+
 def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
-              debug=False,verb=True,nthreads=4) -> np.ndarray:
+              debug=False,verb=True,nthreads=4,nchnk=3) -> np.ndarray:
   """
   Computes the prestack residual migration
 
@@ -43,6 +62,7 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
     debug    - a debug mode that is less efficient for large images [False]
     verb     - verbosity flag [True]
     nthreads - number of CPU threads to use for computing the residual migration
+    nchnk    - number of chunks for splitting large residual migrations [3]
   """
   if(transp):
     # [nh,nz,nx] -> [nh,nx,nz]
@@ -69,18 +89,29 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
 
   # Residual migration
   nzpc = imgpft.shape[2]; nmpc = imgpft.shape[1]; nhpc = imgpft.shape[0]
-  foro = oro - (nro-1)*dro; fnro = 2*nro-1
-  if(verb): print("Rhos:",np.linspace(foro,foro + (fnro-1)*dro,2*nro-1),flush=True)
+  rhotot = rhos(nro,oro,dro)
+  fnro = len(rhotot)
+  if(verb): print("Rhos:",rhotot,flush=True)
   rmigiftswind = np.zeros([fnro,nh,nm,nz],dtype='float32')
   if(not debug):
-    #TODO: split the rstolt big over small manageable parts if the output will be too big
     # Check if output will be larger than largest int
     ntot = nz*nm*nh*fnro
     maxint = 2**31-1
     if(ntot > maxint):
       # Split into chunks less than maxint
-      nchnk = ntot//maxint + 1
-      fnros = splitnum(fnro,nchnk)
+      sizes = force_odd(splitnum(fnro,nchnk))
+      cnks  = list(chunks(rhotot,sizes))
+      beg = end = 0
+      for icnk in cnks:
+        # Compute the rho parameters
+        foro = icnk[0]
+        fnro = len(icnk); end += fnro
+        nro = (fnro + 1)//2
+        oro = foro + (nro-1)*dro
+        # Do the residual migration
+        rst = rstoltbig.rstoltbig(nz,nm,nh,nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
+        rst.resmig(imgpft,rmigiftswind[beg:end,:,:,:],nthreads,verb)
+        beg = end
     else:
       rst = rstoltbig.rstoltbig(nz,nm,nh,nzpc,nmpc,nhpc,nro,dcs[2],dcs[1],dcs[0],dro,oro)
       rst.resmig(imgpft,rmigiftswind,nthreads,verb)
