@@ -109,9 +109,12 @@ def refocusang(resang,rho,dro,ro1=None,nthreads=24):
   rhoshifts(nro,nx,nz,dro,rho,coords)
 
   # Extract at each rho = 1
-  rfca = np.asarray(Parallel(n_jobs=nthreads)(delayed(map_coordinates)(resang[ia],coords) for ia in range(na)))
+  rfca = np.asarray(Parallel(n_jobs=nthreads)(delayed(map_coordinates)(resangt[ia],coords) for ia in range(na)))
 
-  return rfca[:,ro1,:,:]
+  # Get at the rho1
+  rfcaw = rfca[:,ro1,:,:]
+
+  return np.transpose(rfcaw,(1,0,2))
 
 def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
                       hasfault=None,rectz=30,rectx=30,qcimgs=True):
