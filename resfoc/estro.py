@@ -3,7 +3,7 @@ Functions for estimating the RMS velocity ratio (rho)
 from residual migration images
 
 @author: Joseph Jennings
-@version: 2020.10.01
+@version: 2020.10.07
 """
 import numpy as np
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
@@ -12,6 +12,7 @@ from deeplearn.focuslabels import find_flt_patches, varimax, semblance_power
 from resfoc.ssim import ssim
 from resfoc.rhoshifts import rhoshifts
 from scipy.ndimage import map_coordinates
+from joblib import Parallel,delayed
 from scaas.trismooth import smooth
 from scaas.noise_generator import perlin
 from genutils.ptyprint import progressbar
@@ -78,7 +79,7 @@ def refocusimg(rimgs,rho,dro,ro1=None):
   # Extract at rho = 1
   return rfc[ro1]
 
-def refocusang(resang,rho,dro):
+def refocusang(resang,rho,dro,ro1=None,nthreads=24):
   """
   Refocuses all angles based on an input rho map
 
@@ -90,7 +91,27 @@ def refocusang(resang,rho,dro):
 
     Returns a refocused image and flattened gathers [nx,na,nz]
   """
-  pass
+  # Get dimensions of the input images
+  [nro,nx,na,nz] = resang.shape
+  if(rho.shape[0] != nx or rho.shape[1] != nz):
+    raise Exception("Input rho map must have same spatial dimensions as residually migrated images")
+
+  # Transpose the image so that angle is the slow axis
+  resangt = np.ascontiguousarray(np.transpose(resang,(2,0,1,3)))
+
+  # Get rho=1 index
+  if(ro1 is None):
+    ro1 = int((nro-1)/2)
+
+  coords = np.zeros([3,nro,nx,nz],dtype='float32')
+
+  # Compute the coordinates for shifting
+  rhoshifts(nro,nx,nz,dro,rho,coords)
+
+  # Extract at each rho = 1
+  rfca = np.asarray(Parallel(n_jobs=nthreads)(delayed(map_coordinates)(resang[ia],coords) for ia in range(na)))
+
+  return rfca[:,ro1,:,:]
 
 def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
                       hasfault=None,rectz=30,rectx=30,qcimgs=True):
