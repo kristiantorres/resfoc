@@ -1,15 +1,14 @@
 import inpout.seppy as seppy
 import numpy as np
 from resfoc.semb import rho_semb, pick
-from resfoc.estro import refocusimg
+from resfoc.estro import refocusimg, refocusang
 import matplotlib.pyplot as plt
 from genutils.plot import plot_rhopicks, plot_anggatrhos
 
 sep = seppy.sep()
 
 # Read in residually migrated gathers
-#saxes,storm = sep.read_file("halerest.H")
-saxes,storm = sep.read_file("haleresdistrt.H")
+saxes,storm = sep.read_file("halerest.H")
 [nz,na,nx,nro] = saxes.n; [oz,oa,ox,oro] = saxes.o; [dz,da,dx,dro] = saxes.d
 storm = storm.reshape(saxes.n,order='F').T
 
@@ -58,9 +57,11 @@ kmin = sc2*np.min(stkw); kmax= sc2*np.max(stkw)
 
 # Refocus the stack
 rfi = refocusimg(stkw,rho,dro)
+rfa = refocusang(stormw,rho,dro)
 
-sep.write_file("halesembdistr.H",semb.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("halerhodistr.H",rho.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("halerfidistr.H",rfi.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("halestkdistr.H",stkw[40].T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("halesemb.H",semb.T,os=[oz,oro],ds=[dz,dro])
+sep.write_file("halerho.H",rho.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("halerfi.H",rfi.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("halestk.H",stkw[80].T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("halerfa.H",rfa.T,os=[oz,0,ox],ds=[dz,da,dx])
 

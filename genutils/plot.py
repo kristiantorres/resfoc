@@ -637,7 +637,6 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,f
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
 
-#TODO: don't forget to change the hershey fonts to default
 def plot_img2d(img,**kwargs) -> None:
   """
   A generic function for plotting a 2D seismic image
@@ -660,11 +659,47 @@ def plot_img2d(img,**kwargs) -> None:
     wbox    - figure width set in figure size option [10]
     hbox    - figure height set in figure size option [6]
     interp  - interpolation method applied to the image ['bilinear']
-    im      - an im object used to match a velocity model image [None]
+    imv     - an im object used to match a velocity model image [None]
     crop    - number of pixels used to crop out a colorbar [None]
     cmap    - colormap for seismic image ['gray']
   """
-  pass
+  # Image dimensions
+  if(len(img.shape) != 2):
+    raise Exception("Image must be two-dimensional len(img.shape) = %d"%(len(img.shape)))
+  if(kwargs.get('transp',False)): img = img.T
+  [nz,nx] = img.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('imin',np.min(img)), kwargs.get('imax',np.max(img))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
+  im1 = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Force to be the same size as a velocity model image
+  imv = kwargs.get('imv',None)
+  if(imv is not None):
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+    cbar = fig.colorbar(imv,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+    cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
+    # Crop
+    # TODO: will need to handle either PDF or png crops
+  # Show the plot
+  if(kwargs.get('show',True)):
+    plt.show()
+  # Save the figure
+  figname = kwargs.get('figname',None)
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 
 def plot_vel2d(vel,**kwargs) -> None:
   """
@@ -699,9 +734,9 @@ def plot_vel2d(vel,**kwargs) -> None:
   ax = fig.gca()
   vmin,vmax = kwargs.get('vmin',np.min(vel)), kwargs.get('vmax',np.max(vel))
   xmin = kwargs.get('ox',0.0)
-  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx')
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
   zmin = kwargs.get('oz',0.0)
-  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz')
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
   im1 = ax.imshow(vel,cmap=kwargs.get('cmap','jet'),vmin=vmin,vmax=vmax,
                   interpolation=kwargs.get('interp','bilinear'),
                   extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))

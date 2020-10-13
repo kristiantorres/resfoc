@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 
 # Read in the defocused image
-#iaxes,img = sep.read_file("spimgbobext.H")
-iaxes,img = sep.read_file("spimgextbobdistr.H")
+iaxes,img = sep.read_file("spimgextbobdistrwrng.H")
 img  = img.reshape(iaxes.n,order='F')
 imgt = np.ascontiguousarray(img.T).astype('float32')
 imgtw = imgt[:,0,20:580,:]
@@ -32,7 +31,7 @@ plt.imshow(timgtw[20].T,cmap='gray',interpolation='sinc',vmin=imin,vmax=imax,asp
 plt.show()
 
 # Depth Residual migration
-inro = 41; idro = 0.001250
+inro = 81; idro = 0.001250
 rmig = preresmig(timgtw,[dhx,dx,dz],nps=[65,1025,1025],nro=inro,dro=idro,time=False,nthreads=18,verb=True)
 onro,ooro,odro = get_rho_axis(nro=inro,dro=idro)
 
@@ -42,10 +41,10 @@ rmigt = convert2time(rmig,dz,dt=dtd,dro=odro,verb=True)
 
 na = 41
 rangs  = off2angkzx(rmig ,ohx,dhx,dz,na=na,nthrds=20,transp=True,rverb=True)
-rangst = off2angkzx(rmigt,ohx,dhx,dz,na=na,nthrds=20,transp=True,rverb=True)
 na,oa,da = get_angkzx_axis(na=na)
+sep.write_file("resfaultfocus.H",rangs.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
+del rangs; del rmig
 
-# Write to file
-sep.write_file("haleresdistr.H",rangs.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
-sep.write_file("haleresdistrt.H",rangst.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
+rangst = off2angkzx(rmigt,ohx,dhx,dz,na=na,nthrds=20,transp=True,rverb=True)
+sep.write_file("resfaultfocust.H",rangst.T,ds=[dz,da,dx,odro],os=[oz,oa,ox+20*dx,ooro])
 
