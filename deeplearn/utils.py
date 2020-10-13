@@ -4,7 +4,7 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2020.05.28
+@version: 2020.10.07
 """
 import sys
 import numpy as np
@@ -361,7 +361,7 @@ def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
   if(strdx != 0): xshft = 2
   if(strdz != 0): zshft = 2
 
-  fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
   zticks = np.arange(bgz,egz,dgz)
   xticks = np.arange(bgx,egx,dgx)
@@ -382,7 +382,7 @@ def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
                      textsize,'k')
 
   if(strdx != 0):
-    fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
     ax = fig.gca()
     zticks = np.arange(bgz,egz,dgz)
     xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)
@@ -402,7 +402,7 @@ def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
                        textsize,'r')
 
   if(strdz != 0):
-    fig = plt.figure(figsize=(kwargs.get('wbox',15),kwargs.get('hbox',15)))
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
     ax = fig.gca()
     zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
     xticks = np.arange(bgx,egx,dgx)
@@ -422,7 +422,7 @@ def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
                        textsize,'g')
 
   if(strdx != 0 and strdz != 0):
-    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',10)))
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
     ax = fig.gca()
     zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
     xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)

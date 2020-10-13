@@ -215,6 +215,7 @@ def makemovietb_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kwa
     if(qc):
       plt.show()
 
+#TODO: replace xmin,xmax, etc with ox,dx
 def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   """
   Provides a frame by frame interactive viewing of a 3D numpy array via the arrow keys.
@@ -239,6 +240,9 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
     show      - flag for calling plt.show() [True]
   """
+  if(type(data) is list):
+    data = np.concatenate([iimg[np.newaxis] for iimg in data],axis=0)
+    print(data.shape)
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
   curr_pos = 0
