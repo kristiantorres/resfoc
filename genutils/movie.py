@@ -242,9 +242,9 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   """
   if(type(data) is list):
     data = np.concatenate([iimg[np.newaxis] for iimg in data],axis=0)
-    print(data.shape)
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
+  [nex,nx,nz] = data.shape
   curr_pos = 0
   vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
   if(vmin == None or vmax == None):
