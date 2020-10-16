@@ -39,9 +39,9 @@ fstkww = fstkw[begx:endx,begz:endz]
 rstkw  = rstk [begx:endx,begz:endz]
 
 # Plot the target region
-#plot_img2d(dstkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Defocused',pclip=0.5,aspect=2.0,show=False)
-#plot_img2d(rstkw.T, ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Refocused',pclip=0.5,aspect=2.0,show=False)
-#plot_img2d(fstkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Focused'  ,pclip=0.5,aspect=2.0,show=True )
+plot_img2d(dstkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Defocused',pclip=0.5,aspect=2.0,show=False)
+plot_img2d(rstkw.T, ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Refocused',pclip=0.5,aspect=2.0,show=False)
+plot_img2d(fstkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Focused'  ,pclip=0.5,aspect=2.0,show=True )
 #viewimgframeskey([dstkw,rstk,fstkw],pclip=0.5)
 
 # Patch each of them
