@@ -143,33 +143,45 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
-  """ Plots a binary label on top of an image """
+def plot_seglabel(img,lbl,show=False,color='red',fname=None,**kwargs) -> None:
+  """
+  Plots a binary label on top of an image
+
+  Parameters:
+    img   - image [nz,nx]
+    lbl   - fault labels [nz,nx]
+    show  - flag for showing the image [False]
+    color - color of label to be plotted on image ['red']
+    fname - name of output file to be saved (without the extension) [None]
+  """
+  [nz,nx] = img.shape
   if(img.shape != lbl.shape):
     raise Exception('Input image and label must be same size')
   # Get mask
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
   cmap = colors.ListedColormap([color,'white'])
-  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
+  ox   = kwargs.get('ox',0.0)
+  xmax = ox + kwargs.get('dx',1.0)*nx
+  oz   = kwargs.get('oz',0.0)
+  zmax = oz + kwargs.get('dz',1.0)*nz
+  pclip = kwargs.get('pclip',1.0)
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
-      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
-  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
-  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+      vmin=pclip*kwargs.get('vmin',np.min(img)),vmax=pclip*kwargs.get('vmax',np.max(img)),
+      extent=[ox,xmax,zmax,oz],interpolation=kwargs.get("interp","sinc"))
+  ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel','Z (km)'),fontsize=kwargs.get('labelsize',14))
   ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
   if(fname):
-      ax.set_aspect(kwargs.get('aratio',1.0))
+      ax.set_aspect(kwargs.get('aspect',1.0))
       plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
   # Plot label
-  ax.imshow(mask,cmap=cmap,
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)])
-  ax.set_aspect(kwargs.get('aratio',1.0))
+  ax.imshow(mask,cmap=cmap,extent=[ox,xmax,zmax,oz])
+  ax.set_aspect(kwargs.get('aspect',1.0))
   if(show):
     plt.show()
   if(fname):
