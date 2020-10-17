@@ -151,7 +151,8 @@ class mdlbuild:
     self.lbl[idx] = 1
 
   def fault2d(self,begx=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.15,slcy=None,fpr=False):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.1,slcy=None,fpr=False,
+      **kwargs):
     """
     Creates a 2D fault event in the geologic model.
 
@@ -217,8 +218,8 @@ class mdlbuild:
     # Create mask for fault plane reflection
     if(fpr):
       # Randomly vary decay and strength
-      dec = randfloat(0.9,0.95);
-      rectdecay = randfloat(10,15)
+      dec = kwargs.get('dec',randfloat(0.9,0.95))
+      rectdecay = kwargs.get('rectdecay',randfloat(10,15))
       fpmask = self.fpr_mask(lbltm,lbltn,dec=dec,rectdecay=rectdecay)
       self.vel *= fpmask
     # Update label
@@ -243,6 +244,7 @@ class mdlbuild:
     """
     # Create a mask that smoothly increases from dec to 1.0
     lbltmsm = smooth(lbltm,rect1=rectdecay,rect2=rectdecay)
+    plt.imshow(lbltmsm.T,cmap='jet'); plt.show()
     mcomp  = 1 - lbltmsm        # Mask complement
     mcomp += 1 - np.min(mcomp)  # Bring up to 1.0
     ampmask = mcomp*lbltn

@@ -751,10 +751,10 @@ def plot_vel2d(vel,**kwargs) -> None:
     cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
     cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
   # Display the image
-  if(kwargs.get('show',True)):
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
     plt.show()
   # Save the figure
-  figname = kwargs.get('figname',None)
   if(figname is not None):
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
   # Return the image object
