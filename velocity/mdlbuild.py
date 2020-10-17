@@ -244,7 +244,6 @@ class mdlbuild:
     """
     # Create a mask that smoothly increases from dec to 1.0
     lbltmsm = smooth(lbltm,rect1=rectdecay,rect2=rectdecay)
-    plt.imshow(lbltmsm.T,cmap='jet'); plt.show()
     mcomp  = 1 - lbltmsm        # Mask complement
     mcomp += 1 - np.min(mcomp)  # Bring up to 1.0
     ampmask = mcomp*lbltn
