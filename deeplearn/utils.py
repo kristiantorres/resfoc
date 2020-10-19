@@ -69,14 +69,20 @@ def resample(img,new_shape,kind='linear',ds=[]):
   Resamples an image. Can work up to 4D numpy arrays.
   assumes that the nz and nx axes are the last two (fastest)
   """
-  # Original coordinates
-  length=img.shape[-1]
-  height=img.shape[-2]
-  x=np.linspace(0,length,length)
-  y=np.linspace(0,height,height)
-  # New coordinates for interpolation
-  xnew=np.linspace(0,length,new_shape[1])
-  ynew=np.linspace(0,height,new_shape[0])
+  if(len(img.shape) >= 2):
+   # Original coordinates
+    length=img.shape[-1]
+    height=img.shape[-2]
+    x=np.linspace(0,length,length)
+    y=np.linspace(0,height,height)
+    # New coordinates for interpolation
+    xnew=np.linspace(0,length,new_shape[1])
+    ynew=np.linspace(0,height,new_shape[0])
+  elif(len(img.shape) == 1):
+    length = img.shape[0]
+    x = np.linspace(0,length,length)
+    # New coordinates for interpolation
+    xnew = np.linspace(0,length,new_shape)
   # Compute new samplings
   if(len(ds) != 0):
       dout = []
@@ -100,6 +106,10 @@ def resample(img,new_shape,kind='linear',ds=[]):
     res = np.zeros([new_shape[0],new_shape[1]],dtype='float32')
     f=interpolate.interp2d(x,y,img,kind=kind)
     res[:] = f(xnew,ynew)
+  elif len(img.shape)==1:
+    res = np.zeros(new_shape,dtype='float32')
+    f = interpolate.interp1d(x,img,kind=kind)
+    res[:] = f(xnew)
 
   if(len(ds) == 0):
     return res
