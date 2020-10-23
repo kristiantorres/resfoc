@@ -33,16 +33,16 @@ fpr = False
 mb.vel = stk3d
 #mb.fault2d(begx=0.26,begz=0.4,daz=8000,dz=12000,azim=180.0,theta_die=11,theta_shift=4.0,dist_die=2.0,
 #           throwsc=35.0,fpr=fpr,thresh=0.15)
-mb.fault2d(begx=0.25,begz=0.2,daz=16000,dz=20000,azim=180.0,theta_die=2,theta_shift=4.0,dist_die=2.0,
-           throwsc=35.0,fpr=fpr)
+#mb.fault2d(begx=0.25,begz=0.2,daz=16000,dz=20000,azim=180.0,theta_die=2,theta_shift=4.0,dist_die=2.0,
+#           throwsc=35.0,fpr=fpr)
 #mb.fault2d(begx=0.545,begz=0.4,daz=8000,dz=12000,azim=180.0,theta_die=11,theta_shift=4.0,dist_die=2.0,
 #           throwsc=35.0,fpr=fpr)
 #mb.fault2d(begx=0.66,begz=0.4,daz=8000,dz=9000,azim=180.0,theta_die=11,theta_shift=4.0,dist_die=2.0,
 #           throwsc=30.0,fpr=fpr)
 #mb.fault2d(begx=0.76,begz=0.4,daz=8000,dz=9000,azim=180.0,theta_die=11,theta_shift=4.0,dist_die=2.0,
 #           throwsc=35.0,fpr=fpr)
-#mb.fault2d(begx=0.9,begz=0.4,daz=8000,dz=12000,azim=180.0,theta_die=11,theta_shift=4.0,dist_die=2.0,
-#           throwsc=15.0,fpr=fpr)
+mb.fault2d(begx=0.77,begz=0.26,daz=20000,dz=24000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
+           throwsc=35.0,fpr=fpr)
 velw = mb.vel
 refw = mb.get_refl2d()
 lblw = mb.get_label2d()

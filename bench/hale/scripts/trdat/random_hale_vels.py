@@ -13,7 +13,10 @@ iaxes,img = sep.read_file("faultfocusang.H")
 [nz,na,nx] = iaxes.n; [oz,oa,ox] = iaxes.o; [dz,da,dx] = iaxes.d
 img = img.reshape(iaxes.n,order='F').T
 stk = np.sum(img,axis=1)
-stk3d = np.repeat(stk[np.newaxis],20,axis=0)
+#iaxes,img = sep.read_file("halesos.H")
+#[nz,nx] = iaxes.n; [oz,ox] = iaxes.o; [dz,dx] = iaxes.d
+#stk = img.reshape(iaxes.n,order='F').T
+#stk3d = np.repeat(stk[np.newaxis],20,axis=0)
 
 vaxes,hvel = sep.read_file("vintzcomb.H")
 nvz,nvx = vaxes.n; ovz,ovx = vaxes.o; dvz,dvx = vaxes.d
@@ -105,9 +108,9 @@ plt.plot(zs,0.001*velw[400])
 plt.plot(zs,hvlw[200])
 plt.show()
 
-plot_img2d(stkw.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_vel2d(velw.T*0.001,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
-plot_vel2d(hvlw.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
-plot_img2d(refw.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_seglabel(refw.T,lblw.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=True)
+plot_img2d(stkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
+plot_vel2d(velww.T*0.001,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
+plot_vel2d(hvlww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
+plot_img2d(refww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
+plot_seglabel(refww.T,lblww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=True)
 
