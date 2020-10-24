@@ -14,22 +14,41 @@ from edu.mines.jtk.sgl import *
 from edu.mines.jtk.util import *
 from edu.mines.jtk.util.ArrayMath import *
 
+from sepjy import readFile, writeFile
+
 backgroundColor = Color(0xfd,0xfe,0xff) # easy to make transparent
 
 def main(args):
-  nx,nz = 560,900
-  ais = ArrayInputStream("rfi.dat")
-  x   = zerofloat(nz,nx)
-  #xsm = zerofloat(nz,nx)
-  ais.readFloats(x)
-  ais.close()
-  # Create the samplings
-  sx = Sampling(nx,0.01675,7.37)
-  sz = Sampling(nz,0.005,0.01675)
-  x = mul(1e-8,x)
-  # Compute the structure tensors
+  smps,dat = readFile("spimgbobangstkwind.H")
+  dat = mul(1e-8,dat)
+  # Compute structure tensors
   lof = LocalOrientFilter(4.0)
-  s = lof.applyForTensors(x)
+  s = lof.applyForTensors(dat)
+  smb,datsm = smoothSemblance(smps,dat,s)
+  #datsm = smoothTensors(smps,dat,s)
+  datsm = mul(1e8,datsm)
+  # Write semblance
+  writeFile("sossmb.H",smb,smps)
+  # Write smoothed image
+  writeFile("sos.H",datsm,smps)
+
+def smoothSemblance(smps,dat,s,hw=20,hw2=10):
+  # Compute semblance
+  lsf = LocalSemblanceFilter(hw,hw)
+  smb = lsf.semblance(LocalSemblanceFilter.Direction2.V,s,dat)
+  smb = mul(smb,smb)
+  smb = mul(smb,smb)
+  s.setEigenvalues(0.0,1.0)
+  # Smooth with semblance
+  datsm = copy(dat)
+  c = hw2*(hw2+1)/6.0
+  smooth = LocalSmoothingFilter()
+  smooth.apply(s,c,smb,dat,datsm)
+
+  return smb,datsm
+
+def smoothTensors(smps,dat,s,hw2=10,plot=False):
+  # Compute the structure tensors
   d00 = EigenTensors2(s); d00.invertStructure(0.0,0.0)
   d01 = EigenTensors2(s); d01.invertStructure(0.0,1.0)
   d02 = EigenTensors2(s); d02.invertStructure(0.0,2.0)
@@ -37,33 +56,14 @@ def main(args):
   d11 = EigenTensors2(s); d11.invertStructure(1.0,1.0)
   d12 = EigenTensors2(s); d12.invertStructure(1.0,2.0)
   d14 = EigenTensors2(s); d14.invertStructure(1.0,4.0)
-  xsm = copy(x)
-  hw2 = 10
+  if(plot):
+    plotImgTensors("D04",dat,smps[0],smps[1],d=d04)
+  datsm = copy(dat)
   c = hw2*(hw2+1)/6.0
-  #smooth = LocalSmoothingFilter()
-  #smooth.apply(d04,c,x,xsm)
-  #smooth.applySmoothS(xsm,xsm)
-  #hw = 20
-  #lsf = LocalSemblanceFilter(hw,hw)
-  #smb = lsf.semblance(LocalSemblanceFilter.Direction2.V,s,x)
-  #smb = mul(smb,smb)
-  #smb = mul(smb,smb)
-  ##plotImg(smb,sx,sz)
-  #s.setEigenvalues(0.0,1.0)
-  #smooth = LocalSmoothingFilter()
-  ##hw2 = 10
-  #c = hw2*(hw2+1)/6.0
-  #smooth.apply(s,c,smb,x,xsm)
-  plotImgTensors("D04",x,sz,sx,d=d04)
-  #xsm = mul(1e8,xsm)
-  ## Write semblance
-  #aos = ArrayOutputStream("smb.dat")
-  #aos.writeFloats(smb)
-  #aos.close()
-  ## Write smoothed image
-  #aos = ArrayOutputStream("out.dat")
-  #aos.writeFloats(xsm)
-  #aos.close()
+  smooth.apply(d04,c,dat,datsm)
+  smooth.applySmoothS(datsm,datsm)
+
+  return datsm
 
 def plotImg(img,sx,sz):
   pp = PlotPanel(PlotPanel.Orientation.X1DOWN_X2RIGHT)
@@ -103,5 +103,4 @@ class RunMain(Runnable):
   def run(self):
     main(sys.argv)
 SwingUtilities.invokeLater(RunMain())
-
 
