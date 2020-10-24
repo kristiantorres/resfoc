@@ -38,6 +38,11 @@ dstkww = dstkw[begx:endx,begz:endz]
 fstkww = fstkw[begx:endx,begz:endz]
 rstkw  = rstk [begx:endx,begz:endz]
 
+# Plot the whole images
+plot_img2d(dstkw[:,:500].T,ox=ox+20*dx,dx=dx,dz=dz,title='Defocused',pclip=0.5,aspect=2.0,show=False)
+plot_img2d(rstk[:,:500].T, ox=ox+20*dx,dx=dx,dz=dz,title='Refocused',pclip=0.5,aspect=2.0,show=False)
+plot_img2d(fstkw[:,:500].T,ox=ox+20*dx,dx=dx,dz=dz,title='Focused'  ,pclip=0.5,aspect=2.0,show=True )
+
 # Plot the target region
 plot_img2d(dstkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Defocused',pclip=0.5,aspect=2.0,show=False)
 plot_img2d(rstkw.T, ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,title='Refocused',pclip=0.5,aspect=2.0,show=False)

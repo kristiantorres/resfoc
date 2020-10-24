@@ -208,7 +208,7 @@ def rand_preresmig(img,ds,nro=6,oro=1.0,dro=0.01,offset=5,nps=None,transp=False,
     rho = np.random.randint(nro+offset+1,fnro)*dro + foro
 
   if(verb): print("randrho=%.3f"%(rho))
-  rmig  = preresmig(img,ds,nps,nro=1,oro=rho,dro=dro,time=False,nthreads=1,verb=verb)
+  rmig  = preresmig(img,ds,nro=1,oro=rho,dro=dro,nps=nps,time=False,nthreads=1,verb=verb)
 
   if(wantrho):
     return rmig,rho

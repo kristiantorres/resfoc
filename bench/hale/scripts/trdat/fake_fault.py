@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 iaxes,img = sep.read_file("faultfocusang.H")
 [nz,na,nx] = iaxes.n; [oz,oa,ox] = iaxes.o; [dz,da,dx] = iaxes.d
+nx = 800
 img = img.reshape(iaxes.n,order='F').T
 stk = np.sum(img,axis=1)
 stk3d = np.repeat(stk[np.newaxis],20,axis=0)
@@ -34,27 +35,29 @@ mb.trim(top=0,bot=900)
 
 fpr = True; rd = 20
 #mb.vel = stk3d
-mb.fault2d(begx=0.18,begz=0.28,daz=19000,dz=24000,azim=180.0,theta_die=3.0,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.25,begz=0.28,daz=19000,dz=24000,azim=180.0,theta_die=3.0,theta_shift=4.0,dist_die=2.0,
            throwsc=35.0,fpr=fpr,rectdecay=rd)
-mb.fault2d(begx=0.26,begz=0.23,daz=16000,dz=24000,azim=180.0,theta_die=2.0,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.30,begz=0.21,daz=8800,dz=12000,azim=180.0,theta_die=4.4,theta_shift=4.0,dist_die=2.0,
            throwsc=35.0,fpr=fpr,rectdecay=rd)
-mb.fault2d(begx=0.44,begz=0.25,daz=20000,dz=26000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.432,begz=0.25,daz=20000,dz=26000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
            throwsc=35.0,fpr=fpr,rectdecay=rd)
-mb.fault2d(begx=0.60,begz=0.3,daz=16000,dz=18000,azim=180.0,theta_die=4.0,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.544,begz=0.3,daz=16000,dz=18000,azim=180.0,theta_die=4.0,theta_shift=4.0,dist_die=2.0,
            throwsc=30.0,fpr=fpr,rectdecay=rd)
-mb.fault2d(begx=0.68,begz=0.26,daz=18000,dz=18000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.6,begz=0.26,daz=18000,dz=18000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
            throwsc=35.0,fpr=fpr,rectdecay=rd)
-mb.fault2d(begx=0.77,begz=0.26,daz=20000,dz=24000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
+mb.fault2d(begx=0.663,begz=0.26,daz=20000,dz=24000,azim=180.0,theta_die=2.5,theta_shift=4.0,dist_die=2.0,
            throwsc=35.0,fpr=fpr,rectdecay=rd)
 velw = mb.vel
 refw = mb.get_refl2d()
 lblw = mb.get_label2d()
 
 # First window defocused and focused
-velw = velw[20:580,:]
-refw = refw[20:580,:]
+velw = velw[120:660,:]
+refw = refw[120:660,:]
 stkw = stk [20:580,:]
-lblw = lblw[20:580,:]
+lblw = lblw[120:660,:]
+
+#print(refw.shape,stkw.shape)
 
 begz = 100; endz = 356
 begx = 10;  endx = 522

@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 iaxes,img = sep.read_file("faultfocusang.H")
 [nz,na,nx] = iaxes.n; [oz,oa,ox] = iaxes.o; [dz,da,dx] = iaxes.d
+nx = 800
 img = img.reshape(iaxes.n,order='F').T
 stk = np.sum(img,axis=1)
 #iaxes,img = sep.read_file("halesos.H")
@@ -57,7 +58,7 @@ mb.deposit(1480,thick=40,layer=150,dev_layer=0.0)
 mb.trim(top=0,bot=900)
 
 # Pos
-xpos = np.asarray([0.18,0.26,0.44,0.60,0.68,0.77])
+xpos = np.asarray([0.25,0.30,0.432,0.544,0.6,0.663])
 xhi = xpos + 0.04
 xlo = xpos - 0.04
 cxpos = np.zeros(xpos.shape)
@@ -87,11 +88,11 @@ lblw = mb.get_label2d()
 velw = smooth(velw,rect1=40,rect2=30)
 
 # First window defocused and focused
-velw = velw[20:580,:]
+velw = velw[120:660,:]
 hvlw = hvel[10:290,:]
-refw = refw[20:580,:]
+refw = refw[120:660,:]
 stkw = stk [20:580,:]
-lblw = lblw[20:580,:]
+lblw = lblw[120:660,:]
 
 begz = 100; endz = 356
 begx = 10;  endx = 522
