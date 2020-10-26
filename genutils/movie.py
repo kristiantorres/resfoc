@@ -245,6 +245,10 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
   [nex,nx,nz] = data.shape
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
   curr_pos = 0
   vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
   if(vmin == None or vmax == None):
@@ -269,8 +273,7 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     if(not fast):
       ax.cla()
       ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-          extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
-          kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+          extent=[xmin,xmax,zmax,zmin],
           interpolation=kwargs.get('interp','none'),aspect='auto')
     ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
@@ -301,8 +304,7 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   else:
     img = data[0,:,:]
   l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-      extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
-        kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+      extent=[xmin,xmax,zmax,zmin],
       interpolation=kwargs.get('interp','none'),aspect='auto')
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))

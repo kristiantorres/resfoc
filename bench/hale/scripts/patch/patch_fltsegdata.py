@@ -1,12 +1,11 @@
 import inpout.seppy as seppy
 import numpy as np
 from resfoc.gain import agc
-from deeplearn.utils import normextract, resample, plotseglabel
-from deeplearn.focuslabels import corrsim, semblance_power
+from deeplearn.utils import normextract, resample, plot_seglabel
 from deeplearn.dataloader import WriteToH5
-import matplotlib.pyplot as plt
-from genutils.plot import plot_cubeiso
 from genutils.ptyprint import create_inttag, progressbar
+from genutils.plot import plot_img2d
+import subprocess
 
 # IO
 sep = seppy.sep()
@@ -25,11 +24,11 @@ nw = 20; nex = nm//nw
 ptchz = 128; ptchx = 128
 
 # Define window
-bxw = 100;  exw = nx - 100
-bzw = 0; ezq = nz
+bxw = 140; exw = 652
+bzw = 100; ezw = 356
 
 # Open the output HDF5 file
-wh5 = WriteToH5("/scr2/joseph29/hale_fltseg128.h5",dsize=1)
+wh5 = WriteToH5("/scr2/joseph29/hale2_fltseg128.h5",dsize=1)
 
 k = 0
 for iex in progressbar(range(nex),"iex:"):
@@ -44,9 +43,18 @@ for iex in progressbar(range(nex),"iex:"):
   ldats = []; llbls = []
   for iw in range(nw):
     # Window the image and label and resample
-    focw  = focts[iw,bxw:exw,bzw:nz]
-    lblw  = lbl  [iw,bxw:exw,bzw:nz]
-    focg  = agc(focw)
+    focxw  = focts[iw,bxw:exw,:]
+    lblw  = lbl   [iw,bxw:exw,bzw:ezw]
+    focxg  = agc(focxw)
+    focg = focxg[:,bzw:ezw]
+    # Write the label and the image and smooth
+    sep.write_file("imgw.H",focg.T)
+    sep.write_file("lblw.H",lblw.T)
+    sp = subprocess.check_call("python scripts/SOSmoothing.py -fin imgw.H -labels lblw.H -fout smtw.H",shell=True)
+    saxes,smt = sep.read_file("smtw.H")
+    smt = smt.reshape(saxes.n,order='F').T
+    plot_seglabel(smt.T,lblw.T,show=True)
+    plot_img2d(smt.T)
     # Transpose
     focgt = np.ascontiguousarray(focg.T)
     lblwt = np.ascontiguousarray(lblw.T)
