@@ -80,17 +80,35 @@ class mdlbuild:
     self.lyr = lyrot
 
 
-  def vofz(self,nlayer=20,minvel=1600,maxvel=5000,npts=2,octaves=3,persist=0.3):
-    """ Generate a random v(z) that defines propagation velocities """
+  def vofz(self,nlayer=20,minvel=1600,maxvel=5000,npts=2,octaves=3,persist=0.3,
+           tol=10,tapperc=0.25,vzin=None) -> np.ndarray:
+    """
+    Generate a random v(z) that defines propagation velocities.
+    Can also take in a v(z) function and smoothly perturb it
+
+    Parameters:
+      nlayer  - output number of velocities [20]
+      minvel  - minimum velocity [1600]
+      maxvel  - maximum velocity [5000]
+      tol     - tolerance for determining if out of velocity bounds [10 m/s]
+    """
+    if(tapperc > 0.5): raise Exception("tapperc must be less than 0.5")
+    if(vzin is not None):
+      nlayer = vzin.shape[0]
+      minvel,maxvel = np.min(vzin),np.max(vzin)
     props = np.zeros(nlayer)
     # Make sure we do not go out of bounds
-    while(np.min(props) != minvel or np.max(props) != maxvel):
-      props = np.linspace(maxvel,minvel,nlayer)
+    while(not np.isclose(np.min(props),minvel,atol=tol) or not np.isclose(np.max(props),maxvel,atol=tol)):
+      if(vzin is None):
+        props = np.linspace(maxvel,minvel,nlayer)
+      else:
+        props[:] = vzin[:]
       ptb = noise_generator.perlin(x=np.linspace(0,npts,nlayer), octaves=octaves, period=80, Ngrad=80, persist=persist, ncpu=1)
-      ptb -= np.mean(ptb);
+      ptb -= np.mean(ptb)
       # Define taper so that the ends are not perturbed
-      tap,_ = build_taper_ds(1,nlayer,1,5,15,19)
-      props += 5000*(ptb*tap)
+      tapbeg, tapend = tapperc*nlayer, (1-tapperc)*nlayer
+      tap,_ = build_taper_ds(1,nlayer,1,tapbeg,tapend,nlayer-1)
+      props += maxvel*(ptb*tap)
 
     return props
 
@@ -151,7 +169,8 @@ class mdlbuild:
     self.lbl[idx] = 1
 
   def fault2d(self,begx=0.5,begz=0.5,daz=8000,dz=7000,azim=180,
-      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.15,slcy=None,fpr=False):
+      theta_die=12,theta_shift=4.0,dist_die=0.3,throwsc=1.0,thresh=0.1,slcy=None,fpr=False,
+      **kwargs):
     """
     Creates a 2D fault event in the geologic model.
 
@@ -217,8 +236,8 @@ class mdlbuild:
     # Create mask for fault plane reflection
     if(fpr):
       # Randomly vary decay and strength
-      dec = randfloat(0.9,0.95);
-      rectdecay = randfloat(10,15)
+      dec = kwargs.get('dec',randfloat(0.9,0.95))
+      rectdecay = kwargs.get('rectdecay',randfloat(10,15))
       fpmask = self.fpr_mask(lbltm,lbltn,dec=dec,rectdecay=rectdecay)
       self.vel *= fpmask
     # Update label
@@ -236,7 +255,7 @@ class mdlbuild:
       lbltm      - the normalized fault displacement
       lbltn      - the fault label (thresholded fault displacement)
       dec        - the percent decrease of the velocity along the fault
-                   (if None, randomly selected between 90-95%
+                   (if None, randomly selected between 90-95%)
       rectdecay  - smoothing length that controls the decay of
                    the reflection [10 points]
       rectspread - smoothing length that controls the spread of the reflection [3 points]
