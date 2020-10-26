@@ -49,18 +49,21 @@ for iex in progressbar(range(nex),"iex:"):
     focg = focxg[:,bzw:ezw]
     # Write the label and the image and smooth
     sep.write_file("imgw.H",focg.T)
-    sep.write_file("lblw.H",lblw.T)
-    sp = subprocess.check_call("python scripts/SOSmoothing.py -fin imgw.H -labels lblw.H -fout smtw.H",shell=True)
+    #sep.write_file("lblw.H",lblw.T)
+    #sp = subprocess.check_call("python scripts/SOSmoothing.py -fin imgw.H -labels lblw.H -fout smtw.H",shell=True)
+    sp = subprocess.check_call("python scripts/SOSmoothing.py -fin imgw.H -fout smtw.H",shell=True)
     saxes,smt = sep.read_file("smtw.H")
     smt = smt.reshape(saxes.n,order='F').T
-    plot_seglabel(smt.T,lblw.T,show=True)
-    plot_img2d(smt.T)
+    smtw = smt [:512,:]
     # Transpose
-    focgt = np.ascontiguousarray(focg.T)
+    smtwt = np.ascontiguousarray(smtw.T)
     lblwt = np.ascontiguousarray(lblw.T)
+    #plot_img2d(smtwt)
     # Extract patches
-    fptch = normextract(focgt,nzp=ptchz,nxp=ptchx,norm=True)
+    fptch = normextract(smtwt,nzp=ptchz,nxp=ptchx,norm=True)
     lptch = normextract(lblwt,nzp=ptchz,nxp=ptchx,norm=False)
+    #plot_img2d(fptch[0],dx=dx,dz=dz,show=False)
+    #plot_seglabel(fptch[0],lptch[0],show=True)
     nptch = lptch.shape[0]
     # Write the training data to HDF5 file
     wh5.write_examples(fptch,lptch)
