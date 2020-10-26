@@ -27,10 +27,9 @@ def random_hale_vel(nz=900,nx=800,dz=0.005,dx=0.01675,vzin=None):
   """
   dzm,dxm  = dz*1000,dx*1000
   nlayer = 200
-  if(vzin is None):
-    minvel,maxvel = 1600,5000
-    vz = np.linspace(maxvel,minvel,nlayer)
-  else:
+  minvel,maxvel = 1600,5000
+  vz = np.linspace(maxvel,minvel,nlayer)
+  if(vzin is not None):
     vzr = resample(vzin,90)*1000
     vz[-90:] = vzr[::-1]
 
@@ -50,7 +49,7 @@ def random_hale_vel(nz=900,nx=800,dz=0.005,dx=0.01675,vzin=None):
       mb.squish(amp=150,azim=90.0,lam=0.4,rinline=0.0,rxline=0.0,mode='perlin',octaves=3,order=3)
 
   mb.deposit(1480,thick=40,layer=150,dev_layer=0.0)
-  mb.trim(top=0,bot=900)
+  mb.trim(top=0,bot=nz)
 
   # Pos
   xpos = np.asarray([0.25,0.30,0.432,0.544,0.6,0.663])
@@ -80,7 +79,7 @@ def random_hale_vel(nz=900,nx=800,dz=0.005,dx=0.01675,vzin=None):
   refw = normalize(mb.get_refl2d())
   lblw = mb.get_label2d()
 
-  return velw.T*0.001,refw.T,lblw.T
+  return velw*0.001,refw,lblw
 
 def fake_fault_img(vel,img,ox=7.035,dx=0.01675,ovx=7.035,dvx=0.0335,dz=0.005):
   """
@@ -138,5 +137,5 @@ def fake_fault_img(vel,img,ox=7.035,dx=0.01675,ovx=7.035,dvx=0.0335,dz=0.005):
   refw = normalize(mb.vel)
   lblw = mb.get_label2d()
 
-  return velp.T,refw.T,lblw.T
+  return velp,refw,lblw
 
