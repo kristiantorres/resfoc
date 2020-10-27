@@ -32,7 +32,7 @@ refs = np.ascontiguousarray(refs.reshape(raxes.n,order='F')).astype('float32')
 ny = 1; dy = 1
 
 # Residual migration axis
-nro = 41; dro = 0.001250
+nro = 49; dro = 0.001250
 
 # Read in anomalies
 aaxes,anos = sep.read_file("hale_tranos.H")
@@ -60,7 +60,7 @@ context,socket = startserver()
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
 # Loop over all models
-beg,end = 2,50
+beg,end = 50,200
 for im in progressbar(range(beg,end),"nmod:"):
   # Get the current example
   velin = vels[:,:,im]
@@ -109,7 +109,7 @@ for im in progressbar(range(beg,end),"nmod:"):
     if(k == 0):
       nsin  = [nhx,nrx,nz]
       nps = [next_power_of_2(nin)+1 for nin in nsin]
-      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,drx,dz],nps=nps,nro=nro,dro=dro,offset=14,verb=False)
+      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,drx,dz],nps=nps,nro=nro,dro=dro,offset=23,verb=False)
       rmigt = convert2time(rmig,dz,dt=d1,oro=rho,dro=dro,verb=False)[0]
       rmige = rmigt[np.newaxis,:,np.newaxis,:,:]
 
