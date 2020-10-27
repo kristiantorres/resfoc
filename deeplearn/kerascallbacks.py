@@ -9,7 +9,7 @@ import h5py
 from tensorflow.keras import callbacks
 from deeplearn.dataloader import load_allflddata
 from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
-from deeplearn.utils import thresh, plotseglabel
+from deeplearn.utils import thresh, plot_seglabel
 from resfoc.estro import estro_tgt, onehot2rho
 from genutils.ptyprint import create_inttag
 import numpy as np
