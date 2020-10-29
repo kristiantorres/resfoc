@@ -59,8 +59,10 @@ context,socket = startserver()
 
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
+#TODO: You have a duplicate!!!!
+#      don't forget to remove it (162)
 # Loop over all models
-beg,end = 50,200
+beg,end = 161,200
 for im in progressbar(range(beg,end),"nmod:"):
   # Get the current example
   velin = vels[:,:,im]

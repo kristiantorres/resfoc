@@ -91,3 +91,20 @@ class Vgg3_3d(nn.Module):
 
     return x5
 
+def save_torchnet(net,path) -> None:
+  """
+  Saves a torch net. Handles the case when the network
+  is wrapped with data parallel
+
+  Parameters:
+    net  - the torch network
+    path - the path to the network
+  """
+  # Get the parameter dictionary
+  try:
+    state_dict = net.module.state_dict()
+  except AttributeError:
+    state_dict = net.state_dict()
+
+  torch.save(state_dict, path)
+

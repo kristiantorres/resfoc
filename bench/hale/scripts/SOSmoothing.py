@@ -49,6 +49,7 @@ sep = seppy.sep()
 
 verb = sep.yn2zoo(args.verb)
 
+sosexe = "/homes/sep/joseph29/projects/resfoc/bench/hale/scripts/sos.py"
 if(args.labels is not None):
   laxes,lbl = sep.read_file(args.labels)
   lbl = lbl.reshape(laxes.n,order='F').T
@@ -59,11 +60,11 @@ if(args.labels is not None):
   smb = smooth(lbl.astype('float32'),rect1=20,rect2=20)
   osmb = "fltsmb.H"
   sep.write_file(osmb,smb.T,ofaxes=laxes)
-  sos = "jy ./scripts/sos.py %s %s %s"%(args.fin,osmb,args.fout)
+  sos = "/sep/joseph29/jtk/bin/jy %s %s %s %s"%(sosexe,args.fin,osmb,args.fout)
   if(verb): print(sos)
   sp = subprocess.check_call(sos,shell=True)
 else:
-  sos = "jy ./scripts/sos.py %s %s"%(args.fin,args.fout)
+  sos = "/sep/joseph29/jtk/bin/jy %s %s %s"%(sosexe,args.fin,args.fout)
   if(verb): print(sos)
   sp = subprocess.check_call(sos,shell=True)
 

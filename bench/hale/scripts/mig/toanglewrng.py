@@ -10,7 +10,8 @@ img = img.reshape(iaxes.n,order='F').T
 imgn = img[np.newaxis]
 [dz,dx,dy,dhx] = iaxes.d; [oz,ox,oy,ohx] = iaxes.o
 
-na = 41
+na = 64
+#na = 41
 ang = off2angkzx(imgn,ohx,dhx,dz,na=na,transp=True)
 na,oa,da = get_angkzx_axis(na=na)
 

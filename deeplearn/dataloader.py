@@ -24,7 +24,7 @@ class WriteToH5:
 
     Returns WriteToH5 object
     """
-    self.__hf = h5py.File(name,'w')
+    self.__hf = h5py.File(name,'w',libver='latest')
     self.__dsize = dsize
     self.__channels_last = False
     # For naming the datasets

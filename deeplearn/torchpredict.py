@@ -51,10 +51,6 @@ def segmentfaults(img,net,nzp=128,nxp=128,strdz=None,strdx=None,resize=False):
   # Reconstruct the predictions
   ipra  = iprd.reshape([numpz,numpx,nzp,nxp])
   iprb  = pe.reconstruct(ipra)
-  if(iprb.shape != rimg.shape):
-    iptch = pe.extract(rimg)
-    rimg  = pe.reconstruct(iptch)
-    return iprb, rimg
-  else:
-    return iprb
+
+  return iprb
 
