@@ -153,14 +153,14 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plot_seglabel(img,lbl,show=False,color='red',fname=None,**kwargs) -> None:
+def plot_seglabel(img,lbl,show=True,color='red',fname=None,**kwargs) -> None:
   """
   Plots a binary label on top of an image
 
   Parameters:
     img   - image [nz,nx]
     lbl   - fault labels [nz,nx]
-    show  - flag for showing the image [False]
+    show  - flag for showing the image [True]
     color - color of label to be plotted on image ['red']
     fname - name of output file to be saved (without the extension) [None]
   """
@@ -181,7 +181,7 @@ def plot_seglabel(img,lbl,show=False,color='red',fname=None,**kwargs) -> None:
   pclip = kwargs.get('pclip',1.0)
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
       vmin=pclip*kwargs.get('vmin',np.min(img)),vmax=pclip*kwargs.get('vmax',np.max(img)),
-      extent=[ox,xmax,zmax,oz],interpolation=kwargs.get("interp","sinc"))
+      extent=[ox,xmax,zmax,oz],interpolation=kwargs.get("interp","bilinear"))
   ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel','Z (km)'),fontsize=kwargs.get('labelsize',14))
   ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
@@ -198,8 +198,18 @@ def plot_seglabel(img,lbl,show=False,color='red',fname=None,**kwargs) -> None:
       plt.savefig(fname+"-lbl.png",bbox_inches='tight',dpi=150,transparent=True)
       plt.close()
 
-def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
-  """ Plots unthresholded predictions on top of an image """
+def plot_segprobs(img,prd,pmin=0.01,alpha=0.5,show=True,fname=None,**kwargs) -> None:
+  """
+  Plots unthresholded predictions on top of an image
+
+  Parameters:
+    img   - the input image [nz,nx]
+    prd   - the predicted fault probability [nz,nx]
+    pmin  - the minimum probability to display [0.01]
+    alpha - transparency parameter for displaying probability [0.5]
+    show  - flag for displaying the image [True]
+  """
+  [nz,nx] = img.shape
   if(img.shape != prd.shape):
     raise Exception('Input image and predictions must be same size')
   mask = np.ma.masked_where(prd <= pmin, prd)
@@ -207,12 +217,17 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
+  ox   = kwargs.get('ox',0.0)
+  xmax = ox + kwargs.get('dx',1.0)*nx
+  oz   = kwargs.get('oz',0.0)
+  zmax = oz + kwargs.get('dz',1.0)*nz
+  pclip = kwargs.get('pclip',1.0)
   im = ax.imshow(img,cmap=kwargs.get('cmap','gray'),
-      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
-  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',18))
-  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',18))
+      vmin=pclip*kwargs.get('vmin',np.min(img)),vmax=pclip*kwargs.get('vmax',np.max(img)),
+      extent=[ox,xmax,zmax,oz],
+      interpolation=kwargs.get("interp","bilinear"))
+  ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',18))
+  ax.set_ylabel(kwargs.get('ylabel','Z (km)'),fontsize=kwargs.get('labelsize',18))
   ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',18))
   ax.tick_params(labelsize=kwargs.get('ticksize',18))
   # Set colorbar
@@ -223,15 +238,14 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
     ftype = kwargs.get('ftype','png')
-    ax.set_aspect(kwargs.get('aratio',1.0))
+    ax.set_aspect(kwargs.get('aspect',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
   cbar.remove()
   # Plot label
   imp = ax.imshow(mask,cmap='jet',
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("pinterp","bilinear"),
+      extent=[ox,xmax,zmax,oz],interpolation=kwargs.get("pinterp","bilinear"),
         vmin=pmin,vmax=1.0,alpha=alpha)
-  ax.set_aspect(kwargs.get('aratio',1.0))
+  ax.set_aspect(kwargs.get('aspect',1.0))
   # Set colorbar
   cbar_axp = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
     kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
@@ -300,7 +314,7 @@ def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
 
   return ptchf
 
-def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
+def torchprogress(cur,bsz,tot,loss,acc,size=40,file=sys.stdout,save=True):
   """
   Prints a progress bar during training of a torch
   neural network
@@ -311,6 +325,7 @@ def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
     tot  - the total number batches
     loss - the current running loss value
     acc  - the current accuracy
+    save - flag indicating whether to return the computed values
 
   Prints a progressbar to the screen
   """
@@ -318,10 +333,14 @@ def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
   if(cur == 0): div = 1
   else: div = cur
   curform = create_inttag(cur,tot)
-  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss/div,acc/((cur+1)*bsz)))
+  loss /= div
+  acc /= ((cur+1)*bsz)
+  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss,acc))
   if(cur == tot):
     file.write("\n")
   file.flush()
+  if(save):
+    return loss,acc
 
 def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
                      oz=None,ox=None,transp=False,pltcoords=True,**kwargs) -> None:
