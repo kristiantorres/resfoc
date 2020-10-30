@@ -2,8 +2,9 @@
 Classes and functions for loading in data for deep learning
 
 @author: Joseph Jennings
-@version: 2020.09.22
+@version: 2020.10.29
 """
+import os as opsys
 import h5py
 import numpy as np
 import random
@@ -24,7 +25,7 @@ class WriteToH5:
 
     Returns WriteToH5 object
     """
-    self.__hf = h5py.File(name,'w')
+    self.__hf = h5py.File(name,'w',libver='latest')
     self.__dsize = dsize
     self.__channels_last = False
     # For naming the datasets
@@ -337,4 +338,41 @@ def load_labeled_flat_data(trfile,vafile,begex=None,endex=None):
   if(vafile != None): hfva.close()
 
   return allx, ally
+
+def clean_examples(ifiles,skips,sep,verb=False) -> None:
+  """
+  Cleans examples from a .H file
+
+  Parameters:
+    ifiles - input list of .H files (assumes all files same shape)
+    skips  - file indices over which to skip for cleaning
+    verb   - verbosity flag [False]
+  """
+  if(type(ifiles) is not list):
+    raise Exception("Input files must be within a list")
+  nf = len(ifiles)
+
+  # Prepare the output files
+  ofiles = []
+  for ifile in ifiles:
+    bname = opsys.path.splitext(ifile)[0]
+    ofiles.append(bname + '-cln.H')
+
+  # Get the total enumber of examples
+  taxes = sep.read_header(ifiles[0])
+  nex = taxes.n[-1]
+  os  = taxes.o[:-1]
+  ds  = taxes.d[:-1]
+
+  for iex in progressbar(range(nex),"nex:",verb=verb):
+    if(iex not in skips):
+      for ifile in range(nf):
+        axes,dat = sep.read_wind(ifiles[ifile],fw=iex,nw=1)
+        dat = dat.reshape(axes.n,order='F')
+        if(iex == 0):
+          sep.write_file(ofiles[ifile],dat,os=os,ds=ds)
+        elif(iex == 1):
+          sep.append_file(ofiles[ifile],dat,newaxis=True)
+        else:
+          sep.append_file(ofiles[ifile],dat)
 
