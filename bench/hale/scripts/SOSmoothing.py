@@ -49,7 +49,14 @@ sep = seppy.sep()
 
 verb = sep.yn2zoo(args.verb)
 
-sosexe = "/homes/sep/joseph29/projects/resfoc/bench/hale/scripts/sos.py"
+faxes = sep.read_header(args.fin)
+if(len(faxes.n) == 2):
+  sosexe = "/homes/sep/joseph29/projects/resfoc/bench/hale/scripts/sos.py"
+elif(len(faxes.n) == 3):
+  sosexe = "/homes/sep/joseph29/projects/resfoc/bench/hale/scripts/sosang.py"
+else:
+  raise Exception("Input image must be 2 or 3")
+
 if(args.labels is not None):
   laxes,lbl = sep.read_file(args.labels)
   lbl = lbl.reshape(laxes.n,order='F').T
