@@ -694,10 +694,10 @@ def plot_img2d(img,**kwargs) -> None:
     # Crop
     # TODO: will need to handle either PDF or png crops
   # Show the plot
-  if(kwargs.get('show',True)):
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
     plt.show()
   # Save the figure
-  figname = kwargs.get('figname',None)
   if(figname is not None):
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 

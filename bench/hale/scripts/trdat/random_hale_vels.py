@@ -109,9 +109,13 @@ plt.plot(zs,0.001*velw[400])
 plt.plot(zs,hvlw[200])
 plt.show()
 
-plot_img2d(stkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_vel2d(velww.T*0.001,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
-plot_vel2d(hvlww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw))
-plot_img2d(refww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_seglabel(refww.T,lblww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=True)
+plot_img2d(stkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,aspect=3.0,figname='./fig/trimgs/stk.png')
+plot_vel2d(velww.T*0.001,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw),
+           aspect=3.0,figname='./fig/trimgs/vel.png')
+plot_vel2d(hvlww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,vmin=np.min(hvlw),vmax=np.max(hvlw),
+           aspect=3.0,figname='./fig/trimgs/hvel.png')
+plot_img2d(refww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,
+           aspect=3.0,figname='./fig/trimgs/ref.png')
+plot_seglabel(refww.T,lblww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False,
+              aspect=3.0,figname='./fig/trimgs/label.png')
 

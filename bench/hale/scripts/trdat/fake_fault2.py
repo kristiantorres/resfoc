@@ -63,8 +63,11 @@ refww = refw[begx:endx,begz:endz]
 lblww = lblw[begx:endx,begz:endz]
 stkww = stkw[begx:endx,begz:endz]
 
-plot_img2d(stkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_img2d(velww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_img2d(refww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=False)
-plot_seglabel(refww.T,lblww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=2.0,show=True)
+ox *= 0.001; oz = 0.0
+dz *= 0.001; dx *= 0.001
+
+plot_img2d(stkww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=3.0,figname='./fig/fakefault/stk.png',show=False)
+plot_img2d(velww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=3.0,figname='./fig/fakefault/vel.png',show=False)
+plot_img2d(refww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=3.0,figname='./fig/fakefault/ref.png',show=False)
+plot_seglabel(refww.T,lblww.T,ox=ox+begx*dx,dx=dx,oz=begz*dz,dz=dz,pclip=0.5,aspect=3.0,fname='./fig/fakefault/lbl',show=False)
 
