@@ -3,7 +3,7 @@ import numpy as np
 import glob
 from client.sshworkers import create_host_list, launch_sshworkers, kill_sshworkers
 from server.utils import startserver
-from deeplearn.soschunkr import soschunkr
+from resfoc.soschunkr import soschunkr
 from server.distribute import dstr_collect
 from deeplearn.utils import plot_seglabel
 from deeplearn.dataloader import WriteToH5
@@ -13,7 +13,7 @@ from genutils.ptyprint import progressbar
 hosts = ['thing','storm','torch','fantastic','jarvis']
 wph = len(hosts)*[5]
 hin = create_host_list(hosts,wph)
-cfile = "/homes/sep/joseph29/projects/resfoc/deeplearn/sosworker.py"
+cfile = "/homes/sep/joseph29/projects/resfoc/resfoc/sosworker.py"
 launch_sshworkers(cfile,hosts=hin,sleep=1,verb=1,clean=False)
 
 # Get files
