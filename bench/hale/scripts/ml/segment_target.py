@@ -44,8 +44,8 @@ iprb = segmentfaults(smt,net,nzp=ptchz,nxp=ptchx)
 #plot_img2d(smt,pclip=0.5,show=False)
 plot_segprobs(smt,iprb,pmin=0.2,oz=100*dz,dz=dz,ox=30*dx+ox,dx=dx,
               show=False,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
-              hbar=0.45,barz=0.27,cropsize=140,fname='./fig/segfigs/smoothres')
+              hbar=0.45,barz=0.27,cropsize=140)
 plot_segprobs(stkw.T,iprb,pmin=0.2,oz=100*dz,dz=dz,ox=30*dx+ox,dx=dx,
-              show=False,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
-              hbar=0.45,barz=0.27,cropsize=140,fname='./fig/segfigs/noisyres')
+              show=True,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
+              hbar=0.45,barz=0.27,cropsize=140)
 

@@ -10,7 +10,7 @@ from genutils.ptyprint import create_inttag
 import inpout.seppy as seppy
 
 # Get the GPU
-device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
 # Training set
 #hale_fltseg = HaleFltSegDataGPU('/net/thing/scr2/joseph29/halefltseg_128sm.h5',device,begex=0,endex=4000,verb=True)
