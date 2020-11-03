@@ -91,6 +91,39 @@ class Vgg3_3d(nn.Module):
 
     return x5
 
+class Vgg3a_3d(nn.Module):
+
+  def __init__(self):
+    super(Vgg3a_3d,self).__init__()
+    # Maxpool
+    self.pool1 = nn.MaxPool3d((1,2,2))
+    self.pool2 = nn.MaxPool3d((2,2,2))
+
+    # Convolutional blocks
+    self.conv1 = nn.Conv3d(  1, 32,3,padding=(1,1,1))
+    self.conv2 = nn.Conv3d( 32, 64,3,padding=(1,1,1))
+    self.conv3 = nn.Conv3d( 64,128,3,padding=(1,1,1))
+
+    # Linear
+    self.fc1 = nn.Linear(128 * 8 * 8 * 8,128)
+    self.fc2 = nn.Linear(128,1)
+
+  def forward(self,x):
+    """ Forward pass of the network """
+    # Convolutional layers
+    x1  = F.relu(self.conv1(x  ))
+    x1d = self.pool1(x1)
+    x2  = F.relu(self.conv2(x1d))
+    x2d = self.pool2(x2)
+    x3  = F.relu(self.conv3(x2d))
+    x3d = self.pool2(x3)
+    # Flatten
+    x3f = x3d.view(-1,128 * 8 * 8 * 8)
+    x4  = F.relu(self.fc1(x3f))
+    x5  = self.fc2(x4)
+
+    return x5
+
 def save_torchnet(net,path) -> None:
   """
   Saves a torch net. Handles the case when the network
