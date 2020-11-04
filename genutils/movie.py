@@ -6,7 +6,7 @@ and viewing frames of a numpy array
 """
 import os
 import inpout.seppy as seppy
-from utils.ptyprint import create_inttag, progressbar
+from genutils.ptyprint import create_inttag, progressbar
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -215,6 +215,7 @@ def makemovietb_mpl(arr1,arr2,odir,ftype='png',qc=False,skip=1,pttag=False,**kwa
     if(qc):
       plt.show()
 
+#TODO: replace xmin,xmax, etc with ox,dx
 def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   """
   Provides a frame by frame interactive viewing of a 3D numpy array via the arrow keys.
@@ -239,8 +240,15 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
     show      - flag for calling plt.show() [True]
   """
+  if(type(data) is list):
+    data = np.concatenate([iimg[np.newaxis] for iimg in data],axis=0)
   if(len(data.shape) < 3):
     raise Exception("Data must be 3D")
+  [nex,nx,nz] = data.shape
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
   curr_pos = 0
   vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
   if(vmin == None or vmax == None):
@@ -265,8 +273,7 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
     if(not fast):
       ax.cla()
       ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-          extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
-          kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+          extent=[xmin,xmax,zmax,zmin],
           interpolation=kwargs.get('interp','none'),aspect='auto')
     ax.set_title('%d'%(curr_pos),fontsize=kwargs.get('labelsize',14))
     ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
@@ -297,8 +304,7 @@ def viewimgframeskey(data,transp=True,fast=True,show=True,**kwargs):
   else:
     img = data[0,:,:]
   l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-      extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
-        kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+      extent=[xmin,xmax,zmax,zmin],
       interpolation=kwargs.get('interp','none'),aspect='auto')
   ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
@@ -425,7 +431,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
 
   # Compute plotting min and max
-  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin == None or vmax == None):
     vmin = np.min(data)*kwargs.get('pclip',1.0)
     vmax = np.max(data)*kwargs.get('pclip',1.0)
 
@@ -447,7 +454,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   def key_event(e):
     nonlocal i1,loc1,i2,loc2,i3,loc3,ax1,ax2,ax3,ax4,curr_pos
 
-    if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+    if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]):
       zoomed_out = True
     else:
       zoomed_out = False
@@ -579,8 +586,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       if e.key.isdigit():
         curr_pos=int(e.key)
       curr_pos=curr_pos%ns[3]
-      
-      if(zoomed_out): 
+
+      if(zoomed_out):
         ax[0,1].cla()
       else:
         del ax[0,1].lines[:]
@@ -665,7 +672,7 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         i3=int((loc3-os[2])/ds[2])
         loc3=i3*ds[2]+os[2]
 
-      if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]): 
+      if(ax[1,0].get_xlim()[0] == os[0] and ax[1,0].get_ylim()[1] == os[2] and ax[1,1].get_xlim()[0] == os[1]):
         zoomed_out = True
       else:
         zoomed_out = False
@@ -848,4 +855,106 @@ def resangframes(resang,dz,dx,dro,oro,jx=10,transp=False,show=True,**kwargs):
       ticksize=kwargs.get('ticksize',14),interp=kwargs.get('interp','none'),
       xmax=kwargs.get('xmax',nx*dx),zmax=kwargs.get('zmax',nz*dz),show=show,
       xlabel='X (km)',ylabel='Z (km)')
+
+def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**kwargs):
+  """
+  An interactive visualization of the focused image classification of residual
+  migration images
+
+  Parameters:
+    img       - the input residually migrated angle patch [nro,na,nz,nx]
+    prb       - predicted focus probabilities
+    oro       - origin of residual migration axis
+    dro       - sampling of residual migration axis
+    smb       - computed semblances [None]
+    streamer  - streamer acqusition geometry [True]
+    vmin      - minimum value to display in the data [default is minimum amplitude of all data]
+    vmax      - maximum value to display in the data [default is maximum amplitude of all data]
+    pclip     - how much to clip the min and max of the amplitudes [0.9]
+    ttlstring - title to be printed. Can be printed of the form ttlstring%(ottl + dttl*(framenumber))
+    ottl      - origin for printing title values [0.0]
+    dttl      - sampling for printing title values [1.0]
+    ttlvals   - metric values to print on the title [None]
+    interp    - interpolation type for better display of the data (sinc for seismic, bilinear of velocity) [none]
+    show      - flag for calling plt.show() [True]
+  """
+  if(len(img.shape) < 4):
+    raise Exception("Data must be 4D")
+
+  # Compute the stack
+  stk = np.sum(img,axis=1)
+  # Extract the angle gather from the middle of the patch
+  nro,na,nz,nx = img.shape
+  if(streamer):
+    ang = img[:,32:,:,nx//2]
+  else:
+    ang = img[:,:,:,nx//2]
+  ang = np.transpose(ang,(0,2,1))
+
+  # Normalize predictions and semblance
+  prb /= np.max(prb)
+  if(smb is not None):
+    smb /= np.max(smb)
+
+  # Compute rhos
+  rhos = np.linspace(oro,oro+(nro-1)*dro,nro)
+
+  curr_pos = 0
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin == None or vmax == None):
+    svmin = np.min(stk)*kwargs.get('pclip',1.0)
+    svmax = np.max(stk)*kwargs.get('pclip',1.0)
+    avmin = np.min(ang)*kwargs.get('pclip',1.0)
+    avmax = np.max(ang)*kwargs.get('pclip',1.0)
+
+  def key_event(e):
+    nonlocal curr_pos,vmin,vmax
+
+    if e.key == "n":
+        curr_pos = curr_pos + 1
+    elif e.key == "m":
+        curr_pos = curr_pos - 1
+    else:
+        return
+    curr_pos = curr_pos % img.shape[0]
+
+    istk = stk[curr_pos,:,:]
+    iang = ang[curr_pos,:,:]
+    iprb = prb[curr_pos]
+    ax[0].set_title(r'$\rho$=%f prd=%g'%(oro+curr_pos*dro,iprb),fontsize=kwargs.get('labelsize',14))
+    if(smb is not None):
+      ax[1].set_title(r'smb=%g'%(smb[curr_pos]),fontsize=kwargs.get('labelsize',14))
+    ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
+    if(fast):
+      l1.set_data(istk)
+      l2.set_data(iang)
+    fig.canvas.draw()
+
+  fig,ax = plt.subplots(1,3,figsize=(kwargs.get("wbox",15),kwargs.get("hbox",6)))
+  fig.canvas.mpl_connect('key_press_event', key_event)
+  # Show the first frame
+  istk = stk[0,:,:]; iang = ang[0,:,:]; iprb = prb[0]
+  l1 = ax[0].imshow(istk,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
+                    extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',img.shape[1]),
+                    kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+                     interpolation=kwargs.get('interp','bilinear'),aspect=1)
+  ax[0].set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
+  ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
+  ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
+  ax[0].set_title(r'$\rho=$%.4f prd=%g'%(oro,iprb),fontsize=kwargs.get('labelsize',14))
+  l2 = ax[1].imshow(iang,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
+                    extent=[kwargs.get('amin',0.0),kwargs.get('amax',img.shape[1]),
+                    kwargs.get('zmax',img.shape[0]),kwargs.get('zmin',0.0)],
+                    interpolation=kwargs.get('interp','bilinear'),aspect=1)
+  ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
+  ax[1].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
+  ax[1].tick_params(labelsize=kwargs.get('ticksize',14))
+  if(smb is not None):
+    ax[1].set_title('smb=%g'%(smb[curr_pos]),fontsize=kwargs.get('labelsize',14))
+  ax[2].plot(rhos,prb)
+  if(smb is not None):
+    ax[2].plot(rhos,smb)
+
+  if(show):
+    plt.show()
 
