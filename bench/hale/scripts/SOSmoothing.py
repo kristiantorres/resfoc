@@ -100,8 +100,8 @@ else:
       if(not os.path.exists(imgs[k])):
         sep.write_file(imgs[k],img[:,:,:,k])
     # Start workers
-    hosts = ['thing','storm','torch','fantastic','jarvis']
-    wph = len(hosts)*[5]
+    hosts = ['storm','torch','fantastic','jarvis']
+    wph = len(hosts)*[3]
     hin = create_host_list(hosts,wph)
     cfile = "/homes/sep/joseph29/projects/resfoc/resfoc/sosworker.py"
     launch_sshworkers(cfile,hosts=hin,sleep=1,verb=1,clean=True)
@@ -114,7 +114,6 @@ else:
     oimgs = sorted(output['imgs'])
     # Clean up
     kill_sshworkers(cfile,hosts,verb=False)
-    print(oimgs)
     # Read in each into an array
     for k in range(len(oimgs)):
       saxes,simg = sep.read_file(oimgs[k][0])
