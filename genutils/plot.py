@@ -649,10 +649,10 @@ def plot_img2d(img,**kwargs) -> None:
     pclip   - clipping to apply to the image [1.0]
     imin    - minimum image amplitude [None]
     imax    - maximum image amplitude [None]
-    xmin    - minumum x value to use in extent [None]
-    xmax    - maximum x value to use in extent [None]
-    zmin    - minumum z value to use in extent [None]
-    zmax    - maximum z value to use in extent [None]
+    ox      - image x-origin [0.0]
+    oz      - image z-origin [0.0]
+    dx      - image x-sampling interval [1.0]
+    dz      - image z-sampling interval [1.0]
     xlabel  - label for x axis [None]
     zlabel  - label for z axis [None]
     fsize   - fontsize [15]
@@ -667,7 +667,7 @@ def plot_img2d(img,**kwargs) -> None:
   if(len(img.shape) != 2):
     raise Exception("Image must be two-dimensional len(img.shape) = %d"%(len(img.shape)))
   if(kwargs.get('transp',False)): img = img.T
-  [nz,nx] = img.shape
+  nz,nx = img.shape
   # Make figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
   ax = fig.gca()
@@ -760,4 +760,62 @@ def plot_vel2d(vel,**kwargs) -> None:
   # Return the image object
   if(kwargs.get('retim',False)):
     return im1
+
+def plot_rhoimg2d(img,rho,**kwargs) -> None:
+  """
+  Plots an estimated rho field on top of the seismic image
+
+  Parameters:
+    img   - the input image [nz,nx]
+    rho   - the estimated rho field [nz,nx]
+    ox    - image x-origin [0.0]
+    oz    - image z-origin [0.0]
+    dx    - image x-sampling [1.0]
+    dz    - image z-sampling [1.0]
+    wbox  - figure width set in figure size option [10]
+    hbox  - figure height set in figure size option [6]
+    alpha - transparency value to set for rho
+    imin  - minimum image amplitude [None]
+    imax  - maximum image amplitude [None]
+  """
+  # Check image size
+  if(len(img.shape) != 2 or len(rho.shape) != 2):
+    raise Exception("Input image and rho field must be 2D")
+  # Get sizes
+  nz,nx = img.shape
+  if(nz != rho.shape[0] or nx != rho.shape[1]):
+    raise Exception("image and rho field must be same size")
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('imin',np.min(img)), kwargs.get('imax',np.max(img))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
+  # Image plotting
+  im1 = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  # Rho plotting
+  im2 = ax.imshow(rho,cmap='seismic',interpolation='bilinear',
+                  vmin=kwargs.get('rhomin',0.95),vmax=kwargs.get('rhomax',1.05),
+                  extent=[xmin,xmax,zmax,zmin],alpha=kwargs.get('alpha',0.2),
+                  aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+  cbar = fig.colorbar(im2,cbar_ax,format='%.2f')
+  cbar.solids.set(alpha=1)
+  cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  cbar.set_label(r'$\rho$',fontsize=kwargs.get('labelsize',15))
+  # Display or save the figure
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
+    plt.show()
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 

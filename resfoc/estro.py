@@ -196,7 +196,8 @@ def estro_fltfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, 
     return rhosm
 
 def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=None, # Patching parameters
-                         rectz=30,rectx=30,qcimgs=True,verb=False,fmwrk='torch',device=None):
+                         rectz=30,rectx=30,fltthresh=75,fltlbls=None,qcimgs=True,verb=False,
+                         fmwrk='torch',device=None):
   """
   Estimates rho by choosing the residually migrated patch that has
   highest angle gather and fault focus probability given by the neural network
@@ -212,6 +213,7 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
     strdx      - size of stride in x dimension [nxp/2]
     rectz      - length of smoother in z dimension [30]
     rectx      - length of smoother in x dimension [30]
+    fltlbls    - input fault segmentation labels [None]
     qcimgs     - flag for returning the fault focusing probabilities [nro,nz,nx]
                  and fault patches [nz,nx]
     verb       - verbosity flag [False]
@@ -269,10 +271,17 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
   focprdimg = np.zeros([nro,nz,nx])
   _ = per.extract(focprdimg)
 
+  if(fltlbls is None):
+    fltptch = np.ones([numpz,numpx,nzp,nxp],dtype='int')
+  else:
+    pef = PatchExtractor((nzp,nxp),stride=(strdz,strdx))
+    fltptch = pef.extract(fltlbls)
+
   # Estimate rho from angle-fault focus probabilities
   hlfz = int(nzp/2); hlfx = int(nxp/2)
   for izp in range(numpz):
     for ixp in range(numpx):
+      if(np.sum(fltptch[izp,ixp]) > fltthresh):
         # Find maximum probability and compute rho
         iprb = focprdptch[izp,ixp,:,hlfz,hlfx]
         rhop[izp,ixp,:,:] = np.argmax(iprb)*dro + oro
@@ -281,6 +290,8 @@ def estro_fltangfocdefoc(rimgs,foccnn,dro,oro,nzp=64,nxp=64,strdz=None,strdx=Non
           focprdnrm[izp,ixp,:,:,:] = 0.0
         else:
           focprdnrm[izp,ixp,:,:,:] = focprdptch[izp,ixp,:,:,:]/np.max(focprdptch[izp,ixp,:,hlfz,hlfx])
+      else:
+        rhop[izp,ixp,:,:] = 1.0
 
   # Reconstruct rho and probabiliites
   rho       = pe.reconstruct(rhop)
