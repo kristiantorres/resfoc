@@ -10,21 +10,25 @@ from genutils.plot import plot_img2d
 
 # Read in the image
 sep = seppy.sep()
-#iaxes,img = sep.read_file("spimgbobang.H")
-iaxes,img = sep.read_file("spimgbobangwrng.H")
-img = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T)[:,0,:,:]
-stkw = agc(np.sum(img,axis=1))[30:542,100:356]
+iaxes,img = sep.read_file("spimgbobang.H")
+#iaxes,img = sep.read_file("spimgbobangwrng.H")
+#img = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T)[:,0,:,:]
+#stkw = agc(np.sum(img,axis=1))[30:542,100:356]
 dz,da,dy,dx = iaxes.d; oz,oa,oy,ox = iaxes.o
 
-iaxes,img = sep.read_file("faultfocusang.H")
+#iaxes,img = sep.read_file("faultfocusang.H")
+#img = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T)[:,:,:]
+#stkw = agc(np.sum(img,axis=1))[10:522,100:356]
+
+iaxes,img = sep.read_file("realtorch_rfa.H")
 img = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T)[:,:,:]
-stkw = agc(np.sum(img,axis=1))[10:522,100:356]
+stkw = agc(np.sum(img,axis=1))
 
 # Perform structure-oriented smoothing
 smooth = True
 if(smooth):
-  sep.write_file("presmooth.H",stkw.T)
-  sp = subprocess.check_call("python scripts/SOSmoothing.py -fin presmooth.H -fout smooth.H",shell=True)
+  #sep.write_file("presmooth.H",stkw.T)
+  #sp = subprocess.check_call("python scripts/SOSmoothing.py -fin presmooth.H -fout smooth.H",shell=True)
   saxes,smt = sep.read_file("smooth.H")
   smt = np.ascontiguousarray(smt.reshape(saxes.n,order='F'))
 else:
@@ -40,12 +44,22 @@ net.load_state_dict(torch.load('/scr1/joseph29/hale2_fltsegsm.pth',map_location=
 ptchz,ptchx = 128,128
 iprb = segmentfaults(smt,net,nzp=ptchz,nxp=ptchx)
 
+#sep.write_file("focfltprb.H",iprb,os=[100*dz,ox+30*dx],ds=[dz,dx])
+# Smooth with the probabilities
+#sp = subprocess.check_call("python scripts/SOSmoothing.py -fin presmooth.H -labels focfltprb.H -fout smoothprob.H",shell=True)
+#paxes,smbprb = sep.read_file("smoothprob.H")
+#smbprb = smbprb.reshape(paxes.n,order='F')
+
 # Plot the prediction
 #plot_img2d(smt,pclip=0.5,show=False)
 plot_segprobs(smt,iprb,pmin=0.2,oz=100*dz,dz=dz,ox=30*dx+ox,dx=dx,
               show=False,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
-              hbar=0.45,barz=0.27,cropsize=140)
+              hbar=0.45,barz=0.27,cropsize=140,fname='./fig/torchsmtprd')
 plot_segprobs(stkw.T,iprb,pmin=0.2,oz=100*dz,dz=dz,ox=30*dx+ox,dx=dx,
-              show=True,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
-              hbar=0.45,barz=0.27,cropsize=140)
+              show=False,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
+              hbar=0.45,barz=0.27,cropsize=140,fname='./fig/torchnozprd')
+
+#plot_segprobs(smbprb,iprb,pmin=0.2,oz=100*dz,dz=dz,ox=30*dx+ox,dx=dx,
+#              show=False,pclip=0.5,aspect=3.0,labelsize=14,ticksize=14,barlabelsize=14,
+#              hbar=0.45,barz=0.27,cropsize=140,fname='./fig/smoothprb')
 

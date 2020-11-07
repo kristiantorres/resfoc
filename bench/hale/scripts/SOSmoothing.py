@@ -67,11 +67,12 @@ else:
 if(args.labels is not None):
   laxes,lbl = sep.read_file(args.labels)
   lbl = lbl.reshape(laxes.n,order='F').T
-  zidx = lbl == 0
-  oidx = lbl == 1
-  lbl[zidx] = 1
-  lbl[oidx] = -4.6
-  smb = smooth(lbl.astype('float32'),rect1=20,rect2=20)
+  #zidx = lbl == 0
+  #oidx = lbl == 1
+  #lbl[zidx] = 1
+  #lbl[oidx] = -4.6
+  lbl = 1-lbl
+  smb = smooth(lbl.astype('float32'),rect1=3,rect2=3)
   osmb = "fltsmb.H"
   sep.write_file(osmb,smb.T,ofaxes=laxes)
   sos = "/sep/joseph29/jtk/bin/jy %s %s %s %s"%(sosexe,args.fin,osmb,args.fout)

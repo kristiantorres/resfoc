@@ -55,7 +55,7 @@ plot_seglabel(smt,ilbl)
 
 # Read in the fault focusing network
 fnet = Vgg3a_3d()
-device = torch.device('cuda:1')
+device = torch.device('cuda:2')
 fnet.load_state_dict(torch.load('/scr1/joseph29/hale2_fltfoc.pth',map_location=device))
 fnet.to(device)
 
@@ -68,8 +68,8 @@ rfa = refocusang(imgw,rho.T,dro)
 plot_rhoimg2d(smt,rho,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
 
 # Plot rho img and refocus
-sep.write_file("realtorch_fltprds.H",fltprds.T)
-sep.write_file("realtorch_rho.H",rho,ds=[dz,dx],os=[oz,ox])
-sep.write_file("realtorch_rfi.H",rfi.T,ds=[dz,dx],os=[oz,ox])
-sep.write_file("realtorch_rfa.H",rfa.T,ds=[dz,dx],os=[oz,ox])
+#sep.write_file("realtorch_fltprds.H",fltprds.T)
+#sep.write_file("realtorch_rho.H",rho,ds=[dz,dx],os=[oz,ox])
+#sep.write_file("realtorch_rfi.H",rfi.T,ds=[dz,dx],os=[oz,ox])
+#sep.write_file("realtorch_rfa.H",rfa.T,ds=[dz,dx],os=[oz,ox])
 
