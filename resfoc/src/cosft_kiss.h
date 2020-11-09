@@ -7,8 +7,7 @@
 #ifndef COSFT_H_
 #define COSFT_H_
 
-#include <complex>
-#include <fftw3.h>
+#include "kiss_fftr.h"
 
 class cosft {
   public:
@@ -17,15 +16,15 @@ class cosft {
   void fwd(float *q, int o1, int d1);
   void inv(float *q, int o1, int d1);
   ~cosft() {
+    free(_fwd); free(_inv);
     delete [] _pp; delete[] _p;
-    fftwf_destroy_plan(_fplan); fftwf_destroy_plan(_iplan);
   }
 
   private:
   int _nt, _nw, _n1;
   float *_p;
-  std::complex<float> *_pp;
-  fftwf_plan _fplan, _iplan;
+  kiss_fft_cpx *_pp;
+  kiss_fftr_cfg _fwd, _inv;
 };
 
 #endif /* COSFT_H_ */
