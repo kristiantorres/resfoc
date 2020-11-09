@@ -500,7 +500,7 @@ def ssim_ro(rimgs,fimg):
 
   return np.argmax(ssims)
 
-def anglemask(nz,na,zpos=None,apos=None,rectz=10,recta=10,mode='slant',rand=True):
+def anglemask(nz,na,zpos=None,apos=None,rectz=10,recta=10,mode='slant',rand=True,verb=False):
   """
   Creates an angle mask that can be applied to an
   angle gather to limit the number of angles (illumination)
@@ -514,6 +514,7 @@ def anglemask(nz,na,zpos=None,apos=None,rectz=10,recta=10,mode='slant',rand=True
     recta - number of points to smooth the mask in a [10]
     mode  - mode of creating mask. Either a vertical mask ('vert') or slanted ['slant']
     rand  - add smooth random variation to the mask [True]
+    verb  - verbosity flag [False]
 
   Returns a single angle gather mask [nz,na]
   """
@@ -528,13 +529,19 @@ def anglemask(nz,na,zpos=None,apos=None,rectz=10,recta=10,mode='slant',rand=True
     a0 = int(apos*na)
 
   if(mode == 'vert'):
+    if(apos > 0.5):
+      raise Exception("Please a choose an a0 < 0.5 for vertical mask mode")
     abeg = a0; aend = na-a0
     mask = np.ones([nz,na])
     mask[:,0:abeg] = 0.0
     mask[:,aend:] = 0.0
+    if(verb):
+      print("z0=%d a0=%d af=%d"%(z0,a0,aend))
 
   elif(mode == 'slant'):
     zf = nz-1; af = na-1
+    if(verb):
+      print("z0=%d a0=%d zf=%d af=%d"%(z0,a0,zf,af))
 
     # Slope and intercept
     m = (zf - z0)/(a0 - af)
