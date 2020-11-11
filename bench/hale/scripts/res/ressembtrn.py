@@ -7,8 +7,8 @@ from genutils.plot import plot_rhopicks, plot_anggatrhos, plot_rhoimg2d
 sep = seppy.sep()
 
 # Read in residually migrated gathers
-#saxes,storm = sep.read_file("resmigtrnt.H")
-saxes,storm = sep.read_file("resmigtrntmute.H")
+saxes,storm = sep.read_file("resmigtrnt.H")
+#saxes,storm = sep.read_file("resmigtrntmute.H")
 [nz,na,nx,nro] = saxes.n; [oz,oa,ox,oro] = saxes.o; [dz,da,dx,dro] = saxes.d
 storm = storm.reshape(saxes.n,order='F').T
 
@@ -51,9 +51,15 @@ rfaw  = rfa[:,:,100:356]
 # Window to the target region
 plot_rhoimg2d(stkww.T,rhow.T,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
 
-sep.write_file("resmigtrnmutsemb.H",sembw.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("resmigtrnmutrho.H",rhow.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("resmigtrnmutrfi.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("resmigtrnmutstk.H",stkww.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("resmigtrnmutrfa.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
+sep.write_file("resmigtrnsemb.H",sembw.T,os=[oz,oro],ds=[dz,dro])
+sep.write_file("resmigtrnrho.H",rhow.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("resmigtrnrfi.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("resmigtrnstk.H",stkww.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("resmigtrnrfa.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
+
+#sep.write_file("resmigtrnmutsemb.H",sembw.T,os=[oz,oro],ds=[dz,dro])
+#sep.write_file("resmigtrnmutrho.H",rhow.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("resmigtrnmutrfi.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("resmigtrnmutstk.H",stkww.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("resmigtrnmutrfa.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
 

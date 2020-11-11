@@ -44,7 +44,7 @@ def force_odd(nums):
 
   return onums
 
-def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
+def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=False,transp=False,
               debug=False,verb=True,nthreads=4,nchnk=3) -> np.ndarray:
   """
   Computes the prestack residual migration
@@ -141,6 +141,72 @@ def preresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=True,transp=False,
       # [nh,nx,nz]
       return rmigiftswind
 
+def postresmig(img,ds,nro=6,oro=1.0,dro=0.01,nps=None,time=False,transp=False,
+               verb=True,nthreads=4) -> np.ndarray:
+  """
+  Computes poststack residual migration
+
+  Parameters:
+    img      - the input poststack (zero-offset) image. [nx,nz]
+    ds       - the sampling of the image. [dx,dz] (or [dz,dx] if transp=True)
+    nro      - the number of rhos for the residual migration [6]
+    oro      - the center rho value [1.0]
+    dro      - the spacing between the rhos [0.01]
+    nps      - list of sizes that specify how much to pad for the cosine transform
+               ([nxp,nzp] or [nzp,nxp] if transp=True)
+    time     - return the output migration in time [True]
+    transp   - take input [nz,nx] and return output [nro,nz,nx]
+    verb     - verbosity flag [True]
+    nthreads - number of CPU threads to use for computing the residual migration
+  """
+  if(transp):
+    # [nz,nx] -> [nx,nz]
+    iimg = np.ascontiguousarray(img.T)
+    # [dz,dx] -> [dx,dz]
+    ids = [ds[1],ds[0]]
+  else:
+    iimg = img; ids = ds
+  # Get dimensions
+  nm = iimg.shape[0]; nz = iimg.shape[1]
+  if(nps is None):
+    nmp = pad_cft(nm); nzp = pad_cft(nz)
+  else:
+    if(transp):
+      nmp = nps[1] - img.shape[1]; nzp = nps[0] - img.shape[0]
+    else:
+      nmp = nps[0] - img.shape[0]; nzp = nps[1] - img.shape[1]
+  imgp   = np.pad(iimg,((0,nmp),(0,nzp)),'constant')
+  if(verb): print("Padding to size nmp=%d nzp=%d"%(imgp.shape[0],imgp.shape[1]),flush=True)
+  imgpft = cft.cosft(imgp,axis0=1,axis1=1,verb=verb)
+  # Compute samplings
+  dcs = cft.samplings(imgpft,ds)
+
+  # Residual migration
+  nzpc = imgpft.shape[1]; nmpc = imgpft.shape[0]
+  rhotot = rhos(nro,oro,dro)
+  fnro = len(rhotot)
+  if(verb): print("Rhos:",rhotot,flush=True)
+  rmigiftswind = np.zeros([fnro,nm,nz],dtype='float32')
+  rst = rstoltbig.rstoltbig(nz,nm,1,nzpc,nmpc,1,nro,dcs[1],dcs[0],1,dro,oro)
+  rst.resmig(imgpft,rmigiftswind,nthreads,verb)
+
+  # Convert to time
+  if(time):
+    rmigtime = convert2time(rmigiftswind,ds[1],dt=0.004,oro=oro,dro=dro)
+    if(transp):
+      # [nro,nx,nt] -> [nro,nt,nx]
+      return np.ascontiguousarray(np.transpose(rmigtime,(0,2,1)))
+    else:
+      # [nh,nx,nt]
+      return rmigtime
+  else:
+    if(transp):
+      # [nro,nx,nz] -> [nro,nz,nx]
+      return np.ascontiguousarray(np.transpose(rmigiftswind,(0,2,1)))
+    else:
+      # [nro,nx,nz]
+      return rmigiftswind
+
 def get_rho_axis(nro=6,oro=1.0,dro=0.01):
   return 2*nro-1,oro - (nro-1)*dro,dro
 
@@ -158,7 +224,10 @@ def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
     ot    - output time origin [0.0]
   """
   # Get the dimensions of the input cube
-  fnro = depth.shape[0]; nh = depth.shape[1]; nm = depth.shape[2]; nz = depth.shape[3]
+  if(len(depth.shape) == 4):
+    fnro = depth.shape[0]; nh = depth.shape[1]; nm = depth.shape[2]; nz = depth.shape[3]
+  else:
+    fnro = depth.shape[0]; nh = 1; nm = depth.shape[1]; nz = depth.shape[2]
   nt = nz
   # Compute velocity
   T = (nt-1)*dt; Z = (nz-1)*dz
@@ -166,13 +235,16 @@ def convert2time(depth,dz,dt,oro=1.0,dro=0.01,oz=0.0,ot=0.0,verb=False):
   # Compute rho axis
   nro = (fnro + 1)/2; foro = oro - (nro-1)*dro;
   vel  = np.zeros(depth.shape,dtype='float32')
-  time = np.zeros([fnro,nh,nm,nt],dtype='float32')
+  if(nh > 1):
+    time = np.zeros([fnro,nh,nm,nt],dtype='float32')
+  else:
+    time = np.zeros([fnro,nm,nt],dtype='float32')
   # Apply a stretch for each rho
   for iro in range(fnro):
     if(verb): printprogress("nrho:",iro,fnro)
     ro = foro + iro*dro
     vel[:] = vc/ro
-    d2t.convert2time(nh,nm,nz,oz,dz,nt,ot,dt,vel,depth[iro,:,:,:],time[iro,:,:,:])
+    d2t.convert2time(nh,nm,nz,oz,dz,nt,ot,dt,vel,depth[iro],time[iro])
   if(verb): printprogress("nrho:",fnro,fnro)
 
   return time
