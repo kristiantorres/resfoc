@@ -1,0 +1,26 @@
+[defaults]
+# IO
+img=../focdat/refocus/mltest/mltestdogstk.H
+wgts=/scr1/joseph29/faultpatch-chkpnt.h5
+arch=./dat/networks/faultpatch-arch.json
+figpfx=./fig/migtruetap
+# Patching
+ptchx=64
+ptchz=64
+strdx=32
+strdz=32
+# Other
+verb=y
+show=n
+gpus=1
+# Plotting
+pmin=0.4
+aratio=1.0
+fs=0
+hbar=0.67
+barz=0.16
+barx=0.91
+bxidx=20
+exidx=1000
+cropsize=154
+

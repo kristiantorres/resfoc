@@ -1,0 +1,15 @@
+[defaults]
+# IO
+vel=./fant/velfant5.H
+ref=./fant/reffant5.H
+ptb=./fant/ptbfant5.H
+lbl=./fant/lblfant5.H
+res=./fant/resfant5.H
+ang=./fant/angfant5.H
+stk=./fant/stkfant5.H
+smb=./fant/smbfant5.H
+rho=./fant/rhofant5.H
+rfi=./fant/rfifant5.H
+# Windowing
+fx=373
+nxw=512

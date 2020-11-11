@@ -1,0 +1,10 @@
+[defaults]
+# IO
+velin=/homes/sep/joseph29/projects/resfoc/bench/trdat/dat/vels/velflts/velfltmod0000.H
+refin=/homes/sep/joseph29/projects/resfoc/bench/trdat/dat/vels/velflts/velfltref0000.H
+ptbout=./dat/resmigwrngptb3.H
+imgout=./dat/resmigwrng3.H
+velidx=1
+# Misc
+verb=y
+nthreads=24

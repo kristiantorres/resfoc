@@ -1,0 +1,10 @@
+[defaults]
+# IO
+vel=./fant/velfant3.H
+ref=./fant/reffant3.H
+ptb=./fant/ptbfant3.H
+imgo=./fant/imgofant3.H
+imga=./fant/imgafant3.H
+# Windowing
+fx=373
+nxw=512

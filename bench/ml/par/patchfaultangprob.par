@@ -1,0 +1,17 @@
+[defaults]
+# IO
+focptch=/net/fantastic/scr2/joseph29/angfaultfocptch.h5
+defptch=/net/fantastic/scr2/joseph29/angfaultdefptch.h5
+lblptch=/net/fantastic/scr2/joseph29/angfaultlblptch.h5
+wgts=/scr1/joseph29/xwmig-10ep-chkpnt.h5
+arch=./dat/networks/xwmig-10.json
+focprb=/scr1/joseph29/stkfocfltprb.h5
+defprb=/scr1/joseph29/stkdeffltprb.h5
+#numload=
+# Other
+verb=y
+qcplot=y
+gpus=1
+thresh=0.7
+nqc=0
+

@@ -1,0 +1,12 @@
+[defaults]
+vel=./focdefoc/mltestvel.H
+ptb=./focdefoc/mltestptb.H
+ref=./focdefoc/mltestref.H
+lbl=./focdefoc/mltestlbl.H
+fimgo=./focdefoc/mltestfog.H
+fimga=./focdefoc/mltestfag.H
+dimgo=./focdefoc/mltestdog.H
+dimga=./focdefoc/mltestdag.H
+fx=120
+nxw=1024
+na=64

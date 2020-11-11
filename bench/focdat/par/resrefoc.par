@@ -1,0 +1,13 @@
+[defaults]
+# Input/Output
+imgo=./dat/focdefoc/mltestdog.H
+res=./dat/refocus/mltest/mltestdogres2.H
+ang=./dat/refocus/mltest/mltestdogang2.H
+stk=./dat/refocus/mltest/mltestdogstk2.H
+smb=./dat/refocus/mltest/mltestdogsmb2.H
+rho=./dat/refocus/mltest/mltestdogrho2.H
+rfi=./dat/refocus/mltest/mltestdogrfi2.H
+# Windowing parameters
+fx=305
+nxw=400
+na=64

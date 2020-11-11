@@ -1,0 +1,13 @@
+[defaults]
+# Input/Output
+imgo=./dat/focdefoc/mltestfog.H
+res=./dat/refocus/mltest/mltestfogres.H
+ang=./dat/refocus/mltest/mltestfogang.H
+stk=./dat/refocus/mltest/mltestfogstk.H
+smb=./dat/refocus/mltest/mltestfogsmb.H
+rho=./dat/refocus/mltest/mltestfogrho.H
+rfi=./dat/refocus/mltest/mltestfogrfi.H
+# Windowing parameters
+fx=256
+nxw=512
+na=64

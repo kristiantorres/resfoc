@@ -1,0 +1,7 @@
+[defaults]
+# Input/Output
+stormang=./dat/refocus/mltest/mltestdogang2mask.H
+stk=./dat/refocus/mltest/mltestdogstkmask2.H
+smb=./dat/refocus/mltest/mltestdogsmbmask2.H
+rho=./dat/refocus/mltest/mltestdogrhomask2.H
+rfi=./dat/refocus/mltest/mltestdogrfimask2.H

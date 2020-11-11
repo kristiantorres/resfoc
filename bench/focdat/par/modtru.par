@@ -1,0 +1,15 @@
+[defaults]
+# IO
+vel=./migmodvel/modtruvel.H
+ref=./migmodvel/modtruref.H
+lbl=./migmodvel/modtrulbl.H
+ptb=./migmodvel/modtruptb.H
+res=./migmodvel/modtrures.H
+ang=./migmodvel/modtruang.H
+stk=./migmodvel/modtrustk.H
+smb=./migmodvel/modtrusmb.H
+rho=./migmodvel/modtrurho.H
+rfi=./migmodvel/modtrurfi.H
+# Windowing
+fx=373
+nxw=512

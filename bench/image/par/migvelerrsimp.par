@@ -1,0 +1,11 @@
+[defaults]
+# IO
+timg=zofltimgbig.H
+wimg=zofltimgbigwrng.H
+ptb=velptbbig.H
+ivelout=./fig/simpvelerr.png
+imgout=./fig/tsimpvelerrimg
+wimgout=./fig/wsimpvelerrimg
+# Plotting
+thresh=5
+show=n

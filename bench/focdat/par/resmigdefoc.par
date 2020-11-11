@@ -1,0 +1,11 @@
+[defaults]
+# IO
+img=./focdefoc/mltestfog.H
+reso=./focdefoc/mltestreso.H
+resa=./focdefoc/mltestresa.H
+# Residual migration
+nro=21
+oro=1
+dro=0.00125
+na=64
+verb=y

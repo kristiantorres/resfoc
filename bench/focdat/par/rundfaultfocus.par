@@ -1,0 +1,13 @@
+[defaults]
+vel=./focdefoc/velund.H
+ptb=./focdefoc/ptbund.H
+ref=./focdefoc/refund.H
+lbl=./focdefoc/lblund.H
+fimgo=./focdefoc/fimgound2.H
+fimga=./focdefoc/fimgaund2.H
+dimgo=./focdefoc/dimgound2.H
+dimga=./focdefoc/dimgaund2.H
+fx=120
+nxw=1024
+na=64
+mode=const

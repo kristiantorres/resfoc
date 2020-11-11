@@ -1,0 +1,16 @@
+[defaults]
+# IO
+img=../focdat/dat/refocus/mltest/mltestdogang2mask.H
+#img=../focdat/mltestdogangmaskint.H
+focwgts=/scr1/joseph29/angfltfocdefoc-chkpnt.h5
+focarch=./dat/networks/angfltfocdefoc-arch.json
+# Patching
+ptchx=64
+ptchz=64
+strdx=32
+strdz=32
+# Other
+verb=y
+show=y
+gpus=3
+
