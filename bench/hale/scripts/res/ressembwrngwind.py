@@ -8,8 +8,8 @@ from genutils.ptyprint import create_inttag
 sep = seppy.sep()
 
 # Read in residually migrated gathers
-#saxes,storm = sep.read_file("resfaultfocuswindt.H")
-saxes,storm = sep.read_file("resfaultfocuswindtmute.H")
+saxes,storm = sep.read_file("resfaultfocuswindt.H")
+#saxes,storm = sep.read_file("resfaultfocuswindtmute.H")
 nz,na,nx,nro = saxes.n; oz,oa,ox,oro = saxes.o; dz,da,dx,dro = saxes.d
 storm = storm.reshape(saxes.n,order='F').T
 
@@ -49,15 +49,15 @@ rfaw  = rfa[:,:,100:356]
 # Window to the target region
 plot_rhoimg2d(stkww.T,rhow.T,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
 
-#sep.write_file("faultfocussembwind.H",sembw.T,os=[oz,oro],ds=[dz,dro])
-#sep.write_file("faultfocusrhowind.H",rhow.T,os=[oz,ox],ds=[dz,dx])
-#sep.write_file("faultfocusrfiwind.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
-#sep.write_file("faultfocusstkwind.H",stkww.T,os=[oz,ox],ds=[dz,dx])
-#sep.write_file("faultfocusrfawind.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
+sep.write_file("faultfocussembwind.H",sembw.T,os=[oz,oro],ds=[dz,dro])
+sep.write_file("faultfocusrhowind.H",rhow.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("faultfocusrfiwind.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("faultfocusstkwind.H",stkww.T,os=[oz,ox],ds=[dz,dx])
+sep.write_file("faultfocusrfawind.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
 
-sep.write_file("faultfocussembmutwindfail.H",sembw.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("faultfocusrhomutwindfail.H",rhow.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusrfimutwindfail.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusstkmutwindfail.H",stkww.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusrfamutwindfail.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
+#sep.write_file("faultfocussembmutwindfail.H",sembw.T,os=[oz,oro],ds=[dz,dro])
+#sep.write_file("faultfocusrhomutwindfail.H",rhow.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusrfimutwindfail.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusstkmutwindfail.H",stkww.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusrfamutwindfail.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
 
