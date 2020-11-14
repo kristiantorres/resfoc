@@ -275,9 +275,9 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   # Get spatial plotting range
   [nz,nx] = img.shape;
   ixmin = kwargs.get('ixmin',0); ixmax = kwargs.get('ixmax',nx)
-  xmin  = kwargs.get('xmin',ixmin*dx); xmax = kwargs.get('xmax',ixmax*dx)
+  ox = kwargs.get('ox',ixmin*dx); xmax = ox + nx*dx
   izmin = kwargs.get('izmin',0); izmax = kwargs.get('izmax',nz)
-  zmin  = kwargs.get('zmin',izmin*dz); zmax = kwargs.get('zmax',izmax*dz)
+  oz = kwargs.get('zmin',izmin*dz); zmax = oz + nz*dz
   # Get amplitude range
   ivmin = kwargs.get('imin',np.min(img)); ivmax = kwargs.get('imax',np.max(img))
   pvmin = kwargs.get('velmin',np.min(velptb)); pvmax = kwargs.get('velmax',np.max(velptb))
@@ -286,7 +286,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   fig1 = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax1 = fig1.gca()
   im1 = ax1.imshow(velptb[izmin:izmax,ixmin:ixmax],cmap='seismic',
-      extent=[xmin,xmax,zmax,zmin],interpolation='bilinear',
+      extent=[ox,xmax,zmax,oz],interpolation='bilinear',
       vmin=pvmin,vmax=pvmax)
   plt.close()
   # Plot perturbation on the image
@@ -297,13 +297,16 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   else:
     gimg = img
   ax.imshow(gimg[izmin:izmax,ixmin:ixmax],vmin=ivmin*pclip,vmax=ivmax*pclip,
-             extent=[xmin,xmax,zmax,zmin],cmap='gray',interpolation='sinc')
+             extent=[ox,xmax,zmax,oz],cmap='gray',interpolation=kwargs.get('interp','bilinear'),
+             aspect=kwargs.get('aspect',1.0))
   mask1 = np.ma.masked_where((velptb) < thresh, velptb)
   mask2 = np.ma.masked_where((velptb) > -thresh, velptb)
-  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
-      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
-  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
-      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
+  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[ox,xmax,zmax,oz],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation=kwargs.get('interp','bilinear'),
+      aspect=kwargs.get('aspect',1.0))
+  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[ox,xmax,zmax,oz],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation=kwargs.get('interp','bilinear'),
+      aspect=kwargs.get('aspect',1.0))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',15))
