@@ -6,6 +6,7 @@ and viewing frames of a numpy array
 """
 import os
 import inpout.seppy as seppy
+from inpout.seppy import bytes2float
 from genutils.ptyprint import create_inttag, progressbar
 import numpy as np
 import matplotlib.pyplot as plt
@@ -423,6 +424,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
     data = np.transpose(data,(0,1,3,2))
   # Get the shape of the cube
   ns = np.flip(data.shape)
+  # Get the datatype
+  byte = True if data.dtype == 'uint8' else False
   # Make the coordinates for the cross hairs
   ds = np.append(np.flip(ds),1.0)
   os = np.append(np.flip(os),0.0)
@@ -435,6 +438,9 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   if(vmin == None or vmax == None):
     vmin = np.min(data)*kwargs.get('pclip',1.0)
     vmax = np.max(data)*kwargs.get('pclip',1.0)
+    if(byte):
+      vmin -= 255/2.; vmin *= 1./255
+      vmax -= 255/2.; vmax *= 1./255
 
   # Define nonlocal variables
   loc1 = kwargs.get('loc1',ns[0]/2*ds[0]+os[0])
@@ -472,7 +478,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       else:
         del ax[0,0].lines[:]
 
-      ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,i3,:,:]) if byte else data[curr_pos,i3,:,:]
+      ax[0,0].imshow(np.flip(slc,0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].set_ylabel(label2,fontsize=kwargs.get('labelsize',14))
       ax[0,0].tick_params(labelsize=kwargs.get('ticksize',14))
@@ -507,7 +514,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       else:
         del ax[1,1].lines[:]
 
-      ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,:,i1]) if byte else data[curr_pos,:,:,i1]
+      ax[1,1].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,1].set_xlabel(label2,fontsize=kwargs.get('labelsize',14))
       ax[1,1].tick_params(labelsize=kwargs.get('ticksize',14))
@@ -549,7 +557,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
       else:
         del ax[1,0].lines[:]
 
-      ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,i2,:]) if byte else data[curr_pos,:,i2,:]
+      ax[1,0].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,0].tick_params(labelsize=kwargs.get('ticksize',14))
       del ax[1,1].lines[:]
@@ -601,7 +610,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[1,0].cla()
       else:
         del ax[1,0].lines[:]
-      ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,i2,:]) if byte else data[curr_pos,:,i2,:]
+      ax[1,0].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
       ax[1,0].plot(x1,loc3*np.ones((ns[0],)),c='k')
@@ -613,7 +623,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[1,1].cla()
       else:
         del ax[1,1].lines[:]
-      ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,:,i1]) if byte else data[curr_pos,:,:,i1]
+      ax[1,1].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
       ax[1,1].plot(x2,loc3*np.ones((ns[1],)),c='k')
@@ -630,7 +641,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[0,0].cla()
       else:
         del ax[0,0].lines[:]
-      ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,i3,:,:]) if byte else data[curr_pos,i3,:,:]
+      ax[0,0].imshow(np.flip(slc,0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].plot(loc1*np.ones((ns[1],)),x2,c='k')
       ax[0,0].plot(x1,loc2*np.ones((ns[0],)),c='k')
@@ -681,7 +693,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[1,0].cla()
       else:
         del ax[1,0].lines[:]
-      ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,i2,:]) if byte else data[curr_pos,:,i2,:]
+      ax[1,0].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
       ax[1,0].plot(x1,loc3*np.ones((ns[0],)),c='k')
@@ -693,7 +706,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[1,1].cla()
       else:
         del ax[1,1].lines[:]
-      ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,:,:,i1]) if byte else data[curr_pos,:,:,i1]
+      ax[1,1].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
       ax[1,1].plot(x2,loc3*np.ones((ns[1],)),c='k')
@@ -710,7 +724,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
         ax[0,0].cla()
       else:
         del ax[0,0].lines[:]
-      ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
+      slc = bytes2float(data[curr_pos,i3,:,:]) if byte else data[curr_pos,i3,:,:]
+      ax[0,0].imshow(np.flip(slc,0),interpolation=kwargs.get('interp','none'),aspect='auto',
           extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
       ax[0,0].plot(loc1*np.ones((ns[1],)),x2,c='k')
       ax[0,0].plot(x1,loc2*np.ones((ns[0],)),c='k')
@@ -765,7 +780,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax[0,1].text(0.5,0.5,title[curr_pos],horizontalalignment='center',verticalalignment='center',fontsize=50)
 
   ## xz plane
-  ax[1,0].imshow(data[curr_pos,:,i2,:],interpolation=kwargs.get('interp','none'),aspect='auto',
+  slc = bytes2float(data[curr_pos,:,i2,:]) if byte else data[curr_pos,:,i2,:]
+  ax[1,0].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[0],os[0]+(ns[0])*ds[0],os[2]+ds[2]*(ns[2]),os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
   ax[1,0].tick_params(labelsize=kwargs.get('ticksize',14))
   ax[1,0].plot(loc1*np.ones((ns[2],)),x3,c='k')
@@ -774,7 +790,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax[1,0].set_ylabel(label3,fontsize=kwargs.get('labelsize',14))
 
   # yz plane
-  im = ax[1,1].imshow(data[curr_pos,:,:,i1],interpolation=kwargs.get('interp','none'),aspect='auto',
+  slc = bytes2float(data[curr_pos,:,:,i1]) if byte else data[curr_pos,:,:,i1]
+  im = ax[1,1].imshow(slc,interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[1],os[1]+(ns[1])*ds[1],os[2]+(ns[2])*ds[2],os[2]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
   ax[1,1].tick_params(labelsize=kwargs.get('ticksize',14))
   ax[1,1].plot(loc2*np.ones((ns[2],)),x3,c='k')
@@ -793,7 +810,8 @@ def viewcube3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax2.tick_params(labelsize=kwargs.get('ticksize',14))
 
   # xy plane
-  ax[0,0].imshow(np.flip(data[curr_pos,i3,:,:],0),interpolation=kwargs.get('interp','none'),aspect='auto',
+  slc = bytes2float(data[curr_pos,i3,:,:]) if byte else data[curr_pos,i3,:,:]
+  ax[0,0].imshow(np.flip(slc,0),interpolation=kwargs.get('interp','none'),aspect='auto',
       extent=[os[0],os[0]+(ns[0])*ds[0],os[1],os[1]+(ns[1])*ds[1]],vmin=vmin,vmax=vmax,cmap=kwargs.get('cmap','gray'))
   ax[0,0].tick_params(labelsize=kwargs.get('ticksize',14))
   ax[0,0].plot(loc1*np.ones((ns[1],)),x2,c='k')
