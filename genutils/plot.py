@@ -8,6 +8,7 @@ import numpy as np
 from genutils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
@@ -687,6 +688,12 @@ def plot_img2d(img,**kwargs) -> None:
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
   ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Check if a box is to be plotted
+  nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
+  if(nx_box != 0 and nz_box != 0):
+    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+                              edgecolor='yellow',facecolor='none')
+    ax.add_patch(rect)
   # Force to be the same size as a velocity model image
   imv = kwargs.get('imv',None)
   if(imv is not None):
