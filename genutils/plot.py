@@ -711,6 +711,68 @@ def plot_img2d(img,**kwargs) -> None:
   if(figname is not None):
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 
+def plot_dat2d(dat,**kwargs) -> None:
+  """
+  Plots 2D shot/receiver gathers
+
+  Parameters:
+    dat     - the input data [ntr,nt] (if transp flag, [nt,ntr])
+    transp  - flag indicating that the input is [nt,ntr] [False]
+    figname - name of output figure  [None]
+    show    - display the figure during runtime [True]
+    pclip   - clipping to apply to the image [1.0]
+    dmin    - minimum image amplitude [None]
+    dmax    - maximum image amplitude [None]
+    ox      - data x-origin [0.0]
+    ot      - data time-origin [0.0]
+    dx      - data x-sampling interval [1.0]
+    dt      - data time-sampling interval [1.0]
+    xlabel  - label for x axis [None]
+    tlabel  - label for t axis [None]
+    fsize   - fontsize [15]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    cmap    - colormap for seismic data ['gray']
+  """
+  # Image dimensions
+  if(len(dat.shape) != 2):
+    raise Exception("Data must be two-dimensional len(dat.shape) = %d"%(len(dat.shape)))
+  if(kwargs.get('transp',False)): dat = dat.T
+  ntr,nt = dat.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('imin',np.min(dat)), kwargs.get('imax',np.max(dat))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + ntr*kwargs.get('dx',1.0)
+  tmin = kwargs.get('ot',0.0)
+  tmax = kwargs.get('ot',0.0) + nt*kwargs.get('dt',1.0)
+  im1 = ax.imshow(dat.T,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,tmax,tmin],aspect=kwargs.get('aspect',1.0))
+  if(kwargs.get('dx',1.0) == 1.0):
+    ax.set_xlabel('Receiver No.',fontsize=kwargs.get('labelsize',15))
+  else:
+    ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Time (s)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Check if a box is to be plotted
+  nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
+  if(nx_box != 0 and nz_box != 0):
+    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+                              edgecolor='yellow',facecolor='none')
+    ax.add_patch(rect)
+  # Show the plot
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
+    plt.show()
+  # Save the figure
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+
 def plot_vel2d(vel,**kwargs) -> None:
   """
   A generic function for plotting a 2D velocity model
