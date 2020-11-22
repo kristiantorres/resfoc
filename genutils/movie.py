@@ -976,3 +976,88 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
   if(show):
     plt.show()
 
+def qcf3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,
+             dx=0.025,dy=0.025,ox=469.800,oy=6072.350):
+  """
+  QCs the F3 data
+
+  Parameters:
+    dat  - the input f3 data [ntr,nt]
+    srcx - the source x coordinates [nsht]
+    recx - the receiver x coordinates [ntr]
+    srcy - the source y coordinates [nsht]
+    recy - the receiver x coordinates [ntr]
+    nrec - the number of receivers [nsht]
+  """
+  pass
+  #nsht = len(nrec)
+  #if(nsht != len(srcx) and nsht != len(srcy)):
+  #  raise Exception("Source X/Y coordinates must be same length as nrec")
+  #curr_pos,beg,end = 0,0,0
+
+  #def key_event(e):
+  #  nonlocal curr_pos,vmin,vmax
+
+  #  if e.key == "n":
+  #    curr_pos = curr_pos + 1
+  #    curr_pos = curr_pos % nsht
+  #    beg = end
+  #    end += nrec[curr_pos]
+  #  elif e.key == "m":
+  #    curr_pos = curr_pos - 1
+  #    curr_pos = curr_pos % nsht
+  #    end = beg
+  #    beg -= nrec[curr_pos]
+  #  else:
+  #      return
+  #  beg = end
+  #  end += nrec[isht]
+
+
+  #  # Update the data
+  #  crecx = recx[beg:end]/1000.0
+  #  crecy = recy[beg:end]/1000.0
+  #  csrcx = srcx[beg:end]/1000.0
+  #  csrcy = srcy[beg:end]/1000.0
+  #  ax.set_title('Srcx=%d Srcy=%d'%(srcx[curr_pos],srcy[curr_pos]),fontsize=kwargs.get('labelsize',14))
+  #  ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
+  #  ax.set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
+  #  if('%' in kwargs.get('ttlstring',' ')):
+  #    ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
+  #        fontsize=kwargs.get('labelsize',14))
+  #  else:
+  #    ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+  #  ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  #    l.set_data(img)
+  #  fig.canvas.draw()
+
+  #fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
+  #fig.canvas.mpl_connect('key_press_event', key_event)
+  #ax = fig.add_subplot(111)
+  ## Show the first frame
+  #if(transp):
+  #  img = data[0,:,:].T
+  #else:
+  #  img = data[0,:,:]
+  #l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
+  #    extent=[xmin,xmax,zmax,zmin],
+  #    interpolation=kwargs.get('interp','none'),aspect='auto')
+  #ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
+  #ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+  #ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  ## Color bar
+  #if(kwargs.get('scalebar',False)):
+  #  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
+  #    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
+  #  cbar = fig.colorbar(l,cbar_ax,format='%.2f')
+  #  cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
+  #  cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",18))
+  #  cbar.draw_all()
+  #if('%' in kwargs.get('ttlstring',' ')):
+  #  ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0)),fontsize=kwargs.get('labelsize',14))
+  #else:
+  #  ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
+  #ax.tick_params(labelsize=kwargs.get('ticksize',14))
+  #if(show):
+  #  plt.show()
+
