@@ -49,11 +49,11 @@ rfaw  = rfa[:,:,100:356]
 # Window to the target region
 plot_rhoimg2d(stkww.T,rhow.T,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
 
-sep.write_file("faultfocussembwind.H",sembw.T,os=[oz,oro],ds=[dz,dro])
-sep.write_file("faultfocusrhowind.H",rhow.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusrfiwind.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusstkwind.H",stkww.T,os=[oz,ox],ds=[dz,dx])
-sep.write_file("faultfocusrfawind.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
+#sep.write_file("faultfocussembwind.H",sembw.T,os=[oz,oro],ds=[dz,dro])
+#sep.write_file("faultfocusrhowind.H",rhow.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusrfiwind.H",rfiw.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusstkwind.H",stkww.T,os=[oz,ox],ds=[dz,dx])
+#sep.write_file("faultfocusrfawind.H",rfaw.T,os=[oz,0,ox],ds=[dz,da,dx])
 
 #sep.write_file("faultfocussembmutwindfail.H",sembw.T,os=[oz,oro],ds=[dz,dro])
 #sep.write_file("faultfocusrhomutwindfail.H",rhow.T,os=[oz,ox],ds=[dz,dx])

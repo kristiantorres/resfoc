@@ -32,8 +32,8 @@ fsize = 16
 for ix in range(0,nx,50):
   tag = create_inttag(ix,nx)
   plot_anggatrhos(stormw[48:112],ix,dz,dx,oro=0.96,dro=dro,ox=ox,show=False,pclip=0.6,fontsize=fsize,ticksize=fsize,
-                  imgaspect=2.0,roaspect=0.02)#,figname='./fig/halepicks/anggatrhos-%s'%(tag))
+                  imgaspect=2.0,roaspect=0.02,figname='./fig/halemutepicks/anggatrhos-%s'%(tag))
   # Plot the picked
-  plot_rhopicks(stormw[48:112,ix,:,:],semb[ix,48:112,:],rho[ix,:],dro,dz,oro=0.96,show=True,angaspect=0.04,
-                vmin=smin,vmax=smax,wspace=0.1,rhoaspect=0.16,pclip=1.1)#,figname='./fig/halepicks/rhopick-%s'%(tag))
+  plot_rhopicks(stormw[48:112,ix,:,:],semb[ix,48:112,:],rho[ix,:],dro,dz,oro=0.96,show=False,angaspect=0.04,
+                vmin=smin,vmax=smax,wspace=0.1,rhoaspect=0.16,pclip=1.1,figname='./fig/halemutepicks/rhopick-%s'%(tag))
 

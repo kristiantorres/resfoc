@@ -743,7 +743,7 @@ def plot_dat2d(dat,**kwargs) -> None:
   # Make figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
   ax = fig.gca()
-  imin,imax = kwargs.get('imin',np.min(dat)), kwargs.get('imax',np.max(dat))
+  imin,imax = kwargs.get('dmin',np.min(dat)), kwargs.get('dmax',np.max(dat))
   pclip = kwargs.get('pclip',1.0)
   xmin = kwargs.get('ox',0.0)
   xmax = kwargs.get('ox',0.0) + ntr*kwargs.get('dx',1.0)
