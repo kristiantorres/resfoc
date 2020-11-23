@@ -976,8 +976,8 @@ def viewresangptch(img,prb,oro,dro,smb=None,streamer=True,fast=True,show=True,**
   if(show):
     plt.show()
 
-def qcf3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,
-             dx=0.025,dy=0.025,ox=469.800,oy=6072.350):
+def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
+              dx=25,dy=25,ox=469800,oy=6072350,show=True,**kwargs):
   """
   QCs the F3 data
 
@@ -989,75 +989,85 @@ def qcf3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,
     recy - the receiver x coordinates [ntr]
     nrec - the number of receivers [nsht]
   """
-  pass
-  #nsht = len(nrec)
-  #if(nsht != len(srcx) and nsht != len(srcy)):
-  #  raise Exception("Source X/Y coordinates must be same length as nrec")
-  #curr_pos,beg,end = 0,0,0
+  nsht = len(nrec)
+  if(nsht != len(srcx) and nsht != len(srcy)):
+    raise Exception("Source X/Y coordinates must be same length as nrec")
 
-  #def key_event(e):
-  #  nonlocal curr_pos,vmin,vmax
+  ntr = len(recx)
+  if(dat.shape[0] != ntr):
+    raise Exception("Data must have same number of traces as receiver coordinates")
 
-  #  if e.key == "n":
-  #    curr_pos = curr_pos + 1
-  #    curr_pos = curr_pos % nsht
-  #    beg = end
-  #    end += nrec[curr_pos]
-  #  elif e.key == "m":
-  #    curr_pos = curr_pos - 1
-  #    curr_pos = curr_pos % nsht
-  #    end = beg
-  #    beg -= nrec[curr_pos]
-  #  else:
-  #      return
-  #  beg = end
-  #  end += nrec[isht]
+  pclip = kwargs.get('pclip',1.0)
+  dmin = kwargs.get('dmin',np.min(dat))*pclip
+  dmax = kwargs.get('dmax',np.max(dat))*pclip
 
+  # Windowed grid
+  oxw = ox + 200*dx; oyw = oy + 5*dy
+  nxw1,nyw1 = migslc.shape
 
-  #  # Update the data
-  #  crecx = recx[beg:end]/1000.0
-  #  crecy = recy[beg:end]/1000.0
-  #  csrcx = srcx[beg:end]/1000.0
-  #  csrcy = srcy[beg:end]/1000.0
-  #  ax.set_title('Srcx=%d Srcy=%d'%(srcx[curr_pos],srcy[curr_pos]),fontsize=kwargs.get('labelsize',14))
-  #  ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
-  #  ax.set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
-  #  if('%' in kwargs.get('ttlstring',' ')):
-  #    ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0) + kwargs.get('dttl',1.0)*curr_pos),
-  #        fontsize=kwargs.get('labelsize',14))
-  #  else:
-  #    ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
-  #  ax.tick_params(labelsize=kwargs.get('ticksize',14))
-  #    l.set_data(img)
-  #  fig.canvas.draw()
+  # Plotting axes
+  oxp,oyp = oxw*0.001,oyw*0.001
+  dxp,dyp = dx*0.001,dy*0.001
 
-  #fig = plt.figure(figsize=(kwargs.get("wbox",10),kwargs.get("hbox",10)))
-  #fig.canvas.mpl_connect('key_press_event', key_event)
-  #ax = fig.add_subplot(111)
-  ## Show the first frame
-  #if(transp):
-  #  img = data[0,:,:].T
-  #else:
-  #  img = data[0,:,:]
-  #l = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=vmin,vmax=vmax,
-  #    extent=[xmin,xmax,zmax,zmin],
-  #    interpolation=kwargs.get('interp','none'),aspect='auto')
-  #ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
-  #ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
-  #ax.tick_params(labelsize=kwargs.get('ticksize',14))
-  ## Color bar
-  #if(kwargs.get('scalebar',False)):
-  #  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.12),
-  #    kwargs.get('wbar',0.02),kwargs.get('hbar',0.75)])
-  #  cbar = fig.colorbar(l,cbar_ax,format='%.2f')
-  #  cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
-  #  cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",18))
-  #  cbar.draw_all()
-  #if('%' in kwargs.get('ttlstring',' ')):
-  #  ax.set_title(kwargs.get('ttlstring',' ')%(kwargs.get('ottl',0.0)),fontsize=kwargs.get('labelsize',14))
-  #else:
-  #  ax.set_title(kwargs.get('ttlstring','%d'%curr_pos),fontsize=kwargs.get('labelsize',14))
-  #ax.tick_params(labelsize=kwargs.get('ticksize',14))
-  #if(show):
-  #  plt.show()
+  # Scale the source and receiver coordinates
+  srcx *= 0.001; recx *= 0.001
+  srcy *= 0.001; recy *= 0.001
+
+  curr_pos,beg,end = 0,nrec[0],nrec[1]
+
+  def key_event(e):
+    nonlocal curr_pos,beg,end
+
+    if e.key == "n":
+      curr_pos = curr_pos + 1
+      curr_pos = curr_pos % nsht
+      if(curr_pos == 0):
+        beg = 0
+        end = beg
+      beg = end
+      end += nrec[curr_pos]
+    elif e.key == "m":
+      curr_pos = curr_pos - 1
+      curr_pos = curr_pos % nsht
+      if(curr_pos == nsht-1):
+        end = ntr
+        beg = end
+      end = beg
+      beg -= nrec[curr_pos]
+    else:
+        return
+
+    # Update the data
+    ax[0].set_title('Srcx=%.2f Srcy=%.2f Num=%d/%d'%(srcx[curr_pos],srcy[curr_pos],curr_pos,nsht),fontsize=kwargs.get('labelsize',14))
+    ax[0].set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
+    ax[0].set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
+    ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
+    # Update sources
+    srcs = np.zeros([1,2])
+    srcs[:,0] = srcx[curr_pos]; srcs[:,1] = srcy[curr_pos]
+    scats.set_offsets(srcs)
+    # Update receivers
+    recs = np.zeros([nrec[curr_pos],2])
+    recs[:,0] = recx[beg:end]; recs[:,1] = recy[beg:end]
+    scatr.set_offsets(recs)
+    # Update the shot gathers
+    l.set_data(dat[beg:end,0:ntw].T)
+    fig.canvas.draw()
+
+  fig,ax = plt.subplots(2,1,figsize=(kwargs.get("wbox",12),kwargs.get("hbox",8)))
+  fig.canvas.mpl_connect('key_press_event', key_event)
+  # Show the first frame
+  ax[0].imshow(np.flipud(migslc.T),extent=[oxp,oxp+nxw1*dxp,oyp,oyp+nyw1*dyp],
+            interpolation='none',cmap='gray')
+  scats = ax[0].scatter(srcx[0],srcy[0],marker='*',color='tab:red')
+  scatr = ax[0].scatter(recx[0:nrec[0]],recy[0:nrec[0]],marker='v',color='tab:green')
+  ax[0].set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
+  ax[0].set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
+  ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
+  l = ax[1].imshow(dat[0:nrec[0],0:ntw].T,vmin=dmin,vmax=dmax,extent=[0,nrec[0],ntw*dt,0],
+                   interpolation='bilinear',cmap='gray',aspect=50)
+  ax[1].set_xlabel('Receiver number',fontsize=kwargs.get('labelsize',14))
+  ax[1].set_ylabel('Time (s)',fontsize=kwargs.get('labelsize',14))
+  if(show):
+    plt.show()
 
