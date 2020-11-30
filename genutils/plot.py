@@ -8,6 +8,7 @@ import numpy as np
 from genutils.signal import ampspec1d
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
@@ -275,9 +276,9 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   # Get spatial plotting range
   [nz,nx] = img.shape;
   ixmin = kwargs.get('ixmin',0); ixmax = kwargs.get('ixmax',nx)
-  xmin  = kwargs.get('xmin',ixmin*dx); xmax = kwargs.get('xmax',ixmax*dx)
+  ox = kwargs.get('ox',ixmin*dx); xmax = ox + nx*dx
   izmin = kwargs.get('izmin',0); izmax = kwargs.get('izmax',nz)
-  zmin  = kwargs.get('zmin',izmin*dz); zmax = kwargs.get('zmax',izmax*dz)
+  oz = kwargs.get('zmin',izmin*dz); zmax = oz + nz*dz
   # Get amplitude range
   ivmin = kwargs.get('imin',np.min(img)); ivmax = kwargs.get('imax',np.max(img))
   pvmin = kwargs.get('velmin',np.min(velptb)); pvmax = kwargs.get('velmax',np.max(velptb))
@@ -286,7 +287,7 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   fig1 = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax1 = fig1.gca()
   im1 = ax1.imshow(velptb[izmin:izmax,ixmin:ixmax],cmap='seismic',
-      extent=[xmin,xmax,zmax,zmin],interpolation='bilinear',
+      extent=[ox,xmax,zmax,oz],interpolation='bilinear',
       vmin=pvmin,vmax=pvmax)
   plt.close()
   # Plot perturbation on the image
@@ -297,13 +298,16 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   else:
     gimg = img
   ax.imshow(gimg[izmin:izmax,ixmin:ixmax],vmin=ivmin*pclip,vmax=ivmax*pclip,
-             extent=[xmin,xmax,zmax,zmin],cmap='gray',interpolation='sinc')
+             extent=[ox,xmax,zmax,oz],cmap='gray',interpolation=kwargs.get('interp','bilinear'),
+             aspect=kwargs.get('aspect',1.0))
   mask1 = np.ma.masked_where((velptb) < thresh, velptb)
   mask2 = np.ma.masked_where((velptb) > -thresh, velptb)
-  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
-      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
-  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[xmin,xmax,zmax,zmin],alpha=alpha,
-      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation='bilinear')
+  ax.imshow(mask1[izmin:izmax,ixmin:ixmax],extent=[ox,xmax,zmax,oz],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation=kwargs.get('interp','bilinear'),
+      aspect=kwargs.get('aspect',1.0))
+  ax.imshow(mask2[izmin:izmax,ixmin:ixmax],extent=[ox,xmax,zmax,oz],alpha=alpha,
+      cmap='seismic',vmin=pvmin,vmax=pvmax,interpolation=kwargs.get('interp','bilinear'),
+      aspect=kwargs.get('aspect',1.0))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',15))
@@ -649,10 +653,10 @@ def plot_img2d(img,**kwargs) -> None:
     pclip   - clipping to apply to the image [1.0]
     imin    - minimum image amplitude [None]
     imax    - maximum image amplitude [None]
-    xmin    - minumum x value to use in extent [None]
-    xmax    - maximum x value to use in extent [None]
-    zmin    - minumum z value to use in extent [None]
-    zmax    - maximum z value to use in extent [None]
+    ox      - image x-origin [0.0]
+    oz      - image z-origin [0.0]
+    dx      - image x-sampling interval [1.0]
+    dz      - image z-sampling interval [1.0]
     xlabel  - label for x axis [None]
     zlabel  - label for z axis [None]
     fsize   - fontsize [15]
@@ -667,7 +671,7 @@ def plot_img2d(img,**kwargs) -> None:
   if(len(img.shape) != 2):
     raise Exception("Image must be two-dimensional len(img.shape) = %d"%(len(img.shape)))
   if(kwargs.get('transp',False)): img = img.T
-  [nz,nx] = img.shape
+  nz,nx = img.shape
   # Make figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
   ax = fig.gca()
@@ -684,6 +688,12 @@ def plot_img2d(img,**kwargs) -> None:
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
   ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
   ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Check if a box is to be plotted
+  nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
+  if(nx_box != 0 and nz_box != 0):
+    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+                              edgecolor='yellow',facecolor='none')
+    ax.add_patch(rect)
   # Force to be the same size as a velocity model image
   imv = kwargs.get('imv',None)
   if(imv is not None):
@@ -694,10 +704,72 @@ def plot_img2d(img,**kwargs) -> None:
     # Crop
     # TODO: will need to handle either PDF or png crops
   # Show the plot
-  if(kwargs.get('show',True)):
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
     plt.show()
   # Save the figure
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+
+def plot_dat2d(dat,**kwargs) -> None:
+  """
+  Plots 2D shot/receiver gathers
+
+  Parameters:
+    dat     - the input data [ntr,nt] (if transp flag, [nt,ntr])
+    transp  - flag indicating that the input is [nt,ntr] [False]
+    figname - name of output figure  [None]
+    show    - display the figure during runtime [True]
+    pclip   - clipping to apply to the image [1.0]
+    dmin    - minimum image amplitude [None]
+    dmax    - maximum image amplitude [None]
+    ox      - data x-origin [0.0]
+    ot      - data time-origin [0.0]
+    dx      - data x-sampling interval [1.0]
+    dt      - data time-sampling interval [1.0]
+    xlabel  - label for x axis [None]
+    tlabel  - label for t axis [None]
+    fsize   - fontsize [15]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    cmap    - colormap for seismic data ['gray']
+  """
+  # Image dimensions
+  if(len(dat.shape) != 2):
+    raise Exception("Data must be two-dimensional len(dat.shape) = %d"%(len(dat.shape)))
+  if(kwargs.get('transp',False)): dat = dat.T
+  ntr,nt = dat.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('dmin',np.min(dat)), kwargs.get('dmax',np.max(dat))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + ntr*kwargs.get('dx',1.0)
+  tmin = kwargs.get('ot',0.0)
+  tmax = kwargs.get('ot',0.0) + nt*kwargs.get('dt',1.0)
+  im1 = ax.imshow(dat.T,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,tmax,tmin],aspect=kwargs.get('aspect',1.0))
+  if(kwargs.get('dx',1.0) == 1.0):
+    ax.set_xlabel('Receiver No.',fontsize=kwargs.get('labelsize',15))
+  else:
+    ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Time (s)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Check if a box is to be plotted
+  nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
+  if(nx_box != 0 and nz_box != 0):
+    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+                              edgecolor='yellow',facecolor='none')
+    ax.add_patch(rect)
+  # Show the plot
   figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
+    plt.show()
+  # Save the figure
   if(figname is not None):
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 
@@ -760,4 +832,62 @@ def plot_vel2d(vel,**kwargs) -> None:
   # Return the image object
   if(kwargs.get('retim',False)):
     return im1
+
+def plot_rhoimg2d(img,rho,**kwargs) -> None:
+  """
+  Plots an estimated rho field on top of the seismic image
+
+  Parameters:
+    img   - the input image [nz,nx]
+    rho   - the estimated rho field [nz,nx]
+    ox    - image x-origin [0.0]
+    oz    - image z-origin [0.0]
+    dx    - image x-sampling [1.0]
+    dz    - image z-sampling [1.0]
+    wbox  - figure width set in figure size option [10]
+    hbox  - figure height set in figure size option [6]
+    alpha - transparency value to set for rho
+    imin  - minimum image amplitude [None]
+    imax  - maximum image amplitude [None]
+  """
+  # Check image size
+  if(len(img.shape) != 2 or len(rho.shape) != 2):
+    raise Exception("Input image and rho field must be 2D")
+  # Get sizes
+  nz,nx = img.shape
+  if(nz != rho.shape[0] or nx != rho.shape[1]):
+    raise Exception("image and rho field must be same size")
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('imin',np.min(img)), kwargs.get('imax',np.max(img))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
+  # Image plotting
+  im1 = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  # Rho plotting
+  im2 = ax.imshow(rho,cmap='seismic',interpolation='bilinear',
+                  vmin=kwargs.get('rhomin',0.95),vmax=kwargs.get('rhomax',1.05),
+                  extent=[xmin,xmax,zmax,zmin],alpha=kwargs.get('alpha',0.2),
+                  aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+  cbar = fig.colorbar(im2,cbar_ax,format='%.2f')
+  cbar.solids.set(alpha=1)
+  cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  cbar.set_label(r'$\rho$',fontsize=kwargs.get('labelsize',15))
+  # Display or save the figure
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
+    plt.show()
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 
