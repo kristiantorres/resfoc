@@ -7,8 +7,8 @@ from scaas.wavelet import ricker
 from oway.costaper import costaper
 from scaas.trismooth import smooth
 from scaas.off2ang import off2angkzx, get_angkzx_axis
-from client.slurmworkers import launch_slurmworkers, kill_slurmworkers,\
-                                trim_tsworkers
+from client.slurmworkers import launch_slurmworkers, kill_slurmworkers
+
 # IO
 sep = seppy.sep()
 
@@ -48,13 +48,15 @@ slo   = np.zeros([nz,ny,nvx],dtype='float32')
 refin = np.zeros([nz,ny,nrx],dtype='float32')
 
 # Smooth in slowness
-slo[:,0,:] = smooth(1/vel,rect1=35,rect2=35)
+slo[:,0,:] = smooth(1/vel,rect1=40,rect2=30)
 vel = 1/slo
 
 # Build the reflectivity
 refin[:,0,:] = costaper(ref,nw1=16)
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
+# Lower bound is number of workers
+# Upper bound is number of shots
 nchnk = len(nrec)//2
 hcnkr = hessnchunkr(nchnk,
                     drx,dy,dz,
@@ -62,7 +64,7 @@ hcnkr = hessnchunkr(nchnk,
                     nrec=nrec,srcx=srcx,recx=recx,
                     ovx=ovx,dvx=dvx,ox=orx)
 
-hcnkr.set_hessn_pars(ntx=16,nhx=20,nthrds=16,nrmax=20,mpx=100,sverb=False)
+hcnkr.set_hessn_pars(ntx=16,nhx=20,nthrds=48,nrmax=20,mpx=100,sverb=False)
 gen = iter(hcnkr)
 
 # Distribute work to workers and sum over results

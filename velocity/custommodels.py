@@ -11,7 +11,6 @@ from deeplearn.utils import resample, normalize
 from oway.utils import interp_vel
 from oway.costaper import costaper
 from genutils.rand import randfloat
-from genutils.plot import plot_img2d
 
 def random_hale_vel(nz=900,nx=800,dz=0.005,dx=0.01675,vzin=None):
   """

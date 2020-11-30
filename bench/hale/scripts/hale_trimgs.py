@@ -20,7 +20,7 @@ sep = seppy.sep()
 # Start workers
 cfile = "/home/joseph29/projects/scaas/oway/hessnworker.py"
 logpath = "./log"
-wrkrs,status = launch_slurmworkers(cfile,nworkers=30,wtime=120,queue=['sep','twohour'],
+wrkrs,status = launch_slurmworkers(cfile,nworkers=40,wtime=120,queue=['sep','twohour'],
                                    block=['maz132'],logpath=logpath,slpbtw=4.0,mode='adapt')
 
 print("Workers status: ",*status)
@@ -36,7 +36,7 @@ refs = np.ascontiguousarray(refs.reshape(raxes.n,order='F')).astype('float32')
 ny = 1; dy = 1
 
 # Residual migration axis
-nro = 21; dro = 0.001250
+nro = 49; dro = 0.001250
 
 # Read in anomalies
 aaxes,anos = sep.read_file("hale_tranos.H")
@@ -65,7 +65,7 @@ trestart = 105*60 # Restart every 105 min
 print("Image grid: nxi=%d oxi=%f dxi=%f"%(nrx,orx,drx))
 
 # Loop over all models
-beg = 67
+beg = 323
 for im in progressbar(range(beg,nm),"nmod:"):
   if(im == beg): start = time.time()
   elapse = time.time() - start
@@ -85,7 +85,7 @@ for im in progressbar(range(beg,nm),"nmod:"):
   anoin = anos[:,:,im]
 
   # Smooth in slowness
-  slo[:,0,:] = smooth(1/velin,rect1=35,rect2=35)
+  slo[:,0,:] = smooth(1/velin,rect1=40,rect2=30)
   vel = 1/slo
 
   # Build the reflectivity
@@ -115,7 +115,7 @@ for im in progressbar(range(beg,nm),"nmod:"):
 
     # Distribute work to workers and sum over results
     img = dstr_sum_adapt('cid','result',nchnk,gen,socket,hcnkr.get_img_shape(),
-                         wrkrs,verb=True,logfile='./log/hale_trimgs.log')
+                         wrkrs,interval=5,verb=True,logfile='./log/hale_trimgs.log')
     # Get offset axis
     nhx,ohx,dhx = hcnkr.get_offx_axis()
 
@@ -126,7 +126,7 @@ for im in progressbar(range(beg,nm),"nmod:"):
     if(k == 0):
       nsin  = [nhx,nrx,nz]
       nps = [next_power_of_2(nin)+1 for nin in nsin]
-      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,drx,dz],nps=nps,nro=nro,dro=dro,offset=7,verb=False)
+      rmig,rho  = rand_preresmig(imgt[0,:,0,:,:],[dhx,drx,dz],nps=nps,nro=nro,dro=dro,offset=23,verb=False)
       rmigt = convert2time(rmig,dz,dt=d1,oro=rho,dro=dro,verb=False)[0]
       rmige = rmigt[np.newaxis,:,np.newaxis,:,:]
 

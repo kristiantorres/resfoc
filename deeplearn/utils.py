@@ -4,7 +4,7 @@ Perform pre and post processing of training data
 Also some plotting utlities
 
 @author: Joseph Jennings
-@version: 2020.05.28
+@version: 2020.10.07
 """
 import sys
 import numpy as np
@@ -13,6 +13,7 @@ from deeplearn.python_patch_extractor.PatchExtractor import PatchExtractor
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from genutils.image import remove_colorbar
+from genutils.ptyprint import progressbar, create_inttag
 
 def normalize(img,eps=sys.float_info.epsilon,mode='2d'):
   """
@@ -68,14 +69,20 @@ def resample(img,new_shape,kind='linear',ds=[]):
   Resamples an image. Can work up to 4D numpy arrays.
   assumes that the nz and nx axes are the last two (fastest)
   """
-  # Original coordinates
-  length=img.shape[-1]
-  height=img.shape[-2]
-  x=np.linspace(0,length,length)
-  y=np.linspace(0,height,height)
-  # New coordinates for interpolation
-  xnew=np.linspace(0,length,new_shape[1])
-  ynew=np.linspace(0,height,new_shape[0])
+  if(len(img.shape) >= 2):
+   # Original coordinates
+    length=img.shape[-1]
+    height=img.shape[-2]
+    x=np.linspace(0,length,length)
+    y=np.linspace(0,height,height)
+    # New coordinates for interpolation
+    xnew=np.linspace(0,length,new_shape[1])
+    ynew=np.linspace(0,height,new_shape[0])
+  elif(len(img.shape) == 1):
+    length = img.shape[0]
+    x = np.linspace(0,length,length)
+    # New coordinates for interpolation
+    xnew = np.linspace(0,length,new_shape)
   # Compute new samplings
   if(len(ds) != 0):
       dout = []
@@ -92,12 +99,17 @@ def resample(img,new_shape,kind='linear',ds=[]):
         res[i,j,:,:] = f(xnew,ynew)
   elif len(img.shape)==3:
     res = np.zeros([img.shape[0],new_shape[0],new_shape[1]],dtype='float32')
-    for i in range(img.shape[0]):
+    for i in progressbar(range(img.shape[0]),"nimg:"):
       f = interpolate.interp2d(x,y,img[i,:,:],kind=kind)
       res[i,:,:] = f(xnew,ynew)
   elif len(img.shape)==2:
+    res = np.zeros([new_shape[0],new_shape[1]],dtype='float32')
     f=interpolate.interp2d(x,y,img,kind=kind)
-    res=f(xnew,ynew)
+    res[:] = f(xnew,ynew)
+  elif len(img.shape)==1:
+    res = np.zeros(new_shape,dtype='float32')
+    f = interpolate.interp1d(x,img,kind=kind)
+    res[:] = f(xnew)
 
   if(len(ds) == 0):
     return res
@@ -141,32 +153,45 @@ def thresh(arr,thresh,mode='gt',absval=True):
 
   return out
 
-def plotseglabel(img,lbl,show=False,color='red',fname=None,**kwargs):
-  """ Plots a binary label on top of an image """
+def plot_seglabel(img,lbl,show=False,color='red',fname=None,**kwargs) -> None:
+  """
+  Plots a binary label on top of an image
+
+  Parameters:
+    img   - image [nz,nx]
+    lbl   - fault labels [nz,nx]
+    show  - flag for showing the image [False]
+    color - color of label to be plotted on image ['red']
+    fname - name of output file to be saved (without the extension) [None]
+  """
+  [nz,nx] = img.shape
   if(img.shape != lbl.shape):
     raise Exception('Input image and label must be same size')
   # Get mask
   mask = np.ma.masked_where(lbl == 0, lbl)
   # Select colormap
   cmap = colors.ListedColormap([color,'white'])
-  fig = plt.figure(figsize=(kwargs.get('wbox',8),kwargs.get('hbox',6)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.add_subplot(111)
   # Plot image
+  ox   = kwargs.get('ox',0.0)
+  xmax = ox + kwargs.get('dx',1.0)*nx
+  oz   = kwargs.get('oz',0.0)
+  zmax = oz + kwargs.get('dz',1.0)*nz
+  pclip = kwargs.get('pclip',1.0)
   ax.imshow(img,cmap=kwargs.get('cmap','gray'),
-      vmin=kwargs.get('vmin',np.min(img)),vmax=kwargs.get('vmax',np.max(img)),
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)],interpolation=kwargs.get("interp","sinc"))
-  ax.set_xlabel(kwargs.get('xlabel',''),fontsize=kwargs.get('labelsize',14))
-  ax.set_ylabel(kwargs.get('ylabel',''),fontsize=kwargs.get('labelsize',14))
+      vmin=pclip*kwargs.get('vmin',np.min(img)),vmax=pclip*kwargs.get('vmax',np.max(img)),
+      extent=[ox,xmax,zmax,oz],interpolation=kwargs.get("interp","sinc"))
+  ax.set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
+  ax.set_ylabel(kwargs.get('ylabel','Z (km)'),fontsize=kwargs.get('labelsize',14))
+  ax.set_title(kwargs.get('title',''),fontsize=kwargs.get('labelsize',14))
   ax.tick_params(labelsize=kwargs.get('ticksize',14))
   if(fname):
-      ax.set_aspect(kwargs.get('aratio',1.0))
+      ax.set_aspect(kwargs.get('aspect',1.0))
       plt.savefig(fname+"-img.png",bbox_inches='tight',dpi=150,transparent=True)
   # Plot label
-  ax.imshow(mask,cmap=cmap,
-      extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
-        kwargs.get("zmax",img.shape[0]),kwargs.get("zmin",0)])
-  ax.set_aspect(kwargs.get('aratio',1.0))
+  ax.imshow(mask,cmap=cmap,extent=[ox,xmax,zmax,oz])
+  ax.set_aspect(kwargs.get('aspect',1.0))
   if(show):
     plt.show()
   if(fname):
@@ -197,9 +222,10 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   cbar.ax.tick_params(labelsize=kwargs.get('ticksize',18))
   cbar.set_label(kwargs.get('barlabel','Fault probablility'),fontsize=kwargs.get("barlabelsize",18))
   if(fname):
+    ftype = kwargs.get('ftype','png')
     ax.set_aspect(kwargs.get('aratio',1.0))
     plt.savefig(fname+"-img-tmp.png",bbox_inches='tight',dpi=150,transparent=True)
-    cbar.remove()
+  cbar.remove()
   # Plot label
   imp = ax.imshow(mask,cmap='jet',
       extent=[kwargs.get("xmin",0),kwargs.get("xmax",img.shape[1]),
@@ -216,10 +242,10 @@ def plotsegprobs(img,prd,pmin=0.01,alpha=0.5,show=False,fname=None,**kwargs):
   if(show):
     plt.show()
   if(fname):
-    plt.savefig(fname+"-prd.png",bbox_inches='tight',dpi=150,transparent=True)
+    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
     plt.close()
     # Crop and pad the image so they are the same size
-    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),opath=fname+"-img.png")
+    remove_colorbar(fname+"-img-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype,opath=fname+"-img."+ftype)
 
 def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
   """
@@ -273,3 +299,219 @@ def normextract(img,nzp=64,nxp=64,strdz=None,strdx=None,norm=True,flat=True):
     raise Exception("function supported only up to 3D")
 
   return ptchf
+
+def torchprogress(cur,bsz,tot,loss,acc,size=40, file=sys.stdout) -> None:
+  """
+  Prints a progress bar during training of a torch
+  neural network
+
+  Parameters:
+    cur  - index of the current batch
+    bsz  - size of a batch
+    tot  - the total number batches
+    loss - the current running loss value
+    acc  - the current accuracy
+
+  Prints a progressbar to the screen
+  """
+  x = int(size*cur/tot)
+  if(cur == 0): div = 1
+  else: div = cur
+  curform = create_inttag(cur,tot)
+  file.write("%s/%d [%s%s] loss=%.4g acc=%.4f\r" % (curform,tot,"#"*x, "."*(size-x),loss/div,acc/((cur+1)*bsz)))
+  if(cur == tot):
+    file.write("\n")
+  file.flush()
+
+def plot_patchgrid2d(img,nzp,nxp,strdz=None,strdx=None,dz=None,dx=None,
+                     oz=None,ox=None,transp=False,pltcoords=True,**kwargs) -> None:
+  """
+  Plots the patch grid on the input image
+
+  Parameters:
+    img       - the input image [nz,nx]
+    nzp       - the size of the patch in z (samples)
+    nxp       - the size of the patch in x (samples)
+    strdz     - patch stride in z (samples) [nzp//2]
+    strdx     - patch stride in x (samples) [nxp//2]
+    dz        - depth sampling of image [1.0]
+    dx        - lateral sampling of image [1.0]
+    oz        - depth origin of image [0.0]
+    ox        - lateral origin of image [0.0]
+    transp    - flag indicating to transpose the input image [False]
+    pltcoords - flag indicating to plot the patch coordinates on the image [True]
+  """
+  # Get the image axes
+  if(transp):
+    nx,nz = img.shape
+  else:
+    nz,nx = img.shape
+  if(dz is None): dz = 1.0
+  if(oz is None): oz = 0.0
+  if(dx is None): dx = 1.0
+  if(ox is None): ox = 0.0
+
+  if(strdz is None):
+    strdz = nzp//2
+  if(strdx is None):
+    strdx = nxp//2
+
+  # Do the patch extraction
+  totptchs = normextract(img,nzp,nxp,strdz,strdx).shape[0]
+
+  # Make the patch grids
+  bgz = 0; egz = nz*dz+1; dgz = nzp*dz
+  bgx = 0; egx = nx*dx+1; dgx = nxp*dx
+
+  # Get number of patches in each dimensions
+  nptchz,remz = divmod(nz,nzp)
+  nptchx,remx = divmod(nx,nxp)
+
+  # Plotting parameters
+  cmap   = kwargs.get('cmap','gray')
+  pclip  = kwargs.get('pclip',1.0)
+  vmin   = kwargs.get('vmin',pclip*np.min(img))
+  vmax   = kwargs.get('vmax',pclip*np.max(img))
+  xlabel = kwargs.get('xlabel','X (km)')
+  zlabel = kwargs.get('zlabel','Z (km)')
+  fsize  = kwargs.get('fsize',15)
+  interp = kwargs.get('interp','bilinear')
+  aspect = kwargs.get('aspect','auto')
+  xmin   = ox; xmax = ox + nx*dx
+  zmin   = oz; zmax = oz + nz*dz
+  textsize = kwargs.get('textsize',12)
+  if(strdx != 0): xshft = 2
+  if(strdz != 0): zshft = 2
+
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+  ax = fig.gca()
+  zticks = np.arange(bgz,egz,dgz)
+  xticks = np.arange(bgx,egx,dgx)
+  ax.set_xticks(xticks)
+  ax.set_yticks(zticks)
+  ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                 extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+  ax.grid(linestyle='-',color='k',linewidth=2)
+  ax.set_ylabel(zlabel,fontsize=fsize)
+  ax.set_xlabel(xlabel,fontsize=fsize)
+  ax.tick_params(labelsize=fsize)
+  tot1 = nptchz*nptchx
+  ax.set_title(r'Grid 1: X-stride=0, Z-stride=0 $\rightarrow \,\, %d\times%d = %d$ patches'
+               %(nptchx,nptchz,tot1),fontsize=fsize)
+  # Plot the coordinates
+  if(pltcoords):
+    plot_patchcoords(nptchz,nptchx,zticks,xticks,zmax,xmax,0,0,zshft,xshft,
+                     textsize,'k')
+
+  if(strdx != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+    ax = fig.gca()
+    zticks = np.arange(bgz,egz,dgz)
+    xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='r',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot2 = (nptchx-1)*nptchz
+    ax.set_title(r'Grid 2: X-stride=%d, Z-stride=0 $\rightarrow \,\, %d\times%d = %d$ patches'
+                 %(strdx,nptchx-1,nptchz,tot2),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz,nptchx-1,zticks,xticks,zmax,xmax,0,1,zshft,xshft,
+                       textsize,'r')
+
+  if(strdz != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+    ax = fig.gca()
+    zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
+    xticks = np.arange(bgx,egx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='g',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot3 = (nptchx)*(nptchz-1)
+    ax.set_title(r'Grid 3: X-stride=0, Z-stride=%d $\rightarrow \,\, %d\times%d = %d$ patches'
+        %(strdz,nptchx,nptchz-1,tot3),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz-1,nptchx,zticks,xticks,zmax,xmax,1,0,zshft,xshft,
+                       textsize,'g')
+
+  if(strdx != 0 and strdz != 0):
+    fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
+    ax = fig.gca()
+    zticks = np.arange(bgz+strdz*dz,egz-strdz*dz,dgz)
+    xticks = np.arange(bgx+strdx*dx,egx-strdx*dx,dgx)
+    ax.set_xticks(xticks)
+    ax.set_yticks(zticks)
+    ax.imshow(img,cmap=cmap,interpolation=interp,vmin=vmin,vmax=vmax,
+                   extent=[xmin,xmax,zmax,zmin],aspect=aspect)
+    ax.grid(which='major',linestyle='-',color='b',linewidth=2)
+    ax.set_ylabel(zlabel,fontsize=fsize)
+    ax.set_xlabel(xlabel,fontsize=fsize)
+    ax.tick_params(labelsize=fsize)
+    tot4 = (nptchx-1)*(nptchz-1)
+    ax.set_title(r'Grid 4: X-stride=%d, Z-stride=%d $\rightarrow \,\, %d\times%d = %d$ patches'
+        %(strdx,strdz,nptchx-1,nptchz-1,tot4),fontsize=fsize)
+    if(pltcoords):
+      plot_patchcoords(nptchz-1,nptchx-1,zticks,xticks,zmax,xmax,1,1,zshft,xshft,
+                       textsize,'b')
+
+  print("Total number of patches: %d = %d + %d + %d + %d"%(totptchs,tot1,tot2,tot3,tot4))
+
+  plt.show()
+
+def plot_patchcoords(nptchz,nptchx,zticks,xticks,zmax,xmax,zidxi,xidxi,zshft,xshft,
+                     textsize,color):
+  """
+  Plots the patch coordinates on the image
+  To be used with plot_patchgrid2d
+  """
+  idx = zticks < zmax
+  zticksw = zticks[idx]
+  idx = xticks < xmax
+  xticksw = xticks[idx]
+  # Get the offset
+  xtickdx = xticksw[1] - xticksw[0]
+  ztickdx = zticksw[1] - zticksw[0]
+  for iztick in range(nptchz):
+    zpos = zticksw[iztick] + ztickdx/2
+    xidx = xidxi
+    for ixtick in range(nptchx):
+      xpos = xticksw[ixtick] + xtickdx/2
+      plt.text(xpos,zpos,'(%d,%d)'%(zidxi,xidx),fontsize=textsize,color=color)
+      xidx += xshft
+    zidxi += zshft
+
+def patch_window2d(img,nzp,nxp,transp=False,pad=False) -> np.ndarray:
+  """
+  Windows the data based on the provided patch size so that
+  the patches fit evenly into the image
+
+  Parameters:
+    img    - the input image [n3,nz,nx]
+    nzp    - the size of the patch in z
+    nxp    - the size of the patch in x
+    transp - whether to transpose the input image [False]
+    pad    - pad instead of window [False]
+  """
+  # Get the image shape
+  if(transp):
+    nx,nz = img.shape[-2:]
+  else:
+    nz,nx = img.shape[-2:]
+
+  nzw = nz - divmod(nz,nzp)[1]
+  nxw = nx - divmod(nx,nxp)[1]
+
+  if(len(img.shape) == 2):
+    return img[:nzw,:nxw]
+  else:
+    return img[...,:nzw,:nxw]
+

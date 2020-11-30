@@ -84,42 +84,50 @@ def plot_imgpoff(oimg,dx,dz,zoff,xloc,oh,dh,show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,**kwargs):
+def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,figname=None,**kwargs):
   """
   Makes a plot of the image and the extended axis at a specified location
 
   Parameters
-    aimg - the angle domain image
-    dx   - lateral sampling of the image
-    dz   - depth sampling of the image
-    oa   - origin of the angle axis
-    da   - sampling of the angle axis
-    xloc - the location at which to extract the angle gather [samples]
-    show - flag of whether to display the image plot [True]
+    aimg    - the angle domain image
+    dx      - lateral sampling of the image
+    dz      - depth sampling of the image
+    oa      - origin of the angle axis
+    da      - sampling of the angle axis
+    xloc    - the location at which to extract the angle gather [samples]
+    show    - flag of whether to display the image plot [True]
+    figname - name of output image file [None]
   """
   # Get image dimensions
   na = aimg.shape[0]; nz = aimg.shape[1]; nx = aimg.shape[2]
+  # Image amplitudes
+  stk = np.sum(aimg,axis=0)
+  imin = np.min(stk); imax = np.max(stk)
   fig,ax = plt.subplots(1,2,figsize=(kwargs.get('wbox',15),kwargs.get('hbox',8)),gridspec_kw={'width_ratios':[2,1]})
   # Plot the image
-  ax[0].imshow(np.sum(aimg,axis=0),extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-    cmap=kwargs.get('cmap','gray'))
+  ax[0].imshow(stk,extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
+    cmap=kwargs.get('cmap','gray'),vmin=kwargs.get('imin',imin),vmax=kwargs.get('imax',imax))
   # Plot a line at the specified image point
-  lz = np.linspace(0.0,(nz)*dz,nz)
-  lx = np.zeros(nz) + xloc*dx
-  ax[0].plot(lx,lz,color='k',linewidth=2)
+  if(kwargs.get('plotline',True)):
+    lz = np.linspace(0.0,(nz)*dz,nz)
+    lx = np.zeros(nz) + xloc*dx
+    ax[0].plot(lx,lz,color='k',linewidth=2)
   ax[0].set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('labelsize',14))
+  # Extended image amplitudes
+  amin = np.min(aimg); amax = np.max(aimg)
   # Plot the extended axis
   ax[1].imshow(aimg[:,:,xloc].T,extent=[oa,oa+(na)*da,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500))
+      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('amin',amin),vmax=kwargs.get('amax',amax))
   ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel(' ',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
   ax[1].set_yticks([])
-  plt.subplots_adjust(wspace=-0.4)
-  if(show):
-    plt.show()
+  plt.subplots_adjust(wspace=kwargs.get('wspace',-0.4))
+  if(figname is None and show): plt.show()
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',dpi=150,transparent=True)
 
 def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=None,**kwargs):
   """
@@ -154,8 +162,10 @@ def plot_allanggats(aimg,dz,dx,jx=10,transp=False,aagc=True,show=True,figname=No
   # Plot the figure
   fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',6)))
   ax = fig.gca()
-  ax.imshow(aimgts.T,cmap='gray',extent=[kwargs.get('xmin',0.0),kwargs.get('xmax',nx*dx),kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],
-      vmin=vmin*kwargs.get('pclip',1.0),vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'))
+  zmin = kwargs.get('zmin',0.0); zmax = kwargs.get('zmax',zmin+nz*dz)
+  xmin = kwargs.get('xmin',0.0); xmax = kwargs.get('xmax',xmin+nx*dx)
+  ax.imshow(aimgts.T,cmap='gray',extent=[xmin,xmax,zmax,zmin],vmin=vmin*kwargs.get('pclip',1.0),
+      vmax=vmax*kwargs.get('pclip',1.0),interpolation=kwargs.get('interp','sinc'),aspect=kwargs.get('aspect',1.0))
   ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
   ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',14))
@@ -305,11 +315,14 @@ def plot_imgvelptb(img,velptb,dz,dx,thresh,aagc=True,alpha=0.3,show=False,fignam
   cbar.set_label('Velocity (m/s)',fontsize=kwargs.get('labelsize',15))
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
-    plt.close()
+    if(kwargs.get('close',True)):
+      plt.close()
   if(show):
     plt.show()
 
-def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
+  return ax
+
+def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,figname=None,**kwargs):
   """
   Makes a 3D plot of a data cube
 
@@ -335,7 +348,8 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   x3=np.linspace(os[2], os[2] + ds[2]*(ns[2]), ns[2])
 
   # Compute plotting min and max
-  if(kwargs.get('vmin',None) == None or kwargs.get('vmax',None) == None):
+  vmin = kwargs.get('vmin',None); vmax = kwargs.get('vmax',None)
+  if(vmin is None or vmax is None):
     vmin = np.min(data)*kwargs.get('pclip',1.0)
     vmax = np.max(data)*kwargs.get('pclip',1.0)
 
@@ -408,7 +422,21 @@ def plot3d(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],show=True,**kwargs):
   ax4.set_xticklabels(['%.2f'%(loc1)])
   ax4.tick_params(labelsize=kwargs.get('ticksize',14))
 
+  # Color bar
+  if(kwargs.get('cbar',False)):
+    fig.subplots_adjust(right=0.87)
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.11),
+      kwargs.get('wbar',0.02),kwargs.get('hbar',0.78)])
+    cbar = fig.colorbar(im,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('ticksize',14))
+    cbar.set_label(kwargs.get('barlabel',''),fontsize=kwargs.get("barlabelsize",13))
+    cbar.draw_all()
+
   ax[0,1].axis('off')
+  if(figname is not None):
+    plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
+    plt.close()
+
   if(show):
     plt.show()
 
@@ -608,4 +636,128 @@ def plot_cubeiso(data,os=[0.0,0.0,0.0],ds=[1.0,1.0,1.0],transp=False,show=True,f
 
   if(figname is not None):
     plt.savefig(figname,bbox_inches='tight',transparent=True,dpi=150)
+
+def plot_img2d(img,**kwargs) -> None:
+  """
+  A generic function for plotting a 2D seismic image
+
+  Parameters:
+    img     - the input image [nx,nz] (if transp flag, [nz,nx])
+    transp  - flag indicating that the input is [nz,nx] [False]
+    figname - name of output figure  [None]
+    show    - display the figure during runtime [True]
+    pclip   - clipping to apply to the image [1.0]
+    imin    - minimum image amplitude [None]
+    imax    - maximum image amplitude [None]
+    xmin    - minumum x value to use in extent [None]
+    xmax    - maximum x value to use in extent [None]
+    zmin    - minumum z value to use in extent [None]
+    zmax    - maximum z value to use in extent [None]
+    xlabel  - label for x axis [None]
+    zlabel  - label for z axis [None]
+    fsize   - fontsize [15]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    imv     - an im object used to match a velocity model image [None]
+    crop    - number of pixels used to crop out a colorbar [None]
+    cmap    - colormap for seismic image ['gray']
+  """
+  # Image dimensions
+  if(len(img.shape) != 2):
+    raise Exception("Image must be two-dimensional len(img.shape) = %d"%(len(img.shape)))
+  if(kwargs.get('transp',False)): img = img.T
+  [nz,nx] = img.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
+  ax = fig.gca()
+  imin,imax = kwargs.get('imin',np.min(img)), kwargs.get('imax',np.max(img))
+  pclip = kwargs.get('pclip',1.0)
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
+  im1 = ax.imshow(img,cmap=kwargs.get('cmap','gray'),vmin=pclip*imin,vmax=pclip*imax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Force to be the same size as a velocity model image
+  imv = kwargs.get('imv',None)
+  if(imv is not None):
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+    cbar = fig.colorbar(imv,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+    cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
+    # Crop
+    # TODO: will need to handle either PDF or png crops
+  # Show the plot
+  if(kwargs.get('show',True)):
+    plt.show()
+  # Save the figure
+  figname = kwargs.get('figname',None)
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+
+def plot_vel2d(vel,**kwargs) -> None:
+  """
+  A generic function for plotting a 2D velocity model
+
+  Parameters:
+    vel     - the input velocity model [nx,nz] (if transp flag, [nz,nx])
+    transp  - flag indicating that the input is [nz,nx] [False]
+    figname - name of output figure [None]
+    show    - display the figure during runtime [True]
+    vmin    - minimum velocity value [None]
+    vmax    - maximum velocity value [None]
+    ox      - origin of x axis [0.0]
+    dx      - sampling of x axis [1.0]
+    oz      - origin of z axis [0.0]
+    dz      - sampling of z axis [1.0]
+    xlabel  - label for x axis [None]
+    zlabel  - label for z axis [None]
+    wbox    - figure width set in figure size option [10]
+    hbox    - figure height set in figure size option [6]
+    interp  - interpolation method applied to the image ['bilinear']
+    cbar    - flag for plotting colorbar [True]
+    retim   - flag for returning the imshow object [False]
+  """
+  # Image dimensions
+  if(len(vel.shape) != 2):
+    raise Exception("Velocity must be two-dimensional len(vel.shape) = %d"%(len(vel.shape)))
+  if(kwargs.get('transp',False)): vel = vel.T
+  [nz,nx] = vel.shape
+  # Make figure
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',10)))
+  ax = fig.gca()
+  vmin,vmax = kwargs.get('vmin',np.min(vel)), kwargs.get('vmax',np.max(vel))
+  xmin = kwargs.get('ox',0.0)
+  xmax = kwargs.get('ox',0.0) + nx*kwargs.get('dx',1.0)
+  zmin = kwargs.get('oz',0.0)
+  zmax = kwargs.get('oz',0.0) + nz*kwargs.get('dz',1.0)
+  im1 = ax.imshow(vel,cmap=kwargs.get('cmap','jet'),vmin=vmin,vmax=vmax,
+                  interpolation=kwargs.get('interp','bilinear'),
+                  extent=[xmin,xmax,zmax,zmin],aspect=kwargs.get('aspect',1.0))
+  ax.set_xlabel('X (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',15))
+  ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
+  ax.tick_params(labelsize=kwargs.get('labelsize',15))
+  # Colorbar
+  if(kwargs.get('cbar',True)):
+    cbar_ax = fig.add_axes([kwargs.get('barx',0.91),kwargs.get('barz',0.15),kwargs.get('wbar',0.02),kwargs.get('hbar',0.70)])
+    cbar = fig.colorbar(im1,cbar_ax,format='%.2f')
+    cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
+    cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
+  # Display the image
+  figname = kwargs.get('figname',None)
+  if(kwargs.get('show',True) and figname is None):
+    plt.show()
+  # Save the figure
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+  # Return the image object
+  if(kwargs.get('retim',False)):
+    return im1
 
