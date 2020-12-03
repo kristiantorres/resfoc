@@ -7,6 +7,7 @@ dataset
 """
 import numpy as np
 from oway.mute import mute
+import matplotlib.pyplot as plt
 
 def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025) -> np.ndarray:
   """
@@ -79,4 +80,54 @@ def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.
     mut[beg:] = np.squeeze(mute(dat[beg:],dt=dt,dx=dx,v0=v0,t0=t0s[nstrm-1],tp=tp,half=False,hyper=True))
 
   return mut
+
+def compute_batches(batchin,totnsht):
+  """
+  Computes the starting and stoping points for reading in
+  batches from the F3 data file.
+
+  Parameters:
+    batchin - target batch size
+    totnsht - total number of shots to read in
+
+  Returns the batch size and the start and end of
+  each batch
+  """
+  divs = np.asarray([i for i in range(1,totnsht) if(totnsht%i == 0)])
+  bsize = divs[np.argmin(np.abs(divs - batchin))]
+  nb = totnsht//bsize
+
+  return bsize,nb
+
+def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
+             dx=0.025,dy=0.025,srcs=True,recs=False,figname=None,**kwargs):
+  """
+  Plots the acqusition geometry on a depth/time slice
+
+  Parameters:
+    srcx    - source x coordinates
+    srcy    - source y coordinates
+    recx    - receiver x coordinatesq
+    recy    - receiver y coordinates
+    slc     - time or depth slice [ny,nx]
+    ox      - slice x origin
+    oy      - slice y origin
+    dx      - slice x sampling [0.025]
+    dy      - slice y sampling [0.025]
+    recs    - plot only the receivers (toggles on/off the receivers)
+    cmap    - 'grey' (colormap grey for image, jet for velocity)
+    figname - output name for figure [None]
+  """
+  ny,nx = slc.shape
+  cmap = kwargs.get('cmap','gray')
+  fig = plt.figure(figsize=(14,7)); ax = fig.gca()
+  ax.imshow(np.flipud(slc),cmap=cmap,extent=[ox,ox+nx*dx,oy,oy+ny*dy])
+  if(srcs):
+    ax.scatter(srcx,srcy,marker='*',color='tab:red')
+  if(recs):
+    ax.scatter(recx,recy,marker='v',color='tab:green')
+  if(figname is not None):
+    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+  if(kwargs.get('show',True)):
+    plt.show()
 
