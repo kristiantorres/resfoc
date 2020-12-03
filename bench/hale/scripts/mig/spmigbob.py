@@ -1,8 +1,10 @@
 import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeom as geom
+from oway.utils import interp_vel
 import matplotlib.pyplot as plt
 from genutils.movie import viewimgframeskey
+from genutils.plot import plot_vel2d
 
 # IO
 sep = seppy.sep()
@@ -24,13 +26,14 @@ velin[:,0,:] = vel
 saxes,srcx = sep.read_file("hale_srcxflatbob.H")
 raxes,recx = sep.read_file("hale_recxflatbob.H")
 _,nrec= sep.read_file("hale_nrecbob.H")
-nrec = nrec.astype('int')
+nrec = nrec.astype('int32')
 
 nxi = int(2*nvx); dxi = dvx/2; oxi = ovx
 
 wei = geom.coordgeom(nxi,dxi,ny,dy,nz,dz,ox=oxi,nrec=nrec,srcxs=srcx,recxs=recx)
 
-velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
+velint = interp_vel(nz,ny,0.0,1.0,nxi,oxi,dxi,velin,dvx,1.0,ovx)
+#plot_vel2d(velint[:,0,:])
 
 #datreg = wei.make_sht_cube(dat)
 #drx= recx[1] - recx[0]; dsx = srcx[1] - srcx[0]; osx = srcx[0]
@@ -40,7 +43,7 @@ velint = wei.interp_vel(velin,dvx,dy,ovx=ovx)
 img = wei.image_data(dat,dt,ntx=16,minf=1,maxf=51,vel=velint,nhx=0,nrmax=10,nthrds=40)
 
 # Zero-offset image
-sep.write_file("spimgboborig.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
+sep.write_file("spimgboborigtest.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
 
 # Subsurface offset
 #imgt = np.transpose(img,(2,4,3,1,0))  # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]

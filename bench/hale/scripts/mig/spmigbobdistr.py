@@ -9,7 +9,7 @@ from client.sshworkers import launch_sshworkers, kill_sshworkers
 sep = seppy.sep()
 
 # Start workers
-hosts = ['fantastic','storm','vision','torch', 'thing', 'thanos', 'friday']
+hosts = ['fantastic','storm','torch','thing','jarvis']
 cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworker.py"
 launch_sshworkers(cfile,hosts=hosts,sleep=1,verb=1,clean=False)
 
@@ -53,7 +53,7 @@ socket.bind("tcp://0.0.0.0:5555")
 img = dstr_sum('cid','result',nchnk,gen,socket,icnkr.get_img_shape())
 
 # Zero-offset image
-sep.write_file("spimgbobdistr.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
+sep.write_file("spimgbobdistrtest.H",img,os=[oz,0.0,oxi],ds=[dz,1.0,dxi])
 
 kill_sshworkers(cfile,hosts,verb=False)
 

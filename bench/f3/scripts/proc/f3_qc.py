@@ -26,7 +26,6 @@ nrec = nrec.astype('int32')
 nsht = 1625
 nd = np.sum(nrec[:nsht])
 
-
 # Migration
 maxes,mig = sep.read_file("/data3/northsea_dutch_f3/mig/mig.T")
 mig = mig.reshape(maxes.n,order='F')
