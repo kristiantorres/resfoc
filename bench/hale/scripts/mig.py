@@ -11,8 +11,8 @@ sep = seppy.sep()
 # Start workers
 cfile = "/home/joseph29/projects/scaas/oway/imageworker.py"
 logpath = "./log"
-wrkrs,status = launch_slurmworkers(cfile,nworkers=10,queues=['twohour'],
-                                   logpath=logpath,slpbtw=0.5,chkrnng=True)
+wrkrs,status = launch_slurmworkers(cfile,nworkers=10,wtime=30,queue=['sep','twohour'],
+                                   block=['maz132'],logpath=logpath,slpbtw=4.0,mode='adapt')
 
 print("Workers status: ",*status)
 
