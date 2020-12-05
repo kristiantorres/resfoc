@@ -16,7 +16,7 @@ naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/f3_nrec2.H")
 nrec = nrec.astype('int32')
 
 # Window
-nsht = 2
+nsht = 1
 nd = np.sum(nrec[:nsht])
 srcxw = srcx[:nsht]
 srcyw = srcy[:nsht]
@@ -39,7 +39,7 @@ dz,dx,dy = vaxes.d; oz,ox,oy = vaxes.o
 maxes,mig = sep.read_file("/data3/northsea_dutch_f3/mig/mig.T")
 mig   = np.ascontiguousarray(mig.reshape(maxes.n,order='F').T)
 migw  = mig[5:505,200:1200,:]
-migww = migw[25:125,:800,:800]
+migww = migw[25:125,:500,:800]
 
 velw = vel[25:125,:500,:500]
 nyw,nxw,nz = velw.shape
@@ -55,13 +55,18 @@ recxs,recys = recxw*0.001,recyw*0.001
 wei = geom.coordgeom(nxw,dx,nyw,dy,nz,dz,ox=ox,oy=oyw,srcxs=srcxs,srcys=srcys,
                      nrec=nrecw,recxs=recxs,recys=recys)
 
-velwt = np.ascontiguousarray(np.transpose(velw,(2,0,1)))
+velwt = np.ascontiguousarray(np.transpose(velw,(2,0,1))) # [ny,nx,nz] -> [nz,ny,nx]
 migwt = np.ascontiguousarray(np.transpose(migww,(2,0,1)))
 wei.plot_acq(migwt,iz=400,srcs=True,cmap='gray',show=False)
 wei.plot_acq(velwt,iz=400,recs=True,cmap='jet')
 
-img = wei.image_data(dat,dt,ntx=16,nty=16,minf=1.0,maxf=71.0,vel=velwt,nhx=0,nrmax=20,nthrds=40,wverb=True)
-imgt = np.transpose(img,(0,2,1))
+img = wei.image_data(dat,dt,ntx=16,nty=16,minf=1.0,maxf=51.0,vel=velwt,nhx=20,nrmax=20,nthrds=40,wverb=True)
 
-#sep.write_file("f3img.H",imgt,ds=[dz,dx,dy],os=[0.0,ox,oyw])
+#imgt = np.transpose(img,(0,2,1))
+#sep.write_file("f3imgext.H",imgt,ds=[dz,dx,dy],os=[0.0,ox,oyw])
+
+
+imgt = np.transpose(img,(2,4,3,1,0)) # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
+nhx,ohx,dhx = wei.get_off_axis()
+sep.write_file("f3imgext.H",imgt,ds=[dz,dx,dy,dhx,1.0],os=[0.0,ox,oyw,ohx,0.0])
 

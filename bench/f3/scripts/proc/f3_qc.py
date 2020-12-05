@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 # Data
 sep = seppy.sep()
-#saxes,sht = sep.read_file("/data3/northsea_dutch_f3/f3_shots2.H")
-saxes,sht = sep.read_file("f3_shots2_muted.H")
+saxes,sht = sep.read_file("/data3/northsea_dutch_f3/f3_shots2.H")
+#saxes,sht = sep.read_file("f3_shots2_muted.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_shot.H")
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')

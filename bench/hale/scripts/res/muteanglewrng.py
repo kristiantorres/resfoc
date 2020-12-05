@@ -11,8 +11,8 @@ saxes,storm = sep.read_file("resfaultfocuswindt.H")
 storm = storm.reshape(saxes.n,order='F').T
 
 # Create the mask
-mask = anglemask(nz,na,zpos=0.0,apos=0.45,mode='vert',rand=False,rectz=10,recta=10,verb=True).T
-#mask = anglemask(nz,na,zpos=0.0,apos=0.45,mode='vert',rand=False,rectz=5,recta=5,verb=True).T
+#mask = anglemask(nz,na,zpos=0.0,apos=0.45,mode='vert',rand=False,rectz=10,recta=10,verb=True).T
+mask = anglemask(nz,na,zpos=0.0,apos=0.35,mode='vert',rand=False,rectz=5,recta=5,verb=True).T
 
 plot_img2d(mask.T)
 
