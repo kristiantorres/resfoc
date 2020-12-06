@@ -9,7 +9,8 @@ import numpy as np
 from oway.mute import mute
 import matplotlib.pyplot as plt
 
-def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025) -> np.ndarray:
+def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025,
+                close=False) -> np.ndarray:
   """
   Mutes a shot from the F3 dataset
 
@@ -25,13 +26,17 @@ def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.
     dy    - minimum distance between streamers [20 m]
     dt    - temporal sampling interval [0.002]
     dx    - spacing between receivers [25 m]
+    close - A last resort method if streamer searching will not work [False]
 
   Returns a muted shot gather
   """
   mut = np.zeros(dat.shape,dtype='float32')
   v0 = vel*0.001
-  if(inrec%120 == 0):
+  if(inrec%120 == 0 or close):
     nstream = inrec//120
+    if(close): 
+      diff = 480 - inrec
+      nstream += diff
     k = 0
     for istr in range(nstream):
       irecx,irecy = recx[k],recy[k]
@@ -45,6 +50,7 @@ def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.
       mut[k:k+120] = np.squeeze(mute(dat[k:k+120],dt=dt,dx=dx,v0=v0,t0=t0,tp=tp,half=False,hyper=True))
       k += 120
   else:
+    print("Warning: irregular number of receivers. Searching for different streamer lines")
     t0s = []
     dist = np.sqrt((isrcx-recx[0])**2 + (isrcy-recy[0])**2)
     t0 = dist/vel
