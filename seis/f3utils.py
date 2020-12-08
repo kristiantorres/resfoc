@@ -9,6 +9,7 @@ import numpy as np
 from oway.mute import mute
 import matplotlib.pyplot as plt
 
+#TODO: add a parameter for streamer size. A list with the size of each streamer (near 120)
 def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025,
                 close=False) -> np.ndarray:
   """
@@ -34,7 +35,7 @@ def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.
   v0 = vel*0.001
   if(inrec%120 == 0 or close):
     nstream = inrec//120
-    if(close): 
+    if(close):
       diff = 480 - inrec
       nstream += diff
     k = 0
