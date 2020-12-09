@@ -27,27 +27,33 @@ stkw = np.sum(stormw,axis=2)
 sc2 = 0.2
 kmin = sc2*np.min(stkw); kmax= sc2*np.max(stkw)
 
-fsize = 16
-for ix in range(0,nx,50):
-  tag = create_inttag(ix,nx)
-  plot_anggatrhos(stormw[48:112],ix,dz,dx,oro=0.96,dro=dro,ox=ox,show=False,pclip=0.6,fontsize=fsize,ticksize=fsize,
-                  imgaspect=2.0,roaspect=0.02,figname='./fig/halepicks2/anggatrhos-%s'%(tag))
-  # Plot the picked
-  plot_rhopicks(stormw[48:112,ix,:,:],semb[ix,48:112,:],rho[ix,:],dro,dz,oro=0.96,show=False,angaspect=0.02,
-                vmin=smin,vmax=smax,wspace=0.1,rhoaspect=0.08,pclip=1.1,figname='./fig/halepicks2/muterhopick-%s'%(tag))
+#fsize = 16
+#for ix in range(0,nx,50):
+#  tag = create_inttag(ix,nx)
+#  plot_anggatrhos(stormw[48:112],ix,dz,dx,oro=0.96,dro=dro,ox=ox,show=False,pclip=0.6,fontsize=fsize,ticksize=fsize,
+#                  imgaspect=3.0,roaspect=0.02,figname='./fig/halepicks2/anggatrhos-%s'%(tag))
+#  # Plot the picked
+#  plot_rhopicks(stormw[48:112,ix,:,:],semb[ix,48:112,:],rho[ix,:],dro,dz,oro=0.96,show=False,angaspect=0.02,
+#                vmin=smin,vmax=smax,wspace=0.1,rhoaspect=0.08,pclip=1.1,figname='./fig/halepicks2/rhopick-%s'%(tag))
+
+ix = 225
+tag = create_inttag(ix,nx)
+plot_rhopicks(stormw[48:112,ix,:,100:356],semb[ix,48:112,100:356],rho[ix,100:356],dro,dz,oz=100*dz,oro=0.96,
+              show=False,angaspect=0.02,widthang=6,
+              vmin=smin,vmax=smax,wspace=0.15,rhoaspect=0.12,pclip=1.1,figname='./fig/halepicks2/rhopick-%s'%(tag))
 
 # Refocus the stack
-rfi = refocusimg(stkw,rho,dro)
-rfa = refocusang(stormw,rho,dro)
-
-sembw = semb[:,:,100:356]
-stkww = stkw[80,:,100:356]
-rhow  = rho[:,100:356]
-rfiw  = rfi[:,100:356]
-rfaw  = rfa[:,:,100:356]
-
-# Window to the target region
-plot_rhoimg2d(stkww.T,rhow.T,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
+#rfi = refocusimg(stkw,rho,dro)
+#rfa = refocusang(stormw,rho,dro)
+#
+#sembw = semb[:,:,100:356]
+#stkww = stkw[80,:,100:356]
+#rhow  = rho[:,100:356]
+#rfiw  = rfi[:,100:356]
+#rfaw  = rfa[:,:,100:356]
+#
+## Window to the target region
+#plot_rhoimg2d(stkww.T,rhow.T,dx=dx,dz=dz,ox=ox,oz=100*dz,aspect=2.0)
 
 #sep.write_file("faultfocussembmutwind.H",sembw.T,os=[oz,oro],ds=[dz,dro])
 #sep.write_file("faultfocusrhomutwind.H",rhow.T,os=[oz,ox],ds=[dz,dx])
