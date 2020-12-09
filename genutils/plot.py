@@ -4,8 +4,10 @@ See genutils.movie for interactive plotting
 @author: Joseph Jennings
 @version: 2020.08.20
 """
+import os
 import numpy as np
 from genutils.signal import ampspec1d
+from genutils.image import remove_colorbar
 from resfoc.gain import agc
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -85,12 +87,12 @@ def plot_imgpoff(oimg,dx,dz,zoff,xloc,oh,dh,show=True,**kwargs):
   if(show):
     plt.show()
 
-def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,figname=None,**kwargs):
+def plot_imgpang(aimg,dx,dz,xloc,oa,da,ox=0.0,oz=0.0,show=True,figname=None,**kwargs):
   """
   Makes a plot of the image and the extended axis at a specified location
 
   Parameters
-    aimg    - the angle domain image
+    aimg    - the angle domain image [na,nz,nx]
     dx      - lateral sampling of the image
     dz      - depth sampling of the image
     oa      - origin of the angle axis
@@ -104,14 +106,17 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,figname=None,**kwargs):
   # Image amplitudes
   stk = np.sum(aimg,axis=0)
   imin = np.min(stk); imax = np.max(stk)
-  fig,ax = plt.subplots(1,2,figsize=(kwargs.get('wbox',15),kwargs.get('hbox',8)),gridspec_kw={'width_ratios':[2,1]})
+  wratio = kwargs.get('wratio',3)
+  fig,ax = plt.subplots(1,2,figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)),gridspec_kw={'width_ratios':[wratio,1]})
   # Plot the image
-  ax[0].imshow(stk,extent=[0.0,(nx)*dx,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-    cmap=kwargs.get('cmap','gray'),vmin=kwargs.get('imin',imin),vmax=kwargs.get('imax',imax))
+  ipclip = kwargs.get('ipclip',1.0)
+  ax[0].imshow(stk,extent=[ox,ox+(nx)*dx,oz+(nz)*dz,oz],interpolation=kwargs.get('interp','bilinear'),
+    cmap=kwargs.get('cmap','gray'),vmin=kwargs.get('imin',imin)*ipclip,vmax=kwargs.get('imax',imax)*ipclip,
+    aspect=kwargs.get('iaspect',1))
   # Plot a line at the specified image point
   if(kwargs.get('plotline',True)):
-    lz = np.linspace(0.0,(nz)*dz,nz)
-    lx = np.zeros(nz) + xloc*dx
+    lz = np.linspace(oz,oz+(nz)*dz,nz)
+    lx = np.zeros(nz) + ox + xloc*dx
     ax[0].plot(lx,lz,color='k',linewidth=2)
   ax[0].set_xlabel('X (km)',fontsize=kwargs.get('labelsize',14))
   ax[0].set_ylabel('Z (km)',fontsize=kwargs.get('labelsize',14))
@@ -119,8 +124,10 @@ def plot_imgpang(aimg,dx,dz,xloc,oa,da,show=True,figname=None,**kwargs):
   # Extended image amplitudes
   amin = np.min(aimg); amax = np.max(aimg)
   # Plot the extended axis
+  apclip = kwargs.get('apclip',1.0)
   ax[1].imshow(aimg[:,:,xloc].T,extent=[oa,oa+(na)*da,(nz)*dz,0.0],interpolation=kwargs.get('interp','sinc'),
-      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('amin',amin),vmax=kwargs.get('amax',amax))
+      cmap=kwargs.get('cmap','gray'),aspect=kwargs.get('aaspect',500),vmin=kwargs.get('amin',amin)*apclip,
+      vmax=kwargs.get('amax',amax)*apclip)
   ax[1].set_xlabel(r'Angle ($\degree$)',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel(' ',fontsize=kwargs.get('labelsize',14))
   ax[1].tick_params(labelsize=kwargs.get('labelsize',14))
@@ -484,7 +491,7 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',cnnpck=No
     fig,ax = plt.subplots(1,2,figsize=(wbox,hbox),gridspec_kw={'width_ratios':[widthang,widthrho]})
     # Angle gather
     ax[0].imshow(angrg.T,cmap='gray',aspect=kwargs.get('angaspect',0.009),
-                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',(nz-1)*dz),kwargs.get('zmin',0)],interpolation='sinc',
+                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',oz+(nz)*dz),kwargs.get('zmin',oz)],interpolation='bilinear',
                  vmin=vmin*pclip,vmax=vmax*pclip)
     ax[0].plot(pck,z,linewidth=3,color='tab:cyan')
     if(cnnpck is not None):
@@ -494,7 +501,7 @@ def plot_rhopicks(ang,smb,pck,dro,dz,oro,oz=0.0,doagc=False,mode='sbs',cnnpck=No
     ax[0].tick_params(labelsize=tcksize)
     # Semblance
     ax[1].imshow(smb.T,cmap='jet',aspect=kwargs.get('rhoaspect',0.02),
-                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',nz*dz),kwargs.get('zmin',0.0)],interpolation='bilinear')
+                 extent=[oro,oro+(nro)*dro,kwargs.get('zmax',oz+nz*dz),kwargs.get('zmin',oz)],interpolation='bilinear')
     ax[1].plot(pck,z,linewidth=3,color='k')
     if(cnnpck is not None):
       ax[1].plot(cnnpck,z,linewidth=3,color='gray')
@@ -691,7 +698,8 @@ def plot_img2d(img,**kwargs) -> None:
   # Check if a box is to be plotted
   nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
   if(nx_box != 0 and nz_box != 0):
-    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+    dz,dx = kwargs.get('dz',1.0),kwargs.get('dx',1.0)
+    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box*dx,nz_box*dz,linewidth=2,
                               edgecolor='yellow',facecolor='none')
     ax.add_patch(rect)
   # Force to be the same size as a velocity model image
@@ -701,15 +709,22 @@ def plot_img2d(img,**kwargs) -> None:
     cbar = fig.colorbar(imv,cbar_ax,format='%.2f')
     cbar.ax.tick_params(labelsize=kwargs.get('labelsize',15))
     cbar.set_label('Velocity (km/s)',fontsize=kwargs.get('labelsize',15))
-    # Crop
-    # TODO: will need to handle either PDF or png crops
   # Show the plot
   figname = kwargs.get('figname',None)
   if(kwargs.get('show',True) and figname is None):
     plt.show()
   # Save the figure
+    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
+    plt.close()
   if(figname is not None):
-    plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
+    if(imv is not None):
+      # Crop
+      bname,ftype = os.path.splitext(figname)
+      plt.savefig(bname+'-tmp.png',dpi=150,transparent=True,bbox_inches='tight')
+      plt.close()
+      #remove_colorbar(bname+"-tmp.png",cropsize=kwargs.get('cropsize',0),oftype=ftype[1:],opath=figname)
+    else:
+      plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
 
 def plot_dat2d(dat,**kwargs) -> None:
   """
@@ -760,9 +775,10 @@ def plot_dat2d(dat,**kwargs) -> None:
   ax.set_title(kwargs.get('title',' '),fontsize=kwargs.get('labelsize',15))
   ax.tick_params(labelsize=kwargs.get('labelsize',15))
   # Check if a box is to be plotted
-  nx_box,nz_box = kwargs.get('nx_box',0.0), kwargs.get('nz_box',0.0)
-  if(nx_box != 0 and nz_box != 0):
-    rect = patches.Rectangle((kwargs.get('ox_box',0),kwargs.get('oz_box',0)),nx_box,nz_box,linewidth=2,
+  ntr_box,nt_box = kwargs.get('nx_box',0.0), kwargs.get('nt_box',0.0)
+  if(ntr_box != 0 and nz_box != 0):
+    dt,dtr = kwargs.get('dt',1.0),kwargs.get('dtr',1.0)
+    rect = patches.Rectangle((kwargs.get('otr_box',0),kwargs.get('ot_box',0)),ntr_box*dtr,nz_box*dz,linewidth=2,
                               edgecolor='yellow',facecolor='none')
     ax.add_patch(rect)
   # Show the plot
@@ -802,7 +818,7 @@ def plot_vel2d(vel,**kwargs) -> None:
   if(kwargs.get('transp',False)): vel = vel.T
   [nz,nx] = vel.shape
   # Make figure
-  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',10)))
+  fig = plt.figure(figsize=(kwargs.get('wbox',10),kwargs.get('hbox',5)))
   ax = fig.gca()
   vmin,vmax = kwargs.get('vmin',np.min(vel)), kwargs.get('vmax',np.max(vel))
   xmin = kwargs.get('ox',0.0)
