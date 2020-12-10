@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 sep = seppy.sep()
 #saxes,sht = sep.read_file("/data3/northsea_dutch_f3/f3_shots2_full.H")
 #saxes,sht = sep.read_file("f3_shots2_full_muted.H")
-#saxes,sht = sep.read_file("f3_shots2_600_muted.H")
-saxes,sht = sep.read_file("f3_shots2_600_muted_debub_onetr.H")
+#saxes,sht = sep.read_file("f3_shots2_700_muted.H")
+saxes,sht = sep.read_file("f3_shots2_700_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2_muted.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_shot.H")
@@ -19,14 +19,14 @@ ntr,nt = sht.shape
 dt = 0.002
 
 # Geometry
-sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/f3_srcx2_600.H")
-syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/f3_srcy2_600.H")
-rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/f3_recx2_600.H")
-ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/f3_recy2_600.H")
+sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/f3_srcx2_700.H")
+syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/f3_srcy2_700.H")
+rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/f3_recx2_700.H")
+ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/f3_recy2_700.H")
 
-naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/f3_nrec2_600.H")
+naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/f3_nrec2_700.H")
 nrec = nrec.astype('int32')
-nsht = 1950
+nsht = 2275
 nd = np.sum(nrec[:nsht])
 
 # Read in time slice for QC
