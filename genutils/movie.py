@@ -1065,7 +1065,7 @@ def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
   ax[0].set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
   ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
   l = ax[1].imshow(dat[0:nrec[0],0:ntw].T,vmin=dmin,vmax=dmax,extent=[0,nrec[0],ntw*dt,0],
-                   interpolation='bilinear',cmap='gray',aspect=50)
+                   interpolation='bilinear',cmap='gray',aspect=kwargs.get('aspect',50))
   ax[1].set_xlabel('Receiver number',fontsize=kwargs.get('labelsize',14))
   ax[1].set_ylabel('Time (s)',fontsize=kwargs.get('labelsize',14))
   if(show):

@@ -10,8 +10,8 @@ sep = seppy.sep()
 #saxes,sht = sep.read_file("/data3/northsea_dutch_f3/f3_shots2_full.H")
 #saxes,sht = sep.read_file("f3_shots2_full_muted.H")
 #saxes,sht = sep.read_file("f3_shots2_700_muted.H")
-saxes,sht = sep.read_file("f3_shots2_700_muted_debub_onetr.H")
-#saxes,sht = sep.read_file("f3_shots2_muted.H")
+#saxes,sht = sep.read_file("f3_shots2_700_muted_debub_onetr.H")
+saxes,sht = sep.read_file("f3_shots2_muted.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2_muted_debub_shot.H")
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')
@@ -19,14 +19,14 @@ ntr,nt = sht.shape
 dt = 0.002
 
 # Geometry
-sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/f3_srcx2_700.H")
-syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/f3_srcy2_700.H")
-rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/f3_recx2_700.H")
-ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/f3_recy2_700.H")
+sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcx2.H")
+syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcy2.H")
+rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recx2.H")
+ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy2.H")
 
-naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/f3_nrec2_700.H")
+naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec2.H")
 nrec = nrec.astype('int32')
-nsht = 2275
+nsht = 1625
 nd = np.sum(nrec[:nsht])
 
 # Read in time slice for QC
@@ -34,5 +34,6 @@ saxes,slc = sep.read_wind("migwt.T",fw=400,nw=1)
 dy,dx,dt = saxes.d; oy,ox,ot = saxes.o
 slc = slc.reshape(saxes.n,order='F').T
 
-qc_f3data(sht[:nd],srcx[:nsht],recx[:nd],srcy[:nsht],recy[:nd],nrec[:nsht],slc,pclip=0.02)
+qc_f3data(sht[:nd],srcx[:nsht],recx[:nd],srcy[:nsht],recy[:nd],nrec[:nsht],slc,
+          pclip=0.02,ntw=1500)
 
