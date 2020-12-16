@@ -3,10 +3,11 @@ Utility functions for manipulating/processing the F3
 dataset
 
 @author: Joseph Jennings
-@version: 2020.11.23
+@version: 2020.12.15
 """
 import numpy as np
 from oway.mute import mute
+import subprocess
 import matplotlib.pyplot as plt
 
 #TODO: add a parameter for streamer size. A list with the size of each streamer (near 120)
@@ -140,4 +141,18 @@ def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
   if(kwargs.get('show',True)):
     plt.show()
+
+def sum_extimgs(migdir,fout):
+  """
+  Sums partial extended images to form the full F3 image
+
+  Parameters:
+    migdir - directory containing migration images (string)
+    fout   - output file that will contain the output image (string)
+
+  Returns nothing
+  """
+  pyexec = "/sep/joseph29/anaconda3/envs/py37/bin/python"
+  summer = "/homes/sep/joseph29/projects/resfoc/bench/f3/scripts/mig/MigSum.py"
+  subprocess.Popen([pyexec,summer,"-migdir",migdir,"-fout",fout])
 
