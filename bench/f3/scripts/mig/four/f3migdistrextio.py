@@ -1,10 +1,12 @@
+import os
 import inpout.seppy as seppy
 import numpy as np
 import oway.coordgeom as geom
-from oway.imagechunkr import imagechunkr
-from server.distribute import dstr_sum
+from oway.imagechunkrio import imagechunkrio, id_generator
+from server.distribute import dstr_collect
 from server.utils import startserver
 from client.sshworkers import launch_sshworkers, kill_sshworkers
+from seis.f3utils import sum_extimgs
 from genutils.movie import viewcube3d
 import matplotlib.pyplot as plt
 
@@ -13,7 +15,7 @@ sep = seppy.sep()
 
 # Start workers
 hosts = ['fantastic','storm','torch','thing','jarvis']
-cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworker.py"
+cfile = "/homes/sep/joseph29/projects/scaas/oway/imageworkerio.py"
 launch_sshworkers(cfile,hosts=hosts,sleep=1,verb=1,clean=True)
 
 # Read in the geometry
@@ -52,12 +54,18 @@ velwt = np.ascontiguousarray(np.transpose(velw,(2,0,1)))
 srcxs,srcys = srcxw*0.001,srcyw*0.001
 recxs,recys = recxw*0.001,recyw*0.001
 
+# Make temporary directory
+tag = id_generator()
+bdir = "/homes/sep/joseph29/projects/resfoc/bench/f3/f3ext-" + tag + '/'
+os.mkdir(bdir)
+
 nchnk = len(hosts)
-icnkr = imagechunkr(nchnk,
-                    nxw,dx,nyw,dy,nz,dz,velwt,
-                    dat,dt,minf=1.0,maxf=61.0,
-                    nrec=nrecw,srcx=srcxs,recx=recxs,
-                    srcy=srcys,recy=recys,ox=ox,oy=oy)
+icnkr = imagechunkrio(nchnk,
+                      nxw,dx,nyw,dy,nz,dz,velwt,
+                      dat,dt,minf=1.0,maxf=61.0,
+                      nrec=nrecw,srcx=srcxs,recx=recxs,
+                      srcy=srcys,recy=recys,ox=ox,oy=oy,
+                      bname='f3extimg',bdir=bdir)
 icnkr.set_image_pars(ntx=16,nty=16,nhx=20,nrmax=20,nthrds=40,sverb=True,wverb=True)
 gen = iter(icnkr)
 
@@ -65,13 +73,12 @@ viewcube3d(velwt,ds=[dz,dx,dy],os=[oz,ox,oyw],cmap='jet',width1=1.0)
 # Bind to socket
 context,socket = startserver()
 
-# Distribute work to workers and sum the results
-img = dstr_sum('cid','result',nchnk,gen,socket,icnkr.get_img_shape(),zlevel=-2)
-imgt = np.transpose(img,(2,4,3,1,0)) # [nhy,nhx,nz,ny,nx] -> [nz,nx,ny,nhx,nhy]
+# Distribute the work to the workers and collect the file names
+okeys = ['ofname']
+odict = dstr_collect(okeys,nchnk,gen,socket)
 
-nhx,ohx,dhx = icnkr.get_offx_axis()
-
-#sep.write_file("f3imgdistrext_5m.H",imgt,ds=[dz,dx,dy,dhx,1.0],os=[0.0,ox,oyw,ohx,0.0])
+ofile = "/homes/sep/joseph29/projects/resfoc/bench/f3/f3imgdistrextio_5m.H"
+sum_extimgs(bdir,ofile)
 
 kill_sshworkers(cfile,hosts,verb=False)
 

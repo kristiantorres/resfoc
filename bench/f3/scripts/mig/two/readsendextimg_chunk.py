@@ -2,6 +2,7 @@ import zmq
 import inpout.seppy as seppy
 import numpy as np
 from comm.sendrecv import notify_server, send_zipped_pickle, recv_zipped_pickle
+from genutils.ptyprint import progressbar
 
 # Connect to socket
 context = zmq.Context()
@@ -23,12 +24,12 @@ while True:
   sep = seppy.sep()
   iaxes,img = sep.read_file("/homes/sep/joseph29/projects/resfoc/bench/f3/f3imgextcritical.H")
   img = np.ascontiguousarray(img.reshape(iaxes.n,order='F').T).astype('float32')
-  # Save it to the dictionary
-  ochunk['result'] = img
-  # Tell server this is the result
-  ochunk['msg'] = "result"
+  nhx = img.shape[0]
   # Send back the result
-  send_zipped_pickle(socket,ochunk)
-  # Receive 'thank you'
-  socket.recv()
+  for ihx in progressbar(range(nhx),"transfer"):
+    ochunk = {'msg':'result','cid':0,'idx':ihx}
+    ochunk['img'] = img[ihx]
+    send_zipped_pickle(socket, ochunk, protocol=-1, zlevel=0)
+    # Receive 'thank you'
+    socket.recv()
 
