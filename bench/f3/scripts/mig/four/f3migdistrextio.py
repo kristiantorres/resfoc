@@ -65,7 +65,7 @@ icnkr = imagechunkrio(nchnk,
                       dat,dt,minf=1.0,maxf=61.0,
                       nrec=nrecw,srcx=srcxs,recx=recxs,
                       srcy=srcys,recy=recys,ox=ox,oy=oy,
-                      bname='f3extimg',bdir=bdir)
+                      bname='f3extimg',bdir=bdir,ccntr=0)
 icnkr.set_image_pars(ntx=16,nty=16,nhx=20,nrmax=20,nthrds=40,sverb=True,wverb=True)
 gen = iter(icnkr)
 
@@ -77,8 +77,8 @@ context,socket = startserver()
 okeys = ['ofname']
 odict = dstr_collect(okeys,nchnk,gen,socket)
 
-ofile = "/homes/sep/joseph29/projects/resfoc/bench/f3/f3imgdistrextio_5m.H"
-sum_extimgs(bdir,ofile)
+#ofile = "/homes/sep/joseph29/projects/resfoc/bench/f3/f3imgdistrextio_5m_a.H"
+#sum_extimgs(bdir,ofile)
 
 kill_sshworkers(cfile,hosts,verb=False)
 
