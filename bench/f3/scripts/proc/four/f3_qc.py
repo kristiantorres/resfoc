@@ -7,18 +7,19 @@ import matplotlib.pyplot as plt
 
 # Data
 sep = seppy.sep()
-saxes,sht = sep.read_file("f3_shots2interp_muted.H")
+saxes,sht = sep.read_file("f3_shots2interp_700_muted_debub_onetr.H")
+#saxes,sht = sep.read_file("f3_shots2interp_muted_debub_onetr.H")
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')
 ntr,nt = sht.shape
 dt = 0.004
 
 # Geometry
-sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcx2.H")
-syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcy2.H")
-rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recx2.H")
-ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy2.H")
+sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcx2_700.H")
+syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcy2_700.H")
+rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recx2_700.H")
+ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy2_700.H")
 
-naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec2.H")
+naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec2_700.H")
 nrec = nrec.astype('int32')
 nsht = 1625
 nd = np.sum(nrec[:nsht])
