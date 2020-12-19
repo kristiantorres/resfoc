@@ -22,7 +22,7 @@ caxes,cub1 = sep.read_file("./f3tmps/f3img05.H")
 dz,dx,dy = caxes.d; oz,ox,oy = caxes.o
 cub1 = cub1.reshape(caxes.n,order='F')
 
-caxes, cub2 = sep.read_file("./f3tmps/f3img12.H")
+caxes, cub2 = sep.read_file("./f3tmps2/f3img2-12.H")
 cub2 = cub2.reshape(caxes.n,order='F')
 cub = cub1 + cub2
 pcub = np.ascontiguousarray(cub.T).astype('float32')
@@ -35,6 +35,6 @@ f3 = f3.reshape(faxes.n,order='F').T # [ny,nx,nz] -> [nz,nx,ny]
 print(f3.shape)
 f3w = f3[:900,:500,25:125]
 
-#viewcube3d(f3w,ds=[dz,dx,dy],os=[oz,ox,oy],interp='bilinear',width3=1.0,show=False)
+viewcube3d(f3w,ds=[dz,dx,dy],os=[oz,ox,oy],interp='bilinear',width3=1.0,show=False)
 viewcube3d(acub.T,ds=[dz,dx,dy],os=[oz,ox,oy],interp='bilinear',pclip=0.1,width3=1.0,show=True)
 

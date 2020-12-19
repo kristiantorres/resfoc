@@ -8,6 +8,7 @@ dataset
 import numpy as np
 from oway.mute import mute
 import matplotlib.pyplot as plt
+import subprocess
 
 def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025) -> np.ndarray:
   """
@@ -99,6 +100,22 @@ def compute_batches(batchin,totnsht):
 
   return bsize,nb
 
+def compute_batches_var(batchin,totnsht):
+  """
+  Computes a variable batch size
+
+  Parameters:
+    batchin - the batch size (except at the end)
+    totnsht - total number of shots to be read in
+
+  Returns a list of batch sizes
+  """
+  igr = divmod(totnsht,batchin)
+  if(igr[1] != 0):
+    return [batchin]*igr[0] + [igr[1]]
+  else:
+    return [batchin]*igr[0]
+
 def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
              dx=0.025,dy=0.025,srcs=True,recs=False,figname=None,**kwargs):
   """
@@ -130,4 +147,18 @@ def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
     plt.savefig(figname,dpi=150,transparent=True,bbox_inches='tight')
   if(kwargs.get('show',True)):
     plt.show()
+
+def sum_extimgs(migdir,fout):
+  """
+  Sums partial extended images to form the full F3 image
+
+  Parameters:
+    migdir - directory containing migration images (string)
+    fout   - output file that will contain the output image (string)
+
+  Returns nothing
+  """
+  pyexec = "/home/joseph29/opt/miniconda3/envs/py37/bin/python"
+  summer = "/home/joseph29/projects/resfoc/bench/f3/scripts/MigSum.py"
+  subprocess.Popen([pyexec,summer,"-migdir",migdir,"-fout",fout])
 
