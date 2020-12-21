@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 #TODO: add a parameter for streamer size. A list with the size of each streamer (near 120)
 #TODO: find the streamer header and use that to determine if you are on a new streamer line
+#      seems that the header ShotPoint is promising for this
 def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025,
                 close=False) -> np.ndarray:
   """
