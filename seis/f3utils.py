@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 #TODO: add a parameter for streamer size. A list with the size of each streamer (near 120)
 #TODO: find the streamer header and use that to determine if you are on a new streamer line
+#      seems that the header ShotPoint is promising for this
 def mute_f3shot(dat,isrcx,isrcy,inrec,recx,recy,tp=0.5,vel=1450.0,dymin=15,dt=0.002,dx=0.025,
                 close=False) -> np.ndarray:
   """
@@ -107,22 +108,6 @@ def compute_batches(batchin,totnsht):
   nb = totnsht//bsize
 
   return bsize,nb
-
-def compute_batches_var(batchin,totnsht):
-  """
-  Computes a variable batch size
-
-  Parameters:
-    batchin - the batch size (except at the end)
-    totnsht - total number of shots to be read in
-
-  Returns a list of batch sizes
-  """
-  igr = divmod(totnsht,batchin)
-  if(igr[1] != 0):
-    return [batchin]*igr[0] + [igr[1]]
-  else:
-    return [batchin]*igr[0]
 
 def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
              dx=0.025,dy=0.025,srcs=True,recs=False,figname=None,**kwargs):
