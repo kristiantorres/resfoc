@@ -26,7 +26,6 @@ migw = mig[:,200:1200,5:505]
 # Read in the velocity model
 vaxes,vel = sep.read_file("./vels/miglintz.H")
 vel = vel.reshape(vaxes.n,order='F')
-#print(migw.shape,vel.shape)
 
 # Windowed grid
 oxw = ox + 200*dx; oyw = oy + 5*dy
@@ -40,8 +39,8 @@ dzp,dxp,dyp = dz*0.001,dx*0.001,dy*0.001
 #viewcube3d(vel,os=[0.0,oxp,oyp],ds=[dzp,dxp,dyp],width3=2.0,cmap='jet',cbar=True)
 
 # Second round of windowing
-velw  = vel[:400,:500,:50]
-migww = migw[:800,:500,:50]
+velw  = vel[:400,:600,:50]
+migww = migw[:800,:600,:50]
 nzw2,nxw2,nyw2 = velw.shape
 #print(velw.shape,migww.shape)
 
@@ -128,19 +127,19 @@ for isy in range(nsy):
     if(nrec != len(recyinfo)):
       print("Warning nrecx != nrecy for shot %f %f"%(rsy,rsx))
     if(isy == 0 and isx == 0):
-      sep.write_file("f3_srcx2.H",np.asarray([rsx]))
-      sep.write_file("f3_srcy2.H",np.asarray([rsy]))
-      sep.write_file("f3_recx2.H",recxinfo.astype('float32'))
-      sep.write_file("f3_recy2.H",recyinfo.astype('float32'))
-      sep.write_file("f3_nrec2.H",np.asarray([nrec],dtype='float32'))
-      sep.write_file("f3_shots2.H",srcdat.T,ds=[dt,1.0])
+      sep.write_file("windowed_data/f3_srcx2_600.H",np.asarray([rsx]))
+      sep.write_file("windowed_data/f3_srcy2_600.H",np.asarray([rsy]))
+      sep.write_file("windowed_data/f3_recx2_600.H",recxinfo.astype('float32'))
+      sep.write_file("windowed_data/f3_recy2_600.H",recyinfo.astype('float32'))
+      sep.write_file("windowed_data/f3_nrec2_600.H",np.asarray([nrec],dtype='float32'))
+      sep.write_file("windowed_data/f3_shots2_600.H",srcdat.T,ds=[dt,1.0])
     else:
-      sep.append_file("f3_srcx2.H",np.asarray([rsx]))
-      sep.append_file("f3_srcy2.H",np.asarray([rsy]))
-      sep.append_file("f3_recx2.H",recxinfo.astype('float32'))
-      sep.append_file("f3_recy2.H",recyinfo.astype('float32'))
-      sep.append_file("f3_nrec2.H",np.asarray([nrec],dtype='float32'))
-      sep.append_file("f3_shots2.H",srcdat.T)
+      sep.append_file("windowed_data/f3_srcx2_600.H",np.asarray([rsx]))
+      sep.append_file("windowed_data/f3_srcy2_600.H",np.asarray([rsy]))
+      sep.append_file("windowed_data/f3_recx2_600.H",recxinfo.astype('float32'))
+      sep.append_file("windowed_data/f3_recy2_600.H",recyinfo.astype('float32'))
+      sep.append_file("windowed_data/f3_nrec2_600.H",np.asarray([nrec],dtype='float32'))
+      sep.append_file("windowed_data/f3_shots2_600.H",srcdat.T)
     if(qc):
       # Plot the source receiver geometry for this shot
       fig = plt.figure(figsize=(10,5)); ax = fig.gca()
