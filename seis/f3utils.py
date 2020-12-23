@@ -32,7 +32,8 @@ def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,d
   mut = np.zeros(dat.shape,dtype='float32')
   v0 = vel*0.001
   # Find the beginning indices of the streamer
-  idxs = np.where(strm[:nrec] == 1)[0]
+  idxs = list(np.where(strm[:nrec] == 1)[0])
+  idxs.append(nrec)
   for istr in range(1,len(idxs)):
     irecx,irecy = recx[idxs[istr-1]],recy[idxs[istr-1]]
     dist = np.sqrt((isrcx-irecx)**2 + (isrcy-irecy)**2)
