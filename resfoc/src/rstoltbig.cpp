@@ -1,5 +1,6 @@
 #include <omp.h>
 #include <math.h>
+#include <cstring>
 #include "stretch.h"
 #include "ficosft.h"
 #include "rstoltbig.h"
