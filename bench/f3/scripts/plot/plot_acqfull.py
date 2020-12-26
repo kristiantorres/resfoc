@@ -5,12 +5,12 @@ from seis.f3utils import plot_acq
 sep = seppy.sep()
 
 # Read in geometry
-sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcx2_full.H")
-syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcy2_full.H")
-rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recx2_full.H")
-ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy2_full.H")
+sxaxes,srcx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcx3_full.H")
+syaxes,srcy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_srcy3_full.H")
+rxaxes,recx = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recx3_full.H")
+ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy3_full.H")
 
-naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec2_full.H")
+naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec3_full.H")
 nrec = nrec.astype('int32')
 
 srcx *= 0.001

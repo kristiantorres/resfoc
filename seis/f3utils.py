@@ -10,7 +10,8 @@ from oway.mute import mute
 import subprocess
 import matplotlib.pyplot as plt
 
-def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,dx=0.025) -> np.ndarray:
+def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,dx=0.025,
+                hyper=True) -> np.ndarray:
   """
   Mutes a shot from the F3 dataset
 
@@ -39,12 +40,12 @@ def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,d
     dist = np.sqrt((isrcx-irecx)**2 + (isrcy-irecy)**2)
     t0 = dist/vel
     if(t0 > 0.15):
-      t0 = dist/(1500.0)
+      t0 = dist/(vel)
       v0 = 1.5
     else:
       v0 = vel*0.001
     mut[idxs[istr-1]:idxs[istr]] = np.squeeze(mute(dat[idxs[istr-1]:idxs[istr]],dt=dt,dx=dx,v0=v0,t0=t0,tp=tp,
-                                                   half=False,hyper=True))
+                                                   half=False,hyper=hyper))
   return mut
 
 def compute_batches(batchin,totnsht):
