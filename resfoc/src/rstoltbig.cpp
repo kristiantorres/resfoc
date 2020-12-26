@@ -16,11 +16,17 @@ rstoltbig::rstoltbig(int nz, int nm, int nh, int nzp, int nmp, int nhp, int nro,
   /* Origin */
   _oro = oro - (nro-1)*dro;
   /* Set up inverse cosine transform inputs */
-  _dim1 = 2; _n1 = _nzp*_nmp*_nhp; _n2 = 1;
   _ns    = new int[3]();  _signs = new int[3](); _s = new int[3]();
-  _ns[0] = _nzp; _signs[0] = 1; _s[0] = 1;
-  _ns[1] = _nmp; _signs[1] = 1; _s[1] = _nzp;
-  _ns[2] = _nhp; _signs[2] = 1; _s[2] = _nzp*_nmp;
+  _dim1 = 2; _n1 = _nzp*_nmp*_nhp; _n2 = 1;
+	if(_nhp > 1) { // Prestack
+    _ns[0] = _nzp; _signs[0] = 1; _s[0] = 1;
+    _ns[1] = _nmp; _signs[1] = 1; _s[1] = _nzp;
+    _ns[2] = _nhp; _signs[2] = 1; _s[2] = _nzp*_nmp;
+	} else {      // Poststack
+    _ns[0] = _nzp; _signs[0] = 1; _s[0] = 1;
+    _ns[1] = _nmp; _signs[1] = 1; _s[1] = _nzp;
+    _ns[2] = _nhp; _signs[2] = 0; _s[2] = 0;
+	}
 }
 
 void rstoltbig::resmig(float *dat, float *img, int nthrd, bool verb) {
