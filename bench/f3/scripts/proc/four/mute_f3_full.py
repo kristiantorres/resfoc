@@ -14,7 +14,7 @@ ryaxes,recy = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_recy2_ful
 naxes,nrec = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_nrec2_full.H")
 saxes,strm = sep.read_file("/data3/northsea_dutch_f3/windowed_data/f3_strm2_full.H")
 nrec = nrec.astype('int32')
-nsht = 2
+nsht = 3250
 nd = np.sum(nrec[:nsht])
 
 # Data

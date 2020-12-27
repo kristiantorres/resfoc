@@ -6,7 +6,7 @@ from genutils.plot import plot_dat2d
 from genutils.ptyprint import progressbar
 
 sep = seppy.sep()
-saxes,sht = sep.read_file("f3_shots2interp_muted.H")
+saxes,sht = sep.read_file("f3_shots2interp_muteda.H")
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')
 deb = np.zeros(sht.shape,dtype='float32')
 ntr,nt = sht.shape
@@ -24,5 +24,5 @@ for itr in progressbar(range(ntr),"ntr:",verb=True):
 #plot_dat2d(deb,dt=dt,pclip=0.05,aspect=50,title='New',show=False)
 #plot_dat2d(old,dt=dt/2,pclip=0.05,aspect=50,title='Old',show=True)
 
-sep.write_file("f3_shots2interp_muted_debub_onetr.H",deb.T,ds=[dt,1.0])
+sep.write_file("f3_shots2interp_muteda_debub_onetr.H",deb.T,ds=[dt,1.0])
 
