@@ -7,6 +7,7 @@ dataset
 """
 import numpy as np
 from oway.mute import mute
+import segyio
 import subprocess
 import matplotlib.pyplot as plt
 
@@ -47,6 +48,71 @@ def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,d
     mut[idxs[istr-1]:idxs[istr]] = np.squeeze(mute(dat[idxs[istr-1]:idxs[istr]],dt=dt,dx=dx,v0=v0,t0=t0,tp=tp,
                                                    half=False,hyper=hyper))
   return mut
+
+def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False):
+  """
+  Selects an F3 shot and the header keys provided
+
+  Parameters:
+    sx      - source x coordinate
+    sy      - source y coordinate
+    hdrkeys - a list of header keys ['GroupX','GroupY','CDP_TRACE']
+    hmap    - the hashmap for finding the files [None]
+    allkeys - gives all the keys
+
+  Returns the traces for the desired shot as well as the
+  desired headers
+  """
+  # Create the key for the hash map
+  key = str(int(sy)) + ' ' + str(int(sx))
+  if(hmap is None):
+    # Read in hmap from file
+    hmap = np.load('/data3/northsea_dutch_f3/segy/info/scoordhmap.npy',allow_pickle=True)[()]
+  # Read in all source coordinates
+  crds = np.load('/data3/northsea_dutch_f3/segy/info/scoords.npy',allow_pickle=True)[()]
+  if(key not in hmap):
+    #TODO: put in the option to find the nearest source
+    #      will need to use the
+    raise Exception("Provided source coordinate is not an actual coordinate")
+  # Create the list of keys
+  if(allkeys):
+    hdrkeys = []
+    for hkey in hdict: hdrkeys.append(hkey)
+  if(hdrkeys is None):
+    hdrkeys = []
+    hdrkeys.append('GroupX');  hdrkeys.append('GroupY')
+    hdrkeys.append('CDP_TRACE')
+  # Get the file(s) that contain the data
+  dmap = {}
+  ohdict,srcdat = {},[]
+  for ifile in hmap[key]:
+    fname = '/data3/northsea_dutch_f3' + ifile[1:]
+    if(fname not in dmap):
+      dmap[fname] = segyio.open(fname,ignore_geometry=True)
+    # First get the source coordinates for the file
+    srcxf = np.asarray(dmap[fname].attributes(segyio.TraceField.SourceX),dtype='int32')
+    srcyf = np.asarray(dmap[fname].attributes(segyio.TraceField.SourceY),dtype='int32')
+    # Find the traces/indices associated with that source coordinate
+    scoordsf = np.zeros([len(srcxf),2],dtype='int32')
+    scoordsf[:,0] = srcyf; scoordsf[:,1] = srcxf
+    idx1 = scoordsf == np.asarray([sy,sx],dtype='int32')
+    s = np.sum(idx1,axis=1)
+    nidx1 = s == 2
+    # Header dictionaries
+    for ikey in hdrkeys:
+      if(ikey not in ohdict): ohdict[ikey] = []
+      # Get the header values
+      ohdict[ikey].append(np.asarray(dmap[fname].attributes(hdict[ikey]),dtype='int32')[nidx1])
+    # Read in the data
+    data = dmap[fname].trace.raw[:]
+    srcdat.append(data[nidx1,:])
+  # Concatenate the keys from different files
+  for ikey in ohdict: ohdict[ikey] = np.concatenate(ohdict[ikey],axis=0)
+  # Get the data for this shot
+  srcdat = np.concatenate(srcdat,axis=0)
+
+  # Return the data and the keys
+  return ohdict,srcdat
 
 def compute_batches(batchin,totnsht):
   """
@@ -114,4 +180,96 @@ def sum_extimgs(migdir,fout):
   pyexec = "/sep/joseph29/anaconda3/envs/py37/bin/python"
   summer = "/homes/sep/joseph29/projects/resfoc/bench/f3/scripts/mig/MigSum.py"
   subprocess.Popen([pyexec,summer,"-migdir",migdir,"-fout",fout])
+
+hdict={'TRACE_SEQUENCE_LINE': 1,
+ 'TRACE_SEQUENCE_FILE': 5,
+ 'FieldRecord': 9,
+ 'TraceNumber': 13,
+ 'EnergySourcePoint': 17,
+ 'CDP': 21,
+ 'CDP_TRACE': 25,
+ 'TraceIdentificationCode': 29,
+ 'NSummedTraces': 31,
+ 'NStackedTraces': 33,
+ 'DataUse': 35,
+ 'offset': 37,
+ 'ReceiverGroupElevation': 41,
+ 'SourceSurfaceElevation': 45,
+ 'SourceDepth': 49,
+ 'ReceiverDatumElevation': 53,
+ 'SourceDatumElevation': 57,
+ 'SourceWaterDepth': 61,
+ 'GroupWaterDepth': 65,
+ 'ElevationScalar': 69,
+ 'SourceGroupScalar': 71,
+ 'SourceX': 73,
+ 'SourceY': 77,
+ 'GroupX': 81,
+ 'GroupY': 85,
+ 'CoordinateUnits': 89,
+ 'WeatheringVelocity': 91,
+ 'SubWeatheringVelocity': 93,
+ 'SourceUpholeTime': 95,
+ 'GroupUpholeTime': 97,
+ 'SourceStaticCorrection': 99,
+ 'GroupStaticCorrection': 101,
+ 'TotalStaticApplied': 103,
+ 'LagTimeA': 105,
+ 'LagTimeB': 107,
+ 'DelayRecordingTime': 109,
+ 'MuteTimeStart': 111,
+ 'MuteTimeEND': 113,
+ 'TRACE_SAMPLE_COUNT': 115,
+ 'TRACE_SAMPLE_INTERVAL': 117,
+ 'GainType': 119,
+ 'InstrumentGainConstant': 121,
+ 'InstrumentInitialGain': 123,
+ 'Correlated': 125,
+ 'SweepFrequencyStart': 127,
+ 'SweepFrequencyEnd': 129,
+ 'SweepLength': 131,
+ 'SweepType': 133,
+ 'SweepTraceTaperLengthStart': 135,
+ 'SweepTraceTaperLengthEnd': 137,
+ 'TaperType': 139,
+ 'AliasFilterFrequency': 141,
+ 'AliasFilterSlope': 143,
+ 'NotchFilterFrequency': 145,
+ 'NotchFilterSlope': 147,
+ 'LowCutFrequency': 149,
+ 'HighCutFrequency': 151,
+ 'LowCutSlope': 153,
+ 'HighCutSlope': 155,
+ 'YearDataRecorded': 157,
+ 'DayOfYear': 159,
+ 'HourOfDay': 161,
+ 'MinuteOfHour': 163,
+ 'SecondOfMinute': 165,
+ 'TimeBaseCode': 167,
+ 'TraceWeightingFactor': 169,
+ 'GeophoneGroupNumberRoll1': 171,
+ 'GeophoneGroupNumberFirstTraceOrigField': 173,
+ 'GeophoneGroupNumberLastTraceOrigField': 175,
+ 'GapSize': 177,
+ 'OverTravel': 179,
+ 'CDP_X': 181,
+ 'CDP_Y': 185,
+ 'INLINE_3D': 189,
+ 'CROSSLINE_3D': 193,
+ 'ShotPoint': 197,
+ 'ShotPointScalar': 201,
+ 'TraceValueMeasurementUnit': 203,
+ 'TransductionConstantMantissa': 205,
+ 'TransductionConstantPower': 209,
+ 'TransductionUnit': 211,
+ 'TraceIdentifier': 213,
+ 'ScalarTraceHeader': 215,
+ 'SourceType': 217,
+ 'SourceEnergyDirectionMantissa': 219,
+ 'SourceEnergyDirectionExponent': 223,
+ 'SourceMeasurementMantissa': 225,
+ 'SourceMeasurementExponent': 229,
+ 'SourceMeasurementUnit': 231,
+ 'UnassignedInt1': 233,
+ 'UnassignedInt2': 237}
 
