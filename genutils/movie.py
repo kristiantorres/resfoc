@@ -1038,7 +1038,7 @@ def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
         return
 
     # Update the data
-    ax[0].set_title('Srcx=%.2f Srcy=%.2f Num=%d/%d'%(srcx[curr_pos],srcy[curr_pos],curr_pos,nsht),fontsize=kwargs.get('labelsize',14))
+    ax[0].set_title('Srcx=%.3f Srcy=%.3f Num=%d/%d'%(srcx[curr_pos],srcy[curr_pos],curr_pos,nsht),fontsize=kwargs.get('labelsize',14))
     ax[0].set_xlabel(kwargs.get('xlabel','X (km)'),fontsize=kwargs.get('labelsize',14))
     ax[0].set_ylabel(kwargs.get('ylabel','Y (km)'),fontsize=kwargs.get('labelsize',14))
     ax[0].tick_params(labelsize=kwargs.get('ticksize',14))
