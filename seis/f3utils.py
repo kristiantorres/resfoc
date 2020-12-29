@@ -8,6 +8,7 @@ dataset
 import numpy as np
 from oway.mute import mute
 import segyio
+from genutils.ptyprint import progressbar
 import subprocess
 import matplotlib.pyplot as plt
 
@@ -49,7 +50,7 @@ def mute_f3shot(dat,isrcx,isrcy,nrec,strm,recx,recy,tp=0.5,vel=1450.0,dt=0.004,d
                                                    half=False,hyper=hyper))
   return mut
 
-def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False):
+def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False,verb=True):
   """
   Selects an F3 shot and the header keys provided
 
@@ -59,6 +60,7 @@ def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False):
     hdrkeys - a list of header keys ['GroupX','GroupY','CDP_TRACE']
     hmap    - the hashmap for finding the files [None]
     allkeys - gives all the keys
+    verb    - display a progressbar [True]
 
   Returns the traces for the desired shot as well as the
   desired headers
@@ -99,7 +101,7 @@ def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False):
     s = np.sum(idx1,axis=1)
     nidx1 = s == 2
     # Header dictionaries
-    for ikey in hdrkeys:
+    for ikey in progressbar(hdrkeys,"keys:",verb=verb):
       if(ikey not in ohdict): ohdict[ikey] = []
       # Get the header values
       ohdict[ikey].append(np.asarray(dmap[fname].attributes(hdict[ikey]),dtype='int32')[nidx1])
