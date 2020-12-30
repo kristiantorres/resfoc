@@ -11,6 +11,8 @@ from genutils.ptyprint import create_inttag, progressbar
 import numpy as np
 import matplotlib.pyplot as plt
 
+#TODO: add vedo slicing
+
 def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   """
   Saves each frame on the fast axis to a png for viewing
