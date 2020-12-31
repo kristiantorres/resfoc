@@ -134,6 +134,22 @@ def compute_batches(batchin,totnsht):
 
   return bsize,nb
 
+def compute_batches_var(batchin,totnsht):
+  """
+  Computes a variable batch size
+
+  Parameters:
+    batchin - the batch size (except at the end)
+    totnsht - total number of shots to be read in
+
+  Returns a list of batch sizes
+  """
+  igr = divmod(totnsht,batchin)
+  if(igr[1] != 0):
+    return [batchin]*igr[0] + [igr[1]]
+  else:
+    return [batchin]*igr[0]
+
 def plot_acq(srcx,srcy,recx,recy,slc,ox,oy,
              dx=0.025,dy=0.025,srcs=True,recs=False,figname=None,**kwargs):
   """
