@@ -11,8 +11,6 @@ from genutils.ptyprint import create_inttag, progressbar
 import numpy as np
 import matplotlib.pyplot as plt
 
-#TODO: add vedo slicing
-
 def makemovie_mpl(arr,odir,ftype='png',qc=False,skip=1,pttag=False,**kwargs):
   """
   Saves each frame on the fast axis to a png for viewing
@@ -1028,6 +1026,14 @@ def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
         end = beg
       beg = end
       end += nrec[curr_pos]
+    elif e.key == 'y':
+      curr_pos = curr_pos + kwargs.get('sjump',125)
+      curr_pos = curr_pos % nsht
+      if(curr_pos == 0):
+        beg = 0
+        end = beg
+      beg  += sum(nrec[curr_pos-kwargs.get('sjump',125):curr_pos])
+      end  = beg + nrec[curr_pos]
     elif e.key == "m":
       curr_pos = curr_pos - 1
       curr_pos = curr_pos % nsht
@@ -1036,8 +1042,18 @@ def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
         beg = end
       end = beg
       beg -= nrec[curr_pos]
+    elif e.key == 'u':
+      curr_pos = curr_pos - kwargs.get('sjump',125)
+      curr_pos = curr_pos % nsht
+      if(curr_pos == nsht-1):
+        end = ntr
+        beg = end
+      #print(curr_pos,curr_pos+kwargs.get('sjump',125),nrec[curr_pos:curr_pos+kwargs.get('sjump',125)])
+      end -= (sum(nrec[curr_pos+1:curr_pos+1+kwargs.get('sjump',125)]))
+      beg = end - nrec[curr_pos]
     else:
         return
+    #print(beg,end,curr_pos,nrec[curr_pos])
 
     # Update the data
     ax[0].set_title('Srcx=%.3f Srcy=%.3f Num=%d/%d'%(srcx[curr_pos],srcy[curr_pos],curr_pos,nsht),fontsize=kwargs.get('labelsize',14))
