@@ -11,22 +11,22 @@ sep = seppy.sep()
 #saxes,sht = sep.read_file("f3_shots2interp_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2interp_full_muted.H")
 #saxes,sht = sep.read_file("f3_shots2interp_full_muted_debub_onetr.H")
-#saxes,sht = sep.read_file("f3_shots3interp_full_clean.H")
-saxes,sht = sep.read_file("f3_shots3interp_full_muted.H")
+saxes,sht = sep.read_file("f3_shots3interp_full_clean3.H")
+#saxes,sht = sep.read_file("f3_shots3interp_full_muted.H")
 #saxes,sht = sep.read_wind("f3_shots3interp_full_muted.H",fw=0,nw=1000000)
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')
 ntr,nt = sht.shape
 dt = 0.004
 
 # Geometry
-sxaxes,srcx = sep.read_file("f3_srcx3_full_clean.H")
-syaxes,srcy = sep.read_file("f3_srcy3_full_clean.H")
-rxaxes,recx = sep.read_file("f3_recx3_full_clean.H")
-ryaxes,recy = sep.read_file("f3_recy3_full_clean.H")
+sxaxes,srcx = sep.read_file("f3_srcx3_full_clean2.H")
+syaxes,srcy = sep.read_file("f3_srcy3_full_clean2.H")
+rxaxes,recx = sep.read_file("f3_recx3_full_clean2.H")
+ryaxes,recy = sep.read_file("f3_recy3_full_clean2.H")
 
-naxes,nrec = sep.read_file("f3_nrec3_full_clean.H")
+naxes,nrec = sep.read_file("f3_nrec3_full_clean2.H")
 nrec = nrec.astype('int32')
-nsht = 12000
+nsht = 13970
 nd = np.sum(nrec[:nsht])
 
 # Read in time slice for QC

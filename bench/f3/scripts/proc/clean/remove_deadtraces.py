@@ -23,6 +23,7 @@ with open('./doc/toremovesxsy.txt','w') as f:
 
 # Read in the data shot by shot
 begsht = 0
+srcs = set()
 ctr = np.sum(nrec[:begsht])
 for isht in progressbar(range(begsht,len(srcx)),"shots:",verb=True):
   daxes,dat   = sep.read_wind("f3_shots3interp_full.H",fw=ctr,nw=nrec[isht])
@@ -30,7 +31,7 @@ for isht in progressbar(range(begsht,len(srcx)),"shots:",verb=True):
   rxaxes,recx = sep.read_wind("/data3/northsea_dutch_f3/windowed_data/f3_recx3_full.H",fw=ctr,nw=nrec[isht])
   ryaxes,recy = sep.read_wind("/data3/northsea_dutch_f3/windowed_data/f3_recy3_full.H",fw=ctr,nw=nrec[isht])
   staxes,strm = sep.read_wind("/data3/northsea_dutch_f3/windowed_data/f3_strm3_full.H",fw=ctr,nw=nrec[isht])
-  if(isht not in rmlst):
+  if(isht not in rmlst or (srcy[isht],srcx[isht]) not in srcs):
     if(isht == begsht):
       sep.write_file("f3_shots3interp_full_clean.H",dat,ds=[0.004,1.0])
       sep.write_file("f3_recx3_full_clean.H",recx)
@@ -39,6 +40,7 @@ for isht in progressbar(range(begsht,len(srcx)),"shots:",verb=True):
       sep.write_file("f3_srcx3_full_clean.H",np.asarray([srcx[isht]],dtype='float32'))
       sep.write_file("f3_srcy3_full_clean.H",np.asarray([srcy[isht]],dtype='float32'))
       sep.write_file("f3_nrec3_full_clean.H",np.asarray([nrec[isht]],dtype='float32'))
+      srcs.add((srcy[isht],srcx[isht]))
     else:
       sep.append_file("f3_shots3interp_full_clean.H",dat)
       sep.append_file("f3_recx3_full_clean.H",recx)
@@ -47,5 +49,6 @@ for isht in progressbar(range(begsht,len(srcx)),"shots:",verb=True):
       sep.append_file("f3_srcx3_full_clean.H",np.asarray([srcx[isht]],dtype='float32'))
       sep.append_file("f3_srcy3_full_clean.H",np.asarray([srcy[isht]],dtype='float32'))
       sep.append_file("f3_nrec3_full_clean.H",np.asarray([nrec[isht]],dtype='float32'))
+      srcs.add((srcy[isht],srcx[isht]))
   ctr += nrec[isht]
 

@@ -48,12 +48,8 @@ for ibtch in range(nb):
   # Output array
   smute = np.zeros(dat.shape,dtype='float32')
 
-  # residual da - 582,4966
-  # No mute applied - 3106,3232,3356,3481,3606,3731,3856,3981,4106,4231,4356,4481,4606,4731,4856,
-  #                   4981,5107,5231,5356,5481,5606,5731,5856,5981
-  # No mute on first two - 5232
-  # First streamer missing - 4366,4644,4685,4748,4750,4875,4999,5001,5172,5179,5456,
-  # 6800?
+  # residual da -
+  # Streamer header not correct - 13930
   ntrw = 0
   for iexp in progressbar(range(bsizes[ibtch]),"nsht",verb=True):
     smute[ntrw:] = mute_f3shot(dat[ntrw:],srcxw[iexp],srcyw[iexp],nrecw[iexp],strmw[ntrw:],recxw[ntrw:],recyw[ntrw:])
