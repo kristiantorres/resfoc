@@ -116,6 +116,9 @@ def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False,verb=True):
   # Return the data and the keys
   return ohdict,srcdat
 
+def select_f3shotcont(fname,srcy,srcx,recy,recx,nrec):
+  pass
+
 def compute_batches(batchin,totnsht):
   """
   Computes the starting and stoping points for reading in
