@@ -24,6 +24,6 @@ dy,dx,dt = saxes.d; oy,ox,ot = saxes.o
 slc = slc.reshape(saxes.n,order='F')
 slcw = slc[25:125,:500]
 
-plot_acq(srcx,srcy,recx,recy,slc,ox=ox,oy=oy,recs=False,show=True)
+plot_acq(srcx,srcy,recx,recy,slc[:460,:],ox=ox,oy=oy,recs=False,show=True)
 
 

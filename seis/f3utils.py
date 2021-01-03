@@ -7,6 +7,7 @@ dataset
 """
 import numpy as np
 from oway.mute import mute
+import inpout.seppy as seppy
 import segyio
 from genutils.ptyprint import progressbar
 import subprocess
@@ -115,6 +116,55 @@ def select_f3shot(sx,sy,hdrkeys=None,hmap=None,allkeys=False,verb=True):
 
   # Return the data and the keys
   return ohdict,srcdat
+
+def select_f3shotcont(fname,srcys,srcxs,recys,recxs,nrec,sy=None,sx=None,sidx=None):
+  """
+  Selects an F3 shot from a continuous processed file
+
+  Parameters:
+    fname - input filename (SEPlib file containing traces)
+    srcys - input array of y source coordinates
+    srcxs - input array of x source coordinates
+    recys - input array of y receiver coordinates
+    recxs - input array of x receiver coordinates
+    nrec  - number of receivers per shot
+    sy    - input y source coordinate
+    sx    - input x source coordinate
+    sidx  - index of source
+
+  Returns the selected shot and the receiver coordinates
+  """
+  if((sy is None and sx is None) and sidx is None):
+    raise Exception("Must provide either a source coordinate or a source index")
+
+  if(len(srcys) != len(srcxs)): raise Exception("Must have same number of srcys and srcxs")
+
+  nrec  = nrec.astype('int32')
+  srcxs = srcxs.astype('int32')
+  srcys = srcys.astype('int32')
+  nsht  = len(srcys)
+
+  # Initialize IO
+  sep = seppy.sep()
+
+  totred = 0
+  for isht in range(nsht):
+    if(sidx is not None):
+      if(isht == sidx):
+        isaxes,sht = sep.read_wind(fname,fw=totred,nw=nrec[isht])
+        isht = np.ascontiguousarray(sht.reshape(isaxes.n,order='F').T).astype('float32')
+        recyw,recxw = recys[totred:totred+nrec[isht]],recxs[totred:totred+nrec[isht]]
+    else:
+      if(sy == srcys[isht] and sx == srcxs[isht]):
+        isaxes,sht = sep.read_wind(fname,fw=totred,nw=nrec[isht])
+        sht = np.ascontiguousarray(sht.reshape(isaxes.n,order='F').T).astype('float32')
+        recyw,recxw = recys[totred:totred+nrec[isht]],recxs[totred:totred+nrec[isht]]
+    totred += nrec[isht]
+
+  ohdr = {}
+  ohdr['recy'],ohdr['recx'] = recyw,recxw
+
+  return ohdr,sht
 
 def compute_batches(batchin,totnsht):
   """

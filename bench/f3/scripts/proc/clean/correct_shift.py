@@ -33,7 +33,7 @@ for isht in progressbar(range(len(srcx)),"nshots:"):
   if(isht in idxs):
     plot_dat2d(dat[ntr:ntr+nrec[isht]],dt=0.004,pclip=0.02,title='Shifted',aspect=50,show=False)
     if(isht == 12805):
-      dat[ntr:ntr+nrec[isht]] = correct_shift(dat[ntr:ntr+nrec[isht]],-15,-26)
+      dat[ntr:ntr+nrec[isht]] = correct_shift(dat[ntr:ntr+nrec[isht]],-20,-21)
     else:
       dat[ntr:ntr+nrec[isht]] = correct_shift(dat[ntr:ntr+nrec[isht]],-30,-31)
     plot_dat2d(dat[ntr:ntr+nrec[isht]],dt=0.004,pclip=0.02,title='Correct',aspect=50,show=True)

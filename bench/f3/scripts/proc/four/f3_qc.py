@@ -11,8 +11,8 @@ sep = seppy.sep()
 #saxes,sht = sep.read_file("f3_shots2interp_muted_debub_onetr.H")
 #saxes,sht = sep.read_file("f3_shots2interp_full_muted.H")
 #saxes,sht = sep.read_file("f3_shots2interp_full_muted_debub_onetr.H")
-saxes,sht = sep.read_file("f3_shots3interp_full_clean3.H")
-#saxes,sht = sep.read_file("f3_shots3interp_full_muted.H")
+#saxes,sht = sep.read_file("f3_shots3interp_full_clean3.H")
+saxes,sht = sep.read_file("f3_shots3interp_full_muted_debub_onetr.H")
 #saxes,sht = sep.read_wind("f3_shots3interp_full_muted.H",fw=0,nw=1000000)
 sht = np.ascontiguousarray(sht.reshape(saxes.n,order='F').T).astype('float32')
 ntr,nt = sht.shape
@@ -26,7 +26,7 @@ ryaxes,recy = sep.read_file("f3_recy3_full_clean2.H")
 
 naxes,nrec = sep.read_file("f3_nrec3_full_clean2.H")
 nrec = nrec.astype('int32')
-nsht = 13970
+nsht = 5000
 nd = np.sum(nrec[:nsht])
 
 # Read in time slice for QC
@@ -35,5 +35,5 @@ dy,dx,dt = saxes.d; oy,ox,ot = saxes.o
 slc = slc.reshape(saxes.n,order='F').T
 
 qc_f3data(sht[:nd],srcx[:nsht],recx[:nd],srcy[:nsht],recy[:nd],nrec[:nsht],slc,dt=0.004,
-          pclip=0.02,ntw=750,sjump=125)
+          pclip=0.02,ntw=750,sjump=10)
 

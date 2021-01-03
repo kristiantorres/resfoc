@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 
 # Geometry
 sep = seppy.sep()
-sxaxes,srcx = sep.read_file("f3_srcx3_full_clean.H")
-syaxes,srcy = sep.read_file("f3_srcy3_full_clean.H")
-rxaxes,recx = sep.read_file("f3_recx3_full_clean.H")
-ryaxes,recy = sep.read_file("f3_recy3_full_clean.H")
-naxes,nrec = sep.read_file("f3_nrec3_full_clean.H")
-saxes,strm = sep.read_file("f3_strm3_full_clean.H")
+sxaxes,srcx = sep.read_file("f3_srcx3_full_clean2.H")
+syaxes,srcy = sep.read_file("f3_srcy3_full_clean2.H")
+rxaxes,recx = sep.read_file("f3_recx3_full_clean2.H")
+ryaxes,recy = sep.read_file("f3_recy3_full_clean2.H")
+naxes,nrec = sep.read_file("f3_nrec3_full_clean2.H")
+saxes,strm = sep.read_file("f3_strm3_full_clean2.H")
 nrec = nrec.astype('int32')
-nsht = 15461
+nsht = 13970
 nd = np.sum(nrec[:nsht])
 
 # Batch size for processing data
@@ -38,7 +38,7 @@ for ibtch in range(nb):
   recyw = recy[totred:totred+nred]
   strmw = strm[totred:totred+nred]
   # Read in the data
-  daxes,dat = sep.read_wind("f3_shots3interp_full_clean.H",fw=totred,nw=nred)
+  daxes,dat = sep.read_wind("f3_shots3interp_full_clean3.H",fw=totred,nw=nred)
   dat = np.ascontiguousarray(dat.reshape(daxes.n,order='F').T).astype('float32')
   nt,ntr = daxes.n; ot,_ = daxes.o; dt,_ = daxes.d
   isht   += bsizes[ibtch]
@@ -48,13 +48,20 @@ for ibtch in range(nb):
   # Output array
   smute = np.zeros(dat.shape,dtype='float32')
 
-  # residual da -
-  # Streamer header not correct - 13930
+  # Residual da - 458
   ntrw = 0
   for iexp in progressbar(range(bsizes[ibtch]),"nsht",verb=True):
-    smute[ntrw:] = mute_f3shot(dat[ntrw:],srcxw[iexp],srcyw[iexp],nrecw[iexp],strmw[ntrw:],recxw[ntrw:],recyw[ntrw:])
-    #plot_dat2d(dat[ntrw:ntrw+nrecw[iexp],:1500],show=False,dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
-    #plot_dat2d(smute[ntrw:ntrw+nrecw[iexp],:1500],dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
+    if(srcxw[iexp] == 485701.0 and srcyw[iexp] == 6083753.0):
+      strm = np.asarray(list(range(1,115)) + list(range(1,121)))
+      recxw[ntrw+114] = recxw[ntrw+120]
+      recyw[ntrw+114] = recyw[ntrw+120]
+      smute[ntrw:] = mute_f3shot(dat[ntrw:],srcxw[iexp],srcyw[iexp],nrecw[iexp],strm,recxw[ntrw:],recyw[ntrw:])
+      #plot_dat2d(dat[ntrw:ntrw+nrecw[iexp],:1500],show=False,dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
+      #plot_dat2d(smute[ntrw:ntrw+nrecw[iexp],:1500],dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
+    else:
+      smute[ntrw:] = mute_f3shot(dat[ntrw:],srcxw[iexp],srcyw[iexp],nrecw[iexp],strmw[ntrw:],recxw[ntrw:],recyw[ntrw:])
+      #plot_dat2d(dat[ntrw:ntrw+nrecw[iexp],:1500],show=False,dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
+      #plot_dat2d(smute[ntrw:ntrw+nrecw[iexp],:1500],dt=dt,dmin=dmin,dmax=dmax,pclip=0.01,aspect=50)
     ntrw += nrecw[iexp]
 
   # Write out the muted shots
