@@ -1089,3 +1089,9 @@ def qc_f3data(dat,srcx,recx,srcy,recy,nrec,migslc,bidx=0,ntw=1500,dt=0.002,
   if(show):
     plt.show()
 
+
+def vol_slider():
+  """
+  A volume slider using vedo
+  """
+  pass
