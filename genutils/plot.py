@@ -714,8 +714,6 @@ def plot_img2d(img,**kwargs) -> None:
   if(kwargs.get('show',True) and figname is None):
     plt.show()
   # Save the figure
-    plt.savefig(fname+"-prd."+ftype,bbox_inches='tight',dpi=150,transparent=True)
-    plt.close()
   if(figname is not None):
     if(imv is not None):
       # Crop
